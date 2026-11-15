@@ -1,0 +1,10 @@
+## Interface: 11200
+## Title: Twilight Hammer Sync
+## Notes: Explicit, dated guild-bank, auction, profession and roster captures.
+## Author: Twilight Hammer - Infanatis-Y'Shaarj
+## Version: 0.2.7
+## OptionalDeps: Aegis_Exchange, aux-addon, OctoAuctionator
+## SavedVariables: TwilightHammerSync_Captures, TwilightHammerSync_Export
+TwilightHammerSync.lua
+AegisBridge.lua
+AuctionBridges.lua
