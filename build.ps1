@@ -20,7 +20,7 @@ foreach ($edition in @('guild','auctions','bank')) {
     $manifest = $manifest.Replace('Title: Twilight Hammer Sync',"Title: $title").Replace('TwilightHammerSync.lua',"Edition.lua`r`nTwilightHammerSync.lua")
     [IO.File]::WriteAllText($toc,$manifest)
     $name = if ($edition -eq 'auctions') { 'THAuctionOnlySetup.exe' } else { 'TwilightHammerSetup.exe' }
-    $options = @('/nologo','/target:winexe','/optimize+','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll',"/out:$stage\$name")
+    $options = @('/nologo','/target:winexe','/optimize+','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll','/reference:System.Security.dll',"/out:$stage\$name")
     if ($edition -eq 'auctions') { $options += '/define:AUCTION_ONLY' }
     if ($edition -eq 'bank') { $options += '/define:BANK_ENABLED' }
     $options += Get-ChildItem $addon -File | ForEach-Object { "/resource:$($_.FullName),$($_.Name)" }

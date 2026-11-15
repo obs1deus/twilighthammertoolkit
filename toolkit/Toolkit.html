@@ -1,0 +1,601 @@
+<!doctype html><html lang="en"><head><title>Twilight Hammer Toolkit</title></head><body><style>
+#th-toolkit{position:relative;color-scheme:light dark;padding:18px 8px;font:14px/1.45 'Segoe UI',system-ui,sans-serif}
+#th-toolkit *{box-sizing:border-box}
+#th-toolkit .shell{max-width:690px;margin:auto;border:1px solid light-dark(#d1c8da,#4a3b58);border-radius:14px;overflow:hidden;background:light-dark(#fcfaff,#211b2a);color:light-dark(#271d32,#f8efff);box-shadow:0 10px 30px #17102032}
+#th-toolkit header{padding:18px 22px;background:light-dark(#ede3f7,#39294b)}
+#th-toolkit h2,#th-toolkit h3,#th-toolkit p{margin:0}
+#th-toolkit h2{font-size:23px}
+#th-toolkit h3{font-size:15px}
+#th-toolkit .muted{color:light-dark(#60536d,#c7b8d2);font-size:13px}
+#th-toolkit .toolbar,#th-toolkit footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 20px;background:light-dark(#f4eff9,#2b2335)}
+#th-toolkit .toolbar label{display:flex;align-items:center;gap:7px;flex:1 1 280px;flex-wrap:wrap}
+#th-toolkit input[type=text],#th-toolkit select{font:inherit;max-width:100%;min-width:0;border:1px solid light-dark(#c5bad0,#675774);border-radius:5px;padding:7px 9px;color:inherit;background:light-dark(#fff,#211b2a)}
+#th-toolkit input[type=text]{flex:1;min-width:115px}
+#th-toolkit button{font:inherit;border:1px solid light-dark(#c5bad0,#675774);border-radius:6px;padding:7px 11px;color:inherit;background:light-dark(#fff,#362b43);cursor:pointer}
+#th-toolkit button.primary{background:light-dark(#653f91,#d8b6fc);color:light-dark(#fff,#2b193e);border-color:transparent;font-weight:600}
+#th-toolkit .body{padding:16px 20px;display:grid;gap:14px}
+#th-toolkit .sync{display:flex;gap:10px;align-items:center;padding-bottom:12px;border-bottom:1px solid light-dark(#ded6e8,#4a3b58)}
+#th-toolkit .sync select{margin-left:auto}
+#th-toolkit .panels{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#th-toolkit .must-have{padding:10px 12px 6px;background:light-dark(#f1e7fb,#3a294b);border-radius:8px}
+#th-toolkit .must-have legend{padding:0 5px;color:light-dark(#5c337f,#e2c6ff)}
+#th-toolkit .must-have .component:last-child{border-bottom:0}
+#th-toolkit fieldset{margin:0;padding:0;border:0;min-width:0}
+#th-toolkit legend{font-weight:600;margin-bottom:6px}
+#th-toolkit label.component{display:flex;align-items:center;gap:8px;min-height:31px;border-bottom:1px solid light-dark(#ebe4f0,#3b3046)}
+#th-toolkit label.component span{flex:1}
+#th-toolkit input[type=checkbox]{accent-color:light-dark(#653f91,#d8b6fc)}
+#th-toolkit .auction{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#th-toolkit footer output{flex:1 1 180px}
+@media(max-width:500px){#th-toolkit .panels{grid-template-columns:1fr}#th-toolkit .sync{flex-wrap:wrap}#th-toolkit .sync select{margin-left:0}}
+
+
+#th-toolkit .tooltip-description{display:none}
+#th-toolkit .floating-tip{position:absolute;z-index:10;pointer-events:none;max-width:min(310px,calc(100% - 24px));padding:8px 10px;border:1px solid light-dark(#c8b6d5,#776387);border-radius:6px;box-shadow:0 5px 14px #21152c2d;background:light-dark(#fffaff,#30243c);color:light-dark(#33283d,#f8efff);font-size:13px}
+#th-toolkit .floating-tip[hidden]{display:none}
+
+#th-toolkit{--ink:light-dark(#28243a,#ebe7f4);--subtle:light-dark(#57516a,#b8afc8);--line:light-dark(#ddd6e6,#383044);--surface:light-dark(#fcfafe,#17141f);--raised:light-dark(#f2edf7,#211a2b);--gold:light-dark(#795219,#efc783);font-family:'Segoe UI',system-ui,sans-serif}
+#th-toolkit .shell{color:var(--ink);background:var(--surface);border-color:var(--line);border-radius:16px}
+#th-toolkit header{display:flex;align-items:center;gap:14px;padding:21px 24px;background:light-dark(#f1e8f8,#2b2037);border-bottom:1px solid var(--line)}
+#th-toolkit .crest{flex:none;display:grid;place-items:center;width:42px;height:42px;border:1px solid light-dark(#d9c195,#665135);border-radius:10px;color:var(--gold);background:light-dark(#fff4db,#36293b);font-size:22px;line-height:1}
+#th-toolkit h2{letter-spacing:-.025em}
+#th-toolkit .muted{color:var(--subtle)}
+#th-toolkit .toolbar{background:var(--surface);border-bottom:1px solid var(--line);padding:14px 24px}
+#th-toolkit .toolbar label{font-weight:600}
+#th-toolkit .toolbar input{font-weight:400}
+#th-toolkit .toolbar button{white-space:nowrap}
+#th-toolkit .body{padding:17px 24px 20px;gap:17px}
+#th-toolkit .sync{background:var(--raised);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+#th-toolkit fieldset.must-have{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:8px;background:light-dark(#faf0dd,#2b222b);border:1px solid light-dark(#e8d4b1,#584531);border-radius:11px}
+#th-toolkit .must-have legend{color:var(--gold);margin:0 0 0 7px}
+#th-toolkit .must-have label.component{align-items:flex-start;padding:9px 7px;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:7px;font-weight:600;line-height:1.25}
+#th-toolkit .must-have label.component:last-child{border-bottom:1px solid var(--line)}
+#th-toolkit .must-have .component small{display:block;margin-top:3px;font-size:11px;font-weight:400}
+#th-toolkit .panels{gap:20px}
+#th-toolkit .panels legend{width:100%;padding-bottom:5px;border-bottom:1px solid var(--line);margin-bottom:1px}
+#th-toolkit .component{cursor:pointer}
+#th-toolkit .component:hover,#th-toolkit .component:focus-within{background:var(--raised)}
+#th-toolkit .component::after{content:'i';display:grid;place-items:center;flex:0 0 14px;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;color:var(--subtle);font:600 9px/1 'Segoe UI',sans-serif;margin-right:4px}
+#th-toolkit .must-have .component::after{margin:1px 0 0}
+#th-toolkit input[type=checkbox]{margin-inline:4px}
+#th-toolkit .auction{padding-top:11px;border-top:1px solid var(--line)}
+#th-toolkit footer{padding:13px 24px;background:var(--raised);border-top:1px solid var(--line)}
+#th-toolkit button.primary{background:light-dark(#65418c,#eac181);color:light-dark(#fff,#302116);padding-inline:17px}
+@media(max-width:520px){#th-toolkit header,#th-toolkit .toolbar,#th-toolkit .body,#th-toolkit footer{padding-inline:13px}#th-toolkit fieldset.must-have{grid-template-columns:1fr}#th-toolkit .must-have .component small{display:inline;margin-left:4px}}
+</style>
+<style>
+#th-toolkit [hidden]{display:none!important}
+#th-toolkit .setup-nav{display:flex;align-items:center;gap:6px;padding:10px 24px 0}
+#th-toolkit .setup-nav [data-check]{margin-left:auto}
+#th-toolkit .setup-nav [data-settings]{width:36px;padding-inline:0;font-size:18px;line-height:1.1}
+#th-toolkit .setup-nav [data-settings][aria-expanded=true]{border-color:var(--gold)}
+#th-toolkit .setup-nav button[aria-pressed=true]{background:var(--raised);border-color:var(--gold)}
+#th-toolkit .version{display:inline-block;vertical-align:middle;margin-left:5px;padding:2px 6px;border:1px solid var(--line);border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0;color:var(--subtle)}
+#th-toolkit .brand-copy{min-width:0;flex:1}
+#th-toolkit .header-links{display:flex;flex-wrap:wrap;gap:7px;align-items:center;font-size:12px}
+#th-toolkit .header-links a{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;color:var(--ink);background:var(--surface);text-decoration:none;font-weight:600;white-space:nowrap}
+#th-toolkit .header-links a:first-child{color:var(--gold);border-color:light-dark(#dcc7a1,#665135);background:light-dark(#fff5e2,#36293b)}
+#th-toolkit .header-links a:hover{border-color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+#th-toolkit .header-links .external{font-size:11px;color:var(--subtle)}
+@media(max-width:680px){#th-toolkit header{flex-wrap:wrap}#th-toolkit .header-links{flex-basis:100%;padding-left:56px}}
+@media(max-width:390px){#th-toolkit .header-links{padding-left:0}}
+#th-toolkit [data-tweaks] fieldset{display:grid;gap:9px;padding:8px 0 12px;border-bottom:1px solid var(--line)}
+#th-toolkit .tweak-row{display:grid;grid-template-columns:minmax(0,1fr) 86px;gap:10px;align-items:center}
+#th-toolkit .tweak-row small{display:block}
+#th-toolkit .tweak-row input[type=number]{width:100%;min-width:0;padding:7px;color:inherit;background:var(--raised);border:1px solid var(--line);border-radius:6px;font:inherit}
+#th-toolkit .tweak-row input[type=checkbox]{justify-self:start}
+#th-toolkit .pc-check{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:9px 11px;background:var(--raised);border:1px solid var(--line);border-radius:7px}
+#th-toolkit .pc-check [data-pc-result]{flex:1 1 210px}
+</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<style>
+ html,body{margin:0;min-height:100%;background:#181522;color-scheme:dark;}
+ html,body{overflow:hidden}
+ #th-toolkit{padding:0!important;background:none;color-scheme:dark!important}
+ #th-toolkit .shell{min-width:688px;max-width:none;margin:0;min-height:100vh;box-shadow:none}
+ #th-toolkit header{position:relative;min-height:94px;user-select:none}
+ #th-toolkit .splash{display:none}
+ @media(prefers-reduced-motion:no-preference){
+  #th-toolkit{--splash-hold:2.55s}
+  #th-toolkit .shell{animation:toolkit-reveal 420ms var(--splash-hold) cubic-bezier(.2,.75,.25,1) both}
+  #th-toolkit header{overflow:hidden}
+  #th-toolkit header::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 36%,#efc78337 50%,transparent 64%);animation:header-sweep 7s calc(var(--splash-hold) + .33s) infinite}
+  #th-toolkit header .crest{animation:crest-arrive 650ms calc(var(--splash-hold) + .07s) cubic-bezier(.19,1,.35,1) both}
+  #th-toolkit .splash{position:fixed;inset:0;z-index:5;display:grid;place-content:center;justify-items:center;gap:22px;pointer-events:none;background:radial-gradient(ellipse at center,#332440 0%,#211929 42%,#181522 75%);animation:splash-dismiss 450ms var(--splash-hold) both}
+  #th-toolkit .splash-mark{position:relative;display:grid;place-items:center;width:104px;height:104px;border:1px solid #a17b50;border-radius:26px;background:#302239;color:#f0c785;font-size:57px;line-height:1;box-shadow:0 0 38px #d5984133;animation:crest-arrive 720ms cubic-bezier(.19,1,.35,1) both}
+  #th-toolkit .splash-mark::after{content:'';position:absolute;inset:-10px;border:1px solid #f0c785;border-radius:32px;animation:splash-ring 850ms 150ms both}
+  #th-toolkit .splash-title{color:var(--ink);font-size:25px;font-weight:650;animation:splash-title-in 450ms 210ms both}
+ }
+ @keyframes toolkit-reveal{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+ @keyframes header-sweep{0%{opacity:0;transform:translateX(-90%)}2.4%{opacity:1}11%,100%{opacity:0;transform:translateX(90%)}}
+ @keyframes crest-arrive{0%{opacity:.35;transform:rotate(-14deg) scale(.87)}58%{opacity:1;transform:rotate(3deg) scale(1.06)}100%{opacity:1;transform:none}}
+ @keyframes splash-ring{from{opacity:.55;transform:scale(.85)}to{opacity:0;transform:scale(1.35)}}
+ @keyframes splash-title-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+ @keyframes splash-dismiss{from{opacity:1;visibility:visible}to{opacity:0;visibility:hidden}}
+ #th-toolkit .window-actions{position:absolute;top:5px;right:8px;display:flex;gap:3px;z-index:1}
+ #th-toolkit .window-actions button{display:grid;place-items:center;width:25px;height:22px;padding:0;background:transparent;border-color:transparent;border-radius:6px;font-size:17px;line-height:1;color:var(--subtle)}
+ #th-toolkit .window-actions button:hover{border-color:var(--line);background:var(--raised);color:var(--ink)}
+ #th-toolkit .window-actions [data-window=close]:hover{background:#7c2f44;color:#fff}
+ #th-toolkit .header-links{flex-basis:auto;padding-left:0;margin-left:auto}
+ #th-toolkit header .brand-copy{flex:1 1 auto}
+ #th-toolkit header .header-links{margin-top:5px}
+ #th-toolkit .status-detail{flex:1 1 100%}
+ #th-toolkit .component:has(input:disabled){cursor:default}
+ #th-toolkit .installed-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:1px 5px;border:1px solid #375649;border-radius:5px;color:#a8ddc0;background:#20342d;font-size:10px;font-weight:600;line-height:1.4;white-space:nowrap}
+ #th-toolkit .installed-badge[data-files-only=true]{border-color:#675436;color:#edca91;background:#362d24}
+ #th-toolkit .must-have .component{display:grid;grid-template-columns:18px minmax(0,1fr) 14px;grid-template-rows:1fr auto}
+ #th-toolkit .must-have .component::after{grid-row:1;grid-column:3}
+ #th-toolkit .must-have .installed-badge{grid-row:2;grid-column:2;justify-self:start;margin:0}
+ #th-toolkit .panels [data-add-repository]{margin-top:10px}
+ #th-toolkit .repository-form label{display:grid;gap:6px}
+ #th-toolkit .repository-form input{width:100%}
+ #th-toolkit button:disabled{opacity:.6;cursor:wait}
+ #th-toolkit .security-link{padding:5px 0;border:0;background:transparent;color:var(--subtle);font-size:12px}
+ #th-toolkit .security-link:hover{color:var(--gold);text-decoration:underline;text-underline-offset:3px}
+ #th-toolkit .security-dialog{width:min(480px,calc(100% - 26px));max-height:calc(100% - 26px);padding:0;border:1px solid var(--line);border-radius:13px;color:var(--ink);background:var(--surface)}
+ #th-toolkit .security-dialog::backdrop{background:#130f1acc}
+ #th-toolkit .security-content{display:grid;gap:16px;padding:21px 23px}
+ #th-toolkit .security-content h2{font-size:21px;color:var(--gold)}
+ #th-toolkit .security-content section{display:grid;gap:6px}
+ #th-toolkit .security-content .security-path{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+ #th-toolkit .security-content code{overflow-wrap:anywhere;font-size:12px;color:var(--gold)}
+ #th-toolkit .security-content .security-actions{display:flex;flex-wrap:wrap;gap:6px}
+ #th-toolkit .security-content [data-security-results]{white-space:pre-line}
+ #th-toolkit .security-dialog footer{border-radius:0;justify-content:flex-end}
+ #th-toolkit .install-review{border-color:#665135;box-shadow:0 18px 60px #0c0915a6}
+ #th-toolkit .install-review [data-review-source]{display:block;overflow-wrap:anywhere;color:var(--gold);font-size:12px}
+ #th-toolkit .install-review .update-results{padding:0 12px;background:var(--raised);border:1px solid var(--line);border-radius:8px}
+ #th-toolkit .install-review .update-results li:last-child{border-bottom:0}
+ #th-toolkit .sync{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
+ #th-toolkit .sync [data-sync-description]{grid-column:1/-1;min-height:2.9em}
+ #th-toolkit .sync [data-uninstall]{justify-self:start;text-align:left;padding:0}
+ #th-toolkit .security-content .removal-option{display:flex;align-items:center;gap:8px}
+ #th-toolkit .update-results{margin:0;padding:0;list-style:none}
+ #th-toolkit .update-results li{padding:6px 0;border-bottom:1px solid var(--line)}
+</style><div id="th-toolkit">
+ <div class="splash" aria-hidden="true"><span class="splash-mark">⚒</span><span class="splash-title">Twilight Hammer Toolkit</span></div>
+ <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
+  <header><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
+   <span class="crest" aria-hidden="true">⚒</span>
+   <div class="brand-copy"><h2>Twilight Hammer Toolkit <span class="version">v{{VERSION}}</span></h2><p class="muted">OctoWoW addons and client tools</p></div>
+   <nav class="header-links" aria-label="Twilight Hammer links">
+    <a href="https://twilighthammer.hccpride.workers.dev/" target="_blank" rel="noopener noreferrer">Guild Portal <span class="external" aria-hidden="true">↗</span></a>
+    <a href="https://github.com/obs1deus/twilighthammer-sync" target="_blank" rel="noopener noreferrer">GitHub <span class="external" aria-hidden="true">↗</span></a>
+   </nav>
+  </header>
+  <form>
+   <nav class="setup-nav" aria-label="Toolkit controls">
+    <button type="button" data-tab="components" aria-pressed="true">AddOns &amp; Tools</button>
+    <button type="button" data-tab="tweaks" aria-pressed="false">Client Tweaks</button>
+    <button type="button" data-check>Check for updates</button>
+    <button type="button" data-settings aria-label="Game folder settings" aria-controls="game-folder-settings" aria-expanded="true" title="Game folder settings">⚙</button>
+   </nav>
+   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button></div>
+   <div class="body" data-components>
+    <div class="sync"><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Uploads the guild roster, professions, and auction scans. Requires Discord sign-in on the guild portal.</p><button class="security-link" type="button" data-uninstall>Uninstall Sync</button></div>
+    <fieldset class="must-have"><legend>Must Haves</legend>
+      <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1">TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
+      <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2">Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
+      <label class="component"><input type="checkbox" value="BigWigs" aria-describedby="th-toolkit-tip-3" aria-labelledby="th-toolkit-label-3"><span id="th-toolkit-label-3">BigWigs <small class="muted">prodigeomix</small></span><span class="tooltip-description" id="th-toolkit-tip-3">Shows boss ability timers and raid warnings. This is the prodigeomix fork.</span></label>
+    </fieldset>
+    <div class="panels">
+     <fieldset><legend>Raid &amp; Character Addons</legend>
+      <label class="component"><input type="checkbox" value="_LazyPig" aria-describedby="th-toolkit-tip-4" aria-labelledby="th-toolkit-label-4"><span id="th-toolkit-label-4">_LazyPig</span><span class="tooltip-description" id="th-toolkit-tip-4">Adds configurable shortcuts and automation for common tasks such as dismounting and accepting invites.</span></label>
+      <label class="component"><input type="checkbox" value="DopingControl" aria-describedby="th-toolkit-tip-5" aria-labelledby="th-toolkit-label-5"><span id="th-toolkit-label-5">DopingControl</span><span class="tooltip-description" id="th-toolkit-tip-5">Checks raid consumables, buffs, debuffs, resistances, hit, and enchants before a pull.</span></label>
+      <label class="component"><input type="checkbox" value="AutoMarker" aria-describedby="th-toolkit-tip-6" aria-labelledby="th-toolkit-label-6"><span id="th-toolkit-label-6">AutoMarker</span><span class="tooltip-description" id="th-toolkit-tip-6">Automatically assigns raid target icons to configured enemies.</span></label>
+      <label class="component"><input type="checkbox" value="RollFor" aria-describedby="th-toolkit-tip-7" aria-labelledby="th-toolkit-label-7"><span id="th-toolkit-label-7">RollFor</span><span class="tooltip-description" id="th-toolkit-tip-7">Helps manage loot rolls and track who rolled on an item.</span></label>
+      <label class="component"><input type="checkbox" value="SmartLoot" aria-describedby="th-toolkit-tip-8" aria-labelledby="th-toolkit-label-8"><span id="th-toolkit-label-8">SmartLoot</span><span class="tooltip-description" id="th-toolkit-tip-8">Moves and compacts loot roll frames, and can remember your Need, Greed, or Pass choices.</span></label>
+      <label class="component"><input type="checkbox" value="BetterCharacterStats" aria-describedby="th-toolkit-tip-9" aria-labelledby="th-toolkit-label-9"><span id="th-toolkit-label-9">BetterCharacterStats</span><span class="tooltip-description" id="th-toolkit-tip-9">Expands the character panel with more detailed combat stats.</span></label>
+      <label class="component"><input type="checkbox" value="Rinse" aria-describedby="th-toolkit-tip-10" aria-labelledby="th-toolkit-label-10"><span id="th-toolkit-label-10">Rinse</span><span class="tooltip-description" id="th-toolkit-tip-10">Helps identify and dispel removable debuffs on party and raid members.</span></label>
+      <label class="component"><input type="checkbox" value="ChronicleCompanion" aria-describedby="th-toolkit-tip-20" aria-labelledby="th-toolkit-label-20"><span id="th-toolkit-label-20">ChronicleCompanion</span><span class="tooltip-description" id="th-toolkit-tip-20">Adds extended unit data to combat logs for ChronicleClassic. Requires the WoW 1.12 client and Nampower.</span></label>
+      <button type="button" class="security-link" data-add-repository>+ Add from Git link</button>
+     </fieldset>
+     <fieldset><legend>Client Tools &amp; Compatibility</legend>
+      <label class="component"><input type="checkbox" value="Nampower" aria-describedby="th-toolkit-tip-11" aria-labelledby="th-toolkit-label-11"><span id="th-toolkit-label-11">Nampower</span><span class="tooltip-description" id="th-toolkit-tip-11">Client mod that improves spell handling and provides extra functions for compatible addons.</span></label>
+      <label class="component"><input type="checkbox" value="NampowerSettings" aria-describedby="th-toolkit-tip-12" aria-labelledby="th-toolkit-label-12"><span id="th-toolkit-label-12">NampowerSettings</span><span class="tooltip-description" id="th-toolkit-tip-12">Adds an in-game settings panel for the Nampower client mod.</span></label>
+      <label class="component"><input type="checkbox" value="ClassicAPI" aria-describedby="th-toolkit-tip-13" aria-labelledby="th-toolkit-label-13"><span id="th-toolkit-label-13">ClassicAPI</span><span class="tooltip-description" id="th-toolkit-tip-13">Adds newer WoW API functions so compatible addons can use them on the vanilla client.</span></label>
+      <label class="component"><input type="checkbox" value="UnitXP_SP3" aria-describedby="th-toolkit-tip-14" aria-labelledby="th-toolkit-label-14"><span id="th-toolkit-label-14">UnitXP_SP3 <small class="muted">brues-code</small></span><span class="tooltip-description" id="th-toolkit-tip-14">The brues-code client mod exposes extra unit information, including distances, for compatible addons.</span></label>
+      <label class="component"><input type="checkbox" value="UnitXP_SP3_Addon" aria-describedby="th-toolkit-tip-18" aria-labelledby="th-toolkit-label-18"><span id="th-toolkit-label-18">UnitXP_SP3_Addon</span><span class="tooltip-description" id="th-toolkit-tip-18">Companion addon for the UnitXP_SP3 client mod.</span></label>
+      <label class="component"><input type="checkbox" value="VanillaFixes" aria-describedby="th-toolkit-tip-15" aria-labelledby="th-toolkit-label-15"><span id="th-toolkit-label-15">VanillaFixes</span><span class="tooltip-description" id="th-toolkit-tip-15">Launcher and client fixes for WoW 1.12. It can also load compatible DLL mods.</span></label>
+      <label class="component"><input type="checkbox" value="VanillaHelpers" aria-describedby="th-toolkit-tip-16" aria-labelledby="th-toolkit-label-16"><span id="th-toolkit-label-16">VanillaHelpers</span><span class="tooltip-description" id="th-toolkit-tip-16">Client helper library that adds file access, minimap functions, and graphics features.</span></label>
+      <label class="component"><input type="checkbox" value="SuperWoW" aria-describedby="th-toolkit-tip-17" aria-labelledby="th-toolkit-label-17"><span id="th-toolkit-label-17">SuperWoW</span><span class="tooltip-description" id="th-toolkit-tip-17">Extends the vanilla client with extra game APIs, including live file export used by Twilight Hammer Sync.</span></label>
+      <label class="component"><input type="checkbox" value="SuperAPI" aria-describedby="th-toolkit-tip-19" aria-labelledby="th-toolkit-label-19"><span id="th-toolkit-label-19">SuperAPI</span><span class="tooltip-description" id="th-toolkit-tip-19">Companion compatibility addon for the SuperWoW client mod.</span></label>
+      <label class="component"><input type="checkbox" value="Chronicle Sidekick" aria-describedby="th-toolkit-tip-21" aria-labelledby="th-toolkit-label-21"><span id="th-toolkit-label-21">Chronicle Sidekick <small class="muted">Windows app</small></span><span class="tooltip-description" id="th-toolkit-tip-21">Uploads OctoWoW combat logs to Chronicle from the Windows tray. Requires a Chronicle sign-in to upload.</span></label>
+     </fieldset>
+    </div>
+    <label class="auction">Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
+   </div>
+   <div class="body" data-tweaks hidden>
+    <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
+    <p class="muted">Applies to the supported WoW_Modernized.exe build. Setup backs up your executable and settings. Unchecked switches keep the client’s current behavior.</p>
+    <fieldset><legend>Client</legend>
+     <label class="tweak-row"><span>Always auto-loot<small class="muted">Loot automatically by default. Hold the bound auto-loot key, Shift by default, for manual loot.</small></span><input type="checkbox" name="autoLoot"></label>
+     <label class="tweak-row"><span>Large Address Aware<small class="muted">Lets the 32-bit client address more than 2 GB of memory.</small></span><input type="checkbox" name="laa" checked></label>
+     <label class="tweak-row"><span>Nameplate range<small class="muted">How far away nameplates can appear. Vanilla 20 yards. Classic 41 yards.</small></span><input type="number" name="plates" value="30" min="1" max="100" required></label>
+    </fieldset>
+    <fieldset><legend>Camera &amp; graphics</legend>
+     <label class="tweak-row"><span>Field of view<small class="muted">Vanilla 90°. The 110° preset suits widescreen displays.</small></span><input type="number" name="fov" value="110" min="60" max="150" required></label>
+     <label class="tweak-row"><span>Render distance<small class="muted">Terrain draw distance. Vanilla 777. High values can cause crashes when entering the world.</small></span><input type="number" name="render" value="2200" min="777" max="3000" required></label>
+     <label class="tweak-row"><span>Ground clutter distance<small class="muted">How far away grass and ground detail appear. Vanilla 70. Toolkit preset 300.</small></span><input type="number" name="clutter" value="300" min="0" max="1000" required></label>
+     <label class="tweak-row"><span>Camera distance<small class="muted">Maximum zoom-out distance. Vanilla 50. Toolkit limit 100.</small></span><input type="number" name="camera" value="75" min="1" max="100" required></label>
+    </fieldset>
+    <div class="pc-check"><button type="button" data-pc-check>Check my PC</button><span class="muted" data-pc-result aria-live="polite">Get a starting value based on RAM and CPU threads.</span><button type="button" data-pc-apply hidden>Use recommendation</button></div>
+    <fieldset><legend>Sound</legend>
+     <label class="tweak-row"><span>Background sounds<small class="muted">Keep game audio playing while the window is in the background.</small></span><input type="checkbox" name="audio" checked></label>
+    </fieldset>
+   </div>
+   <footer><output class="muted" aria-live="polite">0 optional components selected</output><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit">Preview install</button><div class="status-detail" hidden></div></footer>
+  </form>
+ </section>
+ <dialog class="security-dialog" aria-labelledby="repository-heading" data-repository-dialog>
+  <form class="repository-form">
+   <div class="security-content">
+    <h2 id="repository-heading">Add from Git link</h2>
+    <label>Public addon repository <input name="repository" type="text" maxlength="500" placeholder="https://github.com/owner/addon" required autofocus></label>
+    <p class="muted">Paste the repository URL from GitHub, Gitea, or Forgejo. The Toolkit will show which addons it found before installing.</p>
+   </div>
+   <footer><button type="button" data-cancel-repository>Cancel</button><button type="submit" class="primary">Review addons</button></footer>
+  </form>
+ </dialog>
+ <dialog class="security-dialog install-review" data-install-review aria-labelledby="install-review-title">
+  <form method="dialog">
+   <div class="security-content">
+    <h2 id="install-review-title"></h2>
+    <section data-review-origin hidden><h3>Repository</h3><code data-review-source></code></section>
+    <ul class="update-results" data-review-items></ul>
+    <p class="muted" data-review-note hidden></p>
+   </div>
+   <footer><button value="cancel" autofocus>Cancel</button><button value="install" class="primary">Install</button></footer>
+  </form>
+ </dialog>
+ <dialog class="security-dialog" data-security-dialog aria-labelledby="th-security-title">
+  <div class="security-content">
+   <div><h2 id="th-security-title">Windows Security help</h2><p class="muted">Review a blocked mod and check whether its files are in your game folder.</p></div>
+   <section>
+    <h3>1. Find the blocked file</h3>
+    <p class="muted">Open Protection history and compare the detected file and publisher with the upstream release.</p>
+    <div class="security-actions"><button type="button" data-help-action="security-open">Open Windows Security ↗</button><button type="button" data-help-action="security-history">Review blocked files ↗</button></div>
+   </section>
+   <section>
+    <h3>2. Check the file path</h3>
+    <div class="security-path"><code data-game-folder></code><button type="button" data-help-action="copy-game">Copy game folder</button></div>
+    <div class="security-path"><code data-toolkit-folder></code><button type="button" data-help-action="copy-toolkit">Copy Toolkit folder</button></div>
+    <p class="muted">If you’ve verified a false positive, use the action on that item in Protection history. Windows controls any Restore or Allow action.</p>
+    <button class="security-link" type="button" data-help-action="security-report">Submit a suspected false positive ↗</button>
+   </section>
+   <p class="muted" data-security-results aria-live="polite"></p>
+  </div>
+  <footer><button type="button" data-help-action="security-check">Check again</button><button type="button" class="primary" data-help-close>Close</button></footer>
+ </dialog>
+ <dialog class="security-dialog" data-removal aria-labelledby="th-uninstall-title">
+  <form method="dialog">
+   <div class="security-content">
+    <h2 id="th-uninstall-title">Uninstall Twilight Hammer Sync?</h2>
+    <p class="muted">Stops background uploads and removes the uploader and its scheduled task. Saved captures, logs, and portal data are kept.</p>
+    <label class="removal-option"><input type="checkbox" data-remove-addon> Also remove the WoW addon from the selected game folder</label>
+    <code data-removal-game></code>
+    <p class="muted">Close OctoWoW first if you’re removing the addon.</p>
+   </div>
+   <footer><button value="cancel" autofocus>Cancel</button><button type="button" class="primary" data-confirm-removal>Uninstall</button></footer>
+  </form>
+ </dialog>
+ <dialog class="security-dialog" data-updates aria-labelledby="th-update-title">
+  <form method="dialog">
+   <div class="security-content"><h2 id="th-update-title">Update results</h2><ul class="update-results"></ul></div>
+   <footer><button type="button" data-get-update hidden>Open Toolkit release ↗</button><button class="primary" autofocus>Close</button></footer>
+  </form>
+ </dialog>
+ <div class="floating-tip" aria-hidden="true" hidden></div>
+</div>
+<script>
+(() => {
+ const root = document.getElementById('th-toolkit');
+ const form = root.querySelector('form');
+ const edition = form.elements.edition;
+ const syncDescriptions = {
+  'Guild Sync':'Uploads the guild roster, professions, and auction scans. Requires Discord sign-in on the guild portal.',
+  'Auction Only':'Uploads auction scans to the public Auction House. Open to everyone without signing in.',
+  'Bank and Guild Sync':'Also uploads Twilightbank inventory and gold. Requires a guild officer or admin to authorize through Discord.',
+  'Skip Sync':'Continues setting up your selected addons and tweaks without installing Sync.'
+ };
+ function describeSync(){
+  root.querySelector('[data-sync-description]').textContent=syncDescriptions[edition.value];
+ }
+ edition.addEventListener('change',describeSync);
+ const status = root.querySelector('output');
+ const checks = [...form.querySelectorAll('.component input[type=checkbox]')];
+ const tabs = [...form.querySelectorAll('[data-tab]')];
+ tabs.forEach(button => button.addEventListener('click', () => {
+  tabs.forEach(tab => {
+   const active = tab === button;
+   tab.setAttribute('aria-pressed', String(active));
+   form.querySelector('[data-' + tab.dataset.tab + ']').hidden = !active;
+  });
+ }));
+ const tweakFields = [...form.querySelectorAll('[data-tweaks] fieldset')];
+ function toggleTweaks() {
+  tweakFields.forEach(fieldset => fieldset.disabled = !form.elements.applyTweaks.checked);
+ }
+ form.elements.applyTweaks.addEventListener('change',toggleTweaks);
+ toggleTweaks();
+ const tip = root.querySelector('.floating-tip');
+ let hovered = null;
+ let focused = null;
+ function drawTooltip() {
+  const row = hovered || focused;
+  tip.hidden = !row;
+  if (!row) return;
+  tip.textContent = row.querySelector('.tooltip-description').textContent;
+  const bounds = root.getBoundingClientRect();
+  const anchor = row.getBoundingClientRect();
+  const left = Math.max(12, Math.min(anchor.left - bounds.left, bounds.width - tip.offsetWidth - 12));
+  const above = anchor.top - bounds.top - tip.offsetHeight - 5;
+  tip.style.left = left + 'px';
+  tip.style.top = (above >= 3 ? above : anchor.bottom - bounds.top + 5) + 'px';
+ }
+ checks.forEach(input => {
+  const row = input.closest('.component');
+  row.addEventListener('pointerenter', event => {
+   if (event.pointerType === 'touch') return;
+   hovered = row;
+   drawTooltip();
+  });
+  row.addEventListener('pointerleave', () => {
+   if (hovered === row) hovered = null;
+   drawTooltip();
+  });
+  input.addEventListener('focus', () => {
+   if (input.matches(':focus-visible')) focused = row;
+   drawTooltip();
+  });
+  input.addEventListener('blur', () => {
+   if (focused === row) focused = null;
+   drawTooltip();
+  });
+ });
+ root.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+   hovered = null;
+   focused = null;
+   drawTooltip();
+  }
+ });
+
+ const bridge = window.chrome.webview;
+ const send = (action, data = {}) => bridge.postMessage({action, ...data});
+ const gameField=form.elements.game;
+ const settingsButton=root.querySelector('[data-settings]');
+ const folderSettings=root.querySelector('#game-folder-settings');
+ let confirmedFolder;
+ function showFolderSettings(open,focus=false){
+  folderSettings.hidden=!open;
+  settingsButton.setAttribute('aria-expanded',String(open));
+  if(focus)(open?gameField:settingsButton).focus();
+ }
+ settingsButton.addEventListener('click',()=>{
+  if(folderSettings.hidden)showFolderSettings(true,true);
+  else if(confirmedFolder===gameField.value)showFolderSettings(false,true);
+  else send('save-folder',{game:gameField.value});
+ });
+ root.querySelector('[data-browse]').addEventListener('click',()=>send('browse',{game:gameField.value}));
+ root.querySelector('[data-save-folder]').addEventListener('click',()=>send('save-folder',{game:gameField.value}));
+ gameField.addEventListener('keydown',event=>{
+  if(event.key==='Enter'){event.preventDefault();send('save-folder',{game:gameField.value});}
+ });
+ function badgeFor(label){
+  const badge=document.createElement('b');
+  badge.className='installed-badge';
+  badge.hidden=true;
+  label.append(badge);
+  return badge;
+ }
+ const componentBadges=checks.map(input=>[
+  input.value,
+  badgeFor(input.closest('.must-have')?input.closest('.component'):document.getElementById(input.getAttribute('aria-labelledby')))
+ ]);
+ componentBadges.push(['Twilight Hammer Sync',badgeFor(root.querySelector('.sync h3'))]);
+ const auctionChoices=[...form.elements.auction.options].filter(option=>option.value);
+ function showInstalled(statuses){
+  for(const [name,badge] of componentBadges){
+   const state=statuses[name];
+   badge.hidden=!state;
+   badge.textContent=state||'';
+   badge.dataset.filesOnly=String(state==='Files present');
+   badge.title=state==='Files present'?'Mod file found. It is not listed in dlls.txt.':'';
+  }
+  for(const option of auctionChoices){
+   option.textContent=option.value+(statuses[option.value]?' · Installed':'');
+  }
+  const found=auctionChoices.filter(option=>statuses[option.value]).map(option=>option.value);
+  form.elements.auction.options[0].textContent=found.length?'Keep current setup ('+found.join(', ')+')':'Keep my current setup';
+ }
+ let scanTimer;
+ const scanInstalled=()=>send('installed',{game:gameField.value});
+ gameField.addEventListener('input',()=>{
+  showInstalled({});
+  clearTimeout(scanTimer);
+  scanTimer=setTimeout(scanInstalled,220);
+ });
+ window.addEventListener('focus',scanInstalled);
+ const manual = new Set();
+ const dependencies = {{DEPENDENCIES}};
+ function plan() {
+  const names = new Set();
+  function add(name) {
+   if (names.has(name)) return;
+   (dependencies[name] || []).forEach(add);
+   names.add(name);
+  }
+  manual.forEach(add);
+  return names;
+ }
+ function count() {
+  const names = plan();
+  checks.forEach(input => {
+   input.checked = names.has(input.value);
+   input.disabled = names.has(input.value) && !manual.has(input.value);
+  });
+  const total = names.size + Number(Boolean(form.elements.auction.value));
+  status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
+ }
+ checks.forEach(input => input.addEventListener('change', () => {
+  if (input.checked) manual.add(input.value); else manual.delete(input.value);
+  count();
+ }));
+ form.elements.auction.addEventListener('change', count);
+ function request(action) {
+  send(action, {
+   game: form.elements.game.value, edition: form.elements.edition.value,
+   components: [...manual, form.elements.auction.value].filter(Boolean),
+   tweaks: {
+    enabled: form.elements.applyTweaks.checked, autoLoot:form.elements.autoLoot.checked,
+    laa: form.elements.laa.checked, audio: form.elements.audio.checked,
+    plates:+form.elements.plates.value, fov:+form.elements.fov.value,
+    render:+form.elements.render.value, clutter:+form.elements.clutter.value,
+    camera:+form.elements.camera.value
+   }
+  });
+ }
+ root.querySelector('[data-check]').addEventListener('click',()=>request('updates'));
+ const addRepository=root.querySelector('[data-add-repository]');
+ const repositoryDialog=root.querySelector('[data-repository-dialog]');
+ const repositoryForm=repositoryDialog.querySelector('form');
+ addRepository.addEventListener('click',()=>repositoryDialog.showModal());
+ repositoryDialog.querySelector('[data-cancel-repository]').addEventListener('click',()=>repositoryDialog.close());
+ repositoryForm.addEventListener('submit',event=>{
+  event.preventDefault();
+  repositoryDialog.close();
+  send('install-repository',{game:gameField.value,repository:repositoryForm.elements.repository.value});
+ });
+ const pcResult=root.querySelector('[data-pc-result]');
+ const applyRecommendation=root.querySelector('[data-pc-apply]');
+ let recommendedDistance;
+ root.querySelector('[data-pc-check]').addEventListener('click',()=>send('pc-check'));
+ applyRecommendation.addEventListener('click',()=>{
+  form.elements.render.value=recommendedDistance;
+  pcResult.textContent='Render distance set to '+recommendedDistance+'. Turn on Apply client tweaks to include it in setup.';
+ });
+ form.addEventListener('submit',event=>{event.preventDefault();request('install');});
+ root.querySelectorAll('[data-window]').forEach(button=>button.addEventListener('click',()=>send(button.dataset.window)));
+ window.addEventListener('pointerdown',event=>{
+  if(event.button!==0)return;
+  const left=event.clientX<4,right=event.clientX>=innerWidth-4,top=event.clientY<4,bottom=event.clientY>=innerHeight-4;
+  const edge=top?(left?13:right?14:12):bottom?(left?16:right?17:15):left?10:right?11:0;
+  if(edge){event.preventDefault();event.stopPropagation();send('resize',{edge});}
+ },true);
+ root.querySelector('header').addEventListener('pointerdown', event => {
+  if (event.button === 0 && !event.target.closest('button,a')) send('drag');
+ });
+ form.elements.game.addEventListener('dblclick',()=>send('browse',{game:form.elements.game.value}));
+ form.elements.game.addEventListener('keydown',event=>{
+  if(event.key==='F4'){event.preventDefault();send('browse',{game:form.elements.game.value});}
+ });
+ const security=root.querySelector('[data-security-dialog]');
+ const removal=root.querySelector('[data-removal]');
+ const updateDialog=root.querySelector('[data-updates]');
+ updateDialog.querySelector('[data-get-update]').addEventListener('click',()=>send('release'));
+ const uninstallButton=root.querySelector('[data-uninstall]');
+ uninstallButton.addEventListener('click',()=>{
+  removal.querySelector('[data-remove-addon]').checked=false;
+  removal.querySelector('[data-removal-game]').textContent=form.elements.game.value||'Game folder not selected';
+  removal.showModal();
+ });
+ removal.querySelector('[data-confirm-removal]').addEventListener('click',()=>{
+  const removeAddon=removal.querySelector('[data-remove-addon]').checked;
+  removal.close();
+  send('uninstall',{game:form.elements.game.value,removeAddon});
+ });
+ const securityResults=security.querySelector('[data-security-results]');
+ function showSecurity() {
+  security.querySelector('[data-game-folder]').textContent=form.elements.game.value||'Game folder not selected';
+  if(!security.open)security.showModal();
+ }
+ root.querySelector('[data-help]').addEventListener('click',showSecurity);
+ security.querySelector('[data-help-close]').addEventListener('click',()=>security.close());
+ security.querySelectorAll('[data-help-action]').forEach(button=>button.addEventListener('click',()=>{
+  if(button.dataset.helpAction==='security-check')request('security-check');
+  else send(button.dataset.helpAction,{game:form.elements.game.value});
+ }));
+ root.addEventListener('keydown',event=>{if(event.key==='F1'){event.preventDefault();showSecurity();}});
+ const detail=root.querySelector('.status-detail');
+ const installReview=root.querySelector('[data-install-review]');
+ installReview.addEventListener('close',()=>send('review-install',{confirmed:installReview.returnValue==='install'}));
+ bridge.addEventListener('message',({data})=>{
+  if(data.game!==undefined){
+   gameField.value=data.game;
+   confirmedFolder=data.gameValid?data.game:undefined;
+   showFolderSettings(!data.gameValid,data.gameValid&&folderSettings.contains(document.activeElement));
+   showInstalled({});
+   scanInstalled();
+  }
+  if(data.componentStatuses&&data.installPath===gameField.value)showInstalled(data.componentStatuses);
+  if(data.renderAdvice){
+   const {distance,ramGiB,threads}=data.renderAdvice;
+   recommendedDistance=distance;
+   pcResult.textContent='Suggested '+distance+' · '+(ramGiB?ramGiB+' GB RAM':'RAM unavailable')+' · '+threads+' logical CPU threads. Starting estimate based on RAM and CPU.';
+   applyRecommendation.hidden=false;
+  }
+  if(data.toolkitFolder!==undefined)security.querySelector('[data-toolkit-folder]').textContent=data.toolkitFolder;
+  if(data.securityResult!==undefined)securityResults.textContent=data.securityResult;
+  if(data.status!==undefined)status.textContent=data.status;
+  if(data.review){
+   const {title,source,items,note}=data.review;
+   installReview.querySelector('#install-review-title').textContent=title;
+   installReview.querySelector('[data-review-origin]').hidden=!source;
+   installReview.querySelector('[data-review-source]').textContent=source||'';
+   installReview.querySelector('[data-review-note]').hidden=!note;
+   installReview.querySelector('[data-review-note]').textContent=note||'';
+   installReview.querySelector('[data-review-items]').replaceChildren(...items.map(text=>{
+    const item=document.createElement('li');
+    item.textContent=text;
+    return item;
+   }));
+   installReview.returnValue='cancel';
+   installReview.showModal();
+  }
+  if(data.busy!==undefined) {
+   root.querySelector('[data-check]').disabled=data.busy;
+   root.querySelector('[type=submit]').disabled=data.busy;
+   uninstallButton.disabled=data.busy;
+   addRepository.disabled=data.busy;
+   if(!data.busy)scanInstalled();
+  }
+  if(data.syncRemoved){edition.value='Skip Sync';describeSync();}
+  if(data.updateLines){
+   const list=updateDialog.querySelector('.update-results');
+   list.replaceChildren(...data.updateLines.map(text=>{
+    const item=document.createElement('li');
+    item.textContent=text;
+    return item;
+   }));
+   updateDialog.querySelector('[data-get-update]').hidden=!data.update;
+   if(!updateDialog.open)updateDialog.showModal();
+  }
+  if(data.warning||data.update){
+   detail.replaceChildren();
+   const button=document.createElement('button');
+   button.type='button';
+   button.textContent=data.update?'Open Toolkit release ↗':'Windows Security help';
+   button.addEventListener('click',()=>{if(data.update)send('release');else showSecurity();});
+   detail.append(button);
+   detail.hidden=false;
+  } else if(data.status!==undefined)detail.hidden=true;
+ });
+ send('ready');
+ const shell=root.querySelector('.shell');
+ const header=shell.querySelector('header');
+ function fitWindow(){
+  send('fit',{
+   width:688,
+   height:header.offsetHeight+form.offsetHeight+2,
+   viewport:innerWidth
+  });
+ }
+ const layout=new ResizeObserver(fitWindow);
+ layout.observe(header);
+ layout.observe(form);
+ window.addEventListener('resize',fitWindow);
+})();
+</script>
+</body></html>

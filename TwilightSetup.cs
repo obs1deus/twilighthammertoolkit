@@ -16,13 +16,16 @@ internal static class TwilightSetup {
     private const string TaskName = "Twilight Hammer Saved Capture Sync";
     private static readonly string Folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwilightHammerSync");
     private static readonly string Config = Path.Combine(Folder, "native-game.txt");
+    private static readonly string Approval = Path.Combine(Folder, "native-approval.dpapi");
     private static readonly JavaScriptSerializer Json = new JavaScriptSerializer { MaxJsonLength = 20000000 };
 #if BANK_ENABLED
     private const string Title = "Twilight Hammer Bank and Guild Sync";
+    private const string Mode = "bank";
 #elif AUCTION_ONLY
     private const string Title = "Twilight Hammer Auction Only";
 #else
     private const string Title = "Twilight Hammer Guild Sync";
+    private const string Mode = "guild";
 #endif
 
     [STAThread]
@@ -30,7 +33,7 @@ internal static class TwilightSetup {
         bool upload = args.Length == 1 && args[0] == "--upload";
         try {
             if (upload) Upload();
-            else Install();
+            else if (!Install(args.Length == 2 && args[0] == "--install" ? args[1] : null)) return 2;
             return 0;
         } catch (Exception error) {
             if (upload) Log(error.Message);
@@ -44,10 +47,12 @@ internal static class TwilightSetup {
             File.Exists(Path.Combine(folder, "WoW_Modernized.exe")));
     }
 
-    private static void Install() {
+    private static bool Install(string requestedGame) {
         if (Process.GetProcessesByName("WoW").Length > 0 || Process.GetProcessesByName("WoW_Modernized").Length > 0)
             throw new InvalidOperationException("Close OctoWoW and run Setup again.");
-        string game = File.Exists(Config) ? File.ReadAllText(Config).Trim() : null;
+        if(requestedGame != null && !IsGame(requestedGame))
+            throw new InvalidOperationException("Choose the OctoWoW folder containing WoW.exe.");
+        string game = requestedGame ?? (File.Exists(Config) ? File.ReadAllText(Config).Trim() : null);
         string oldConfig = Path.Combine(Folder, "config.json");
         if (!IsGame(game) && File.Exists(oldConfig)) {
             var previous = Json.Deserialize<Dictionary<string, object>>(File.ReadAllText(oldConfig));
@@ -58,11 +63,15 @@ internal static class TwilightSetup {
                 picker.Description = "Choose the OctoWoW folder containing WoW.exe.";
                 picker.ShowNewFolderButton = false;
                 if (IsGame(@"G:\Games\Octo")) picker.SelectedPath = @"G:\Games\Octo";
-                if (picker.ShowDialog() != DialogResult.OK) return;
+                if (picker.ShowDialog() != DialogResult.OK) return false;
                 game = picker.SelectedPath;
             }
         }
         if (!IsGame(game)) throw new InvalidOperationException("Choose the OctoWoW folder containing WoW.exe.");
+#if !AUCTION_ONLY
+        string approval = Authorize();
+        if (approval == null) return false;
+#endif
         string addon = Path.Combine(game, "Interface", "AddOns", "TwilightHammerSync");
         Directory.CreateDirectory(addon);
         Directory.CreateDirectory(Folder);
@@ -75,9 +84,49 @@ internal static class TwilightSetup {
         if (!String.Equals(assembly.Location, executable, StringComparison.OrdinalIgnoreCase))
             File.Copy(assembly.Location, executable, true);
         File.WriteAllText(Config, game);
+#if !AUCTION_ONLY
+        File.WriteAllBytes(Approval, ProtectedData.Protect(Encoding.UTF8.GetBytes(approval), null, DataProtectionScope.CurrentUser));
+#else
+        File.Delete(Approval);
+#endif
         Register(executable);
-        MessageBox.Show("Setup complete. Start OctoWoW and check that Twilight Hammer is enabled at character selection.", Title);
+        if(requestedGame == null)
+            MessageBox.Show("Setup complete. Start OctoWoW and check that Twilight Hammer is enabled at character selection.", Title);
+        return true;
     }
+
+#if !AUCTION_ONLY
+    private static string ReadApproval() {
+        if (!File.Exists(Approval)) return null;
+        try { return Encoding.UTF8.GetString(ProtectedData.Unprotect(File.ReadAllBytes(Approval), null, DataProtectionScope.CurrentUser)); }
+        catch (CryptographicException) { return null; }
+    }
+
+    private static string Authorize() {
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        string existing = ReadApproval();
+        if (existing != null && IsApproved(existing)) return existing;
+        var bytes = new byte[32];
+        using (var random = RandomNumberGenerator.Create()) random.GetBytes(bytes);
+        string token = BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
+        string hash;
+        using (var sha = SHA256.Create()) hash = BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(token))).Replace("-", "").ToLowerInvariant();
+        var deadline = DateTime.UtcNow.AddMinutes(10);
+        long expires = (long)(deadline - new DateTime(1970,1,1,0,0,0,DateTimeKind.Utc)).TotalMilliseconds;
+        Process.Start(new ProcessStartInfo(Portal + "/api/sync-setup?mode=" + Mode + "&id=" + hash + "&expires=" + expires) { UseShellExecute = true });
+        string instructions = "Authorize this computer on the guild portal in your browser, then choose OK.";
+        while (DateTime.UtcNow < deadline) {
+            if (MessageBox.Show(instructions, Title, MessageBoxButtons.OKCancel, MessageBoxIcon.Information) != DialogResult.OK) return null;
+            if (DateTime.UtcNow < deadline && IsApproved(token)) return token;
+            instructions = "Authorization is still pending. Finish in your browser, then choose OK to check again.";
+        }
+        throw new InvalidOperationException("Portal authorization expired. Start the installation again.");
+    }
+
+    private static bool IsApproved(string token) {
+        return Field(Post("/api/sync-setup/status?mode=" + Mode, Encoding.UTF8.GetBytes("{}"), token), "approved") == "True";
+    }
+#endif
 
     private static void Register(string executable) {
         dynamic service = Activator.CreateInstance(Type.GetTypeFromProgID("Schedule.Service"));
@@ -166,7 +215,7 @@ internal static class TwilightSetup {
         string kind = Field(row, "kind");
 #if BANK_ENABLED
         if ((kind == "inventory" || kind == "wallet") && Field(row, "character").Equals("Twilightbank", StringComparison.OrdinalIgnoreCase))
-            return "twilightbank-upload";
+            return "toolkit-upload";
 #endif
         if (((IList)items).Count == 0) return null;
         if (kind == "auctions") {
@@ -181,7 +230,7 @@ internal static class TwilightSetup {
         }
 #if !AUCTION_ONLY
         if ((kind == "roster" || kind == "professions") && Field(row, "guild").Trim().Equals("Twilight Hammer", StringComparison.OrdinalIgnoreCase))
-            return "guild-upload";
+            return "toolkit-upload";
 #endif
         return null;
     }
@@ -218,10 +267,22 @@ internal static class TwilightSetup {
     }
 
     private static void Send(string route, byte[] body) {
-        var request = (HttpWebRequest)WebRequest.Create(Portal + "/api/data/" + route);
+        string token = null;
+#if !AUCTION_ONLY
+        if (route == "toolkit-upload") {
+            token = ReadApproval();
+            if (token == null) throw new IOException("Run Setup again to authorize this uploader through the guild portal.");
+        }
+#endif
+        if (Field(Post("/api/data/" + route, body, token), "ok") != "True") throw new IOException("Portal did not confirm the upload.");
+    }
+
+    private static Dictionary<string, object> Post(string path, byte[] body, string token) {
+        var request = (HttpWebRequest)WebRequest.Create(Portal + path);
         request.Method = "POST";
         request.ContentType = "application/json";
         request.Headers["Origin"] = Portal;
+        if (token != null) request.Headers["Authorization"] = "Bearer " + token;
         request.AllowAutoRedirect = false;
         request.Timeout = 30000;
         request.ReadWriteTimeout = 30000;
@@ -229,8 +290,7 @@ internal static class TwilightSetup {
         using (Stream stream = request.GetRequestStream()) stream.Write(body, 0, body.Length);
         using (var response = (HttpWebResponse)request.GetResponse())
         using (var reader = new StreamReader(response.GetResponseStream())) {
-            var result = Json.Deserialize<Dictionary<string, object>>(reader.ReadToEnd());
-            if (Field(result, "ok") != "True") throw new IOException("Portal did not confirm the upload.");
+            return Json.Deserialize<Dictionary<string, object>>(reader.ReadToEnd());
         }
     }
 

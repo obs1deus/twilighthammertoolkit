@@ -3,10 +3,10 @@
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
 
 
-Current version: **v0.1.8**
+Current version: **v0.1.18**
 
 
-<img width="668" height="900" alt="image" src="https://github.com/user-attachments/assets/99a3605f-5b9b-4b88-802d-191c86275dd5" />
+![Twilight Hammer Toolkit v0.1.18 showing AddOns & Tools and installed addon badges](toolkit/screenshot.png)
 
 
 - **Guild Portal:** https://twilighthammer.hccpride.workers.dev/
@@ -15,7 +15,8 @@ Current version: **v0.1.8**
 ## Features
 
 - **Twilight Hammer Sync** installer with three editions (Guild Sync, Auction Only, Bank and Guild Sync) and a background uploader.
-- **Addon and client-mod catalog** with raid addons, loot helpers, and client-side mods. The Toolkit downloads each component from its upstream source.
+- **Addon and client-mod catalog** with installed indicators for supported components, including manual installs.
+- **Add from Git link** previews and installs addons from public GitHub, Gitea, and Forgejo repositories.
 - **Client tweaks** for the OctoWoW Modernized client: auto-loot, memory, nameplate range, field of view, render distance, ground clutter, camera distance, and background sound.
 - **Check my PC** recommends a starting render distance based on your RAM and CPU threads.
 - **Automatic dependency handling.** Required components are added to the install plan for you, and detected prerequisites are reused.
@@ -30,13 +31,13 @@ Current version: **v0.1.8**
 - An OctoWoW install (the folder containing `WoW.exe`)
 - OctoWoW closed while you install
 
-The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the Toolkit opens the native Windows interface instead, with the same options.
+The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the Toolkit opens a native Windows interface for the built-in catalog, Sync, and client tweaks.
 
 ## Getting started
 
 1. Download the latest zip from [Releases](https://github.com/obs1deus/twilighthammertoolkit/releases) and extract it.
 2. Close OctoWoW and run `TwilightHammerToolkit.exe`.
-3. Choose your game folder. Double-click the folder field or press **F4** in it to browse.
+3. Choose your game folder. To change it later, click the gear beside **Check for updates**.
 4. Pick a Sync edition, or choose **Skip Sync** if you only want addons or client tweaks.
 5. Tick any optional components you want. Everything starts unchecked.
 6. Optionally turn on **Apply client tweaks** and adjust the values.
@@ -58,7 +59,7 @@ Sync captures game data with an in-game addon and uploads it to the Twilight Ham
 
 - It registers a Windows scheduled task that checks your OctoWoW game files for changes every two minutes while you're signed in to Windows.
 - New captures are sent over HTTPS.
-- These editions upload without a device key or Discord sign-in.
+- Auction Only uploads anonymously. Guild Sync requires one-time approval through the portal's Discord sign-in. An officer or admin must approve Bank and Guild Sync.
 - Choosing a Sync edition replaces any existing Twilight Hammer Sync setup.
 
 **Getting captures to save**
@@ -73,7 +74,7 @@ Click **Uninstall Sync** under AddOns & Tools. This removes the uploader and its
 
 Optional components are grouped like this in the app.
 
-### Must-have raid addons
+### Must Haves
 
 | Component | What it does |
 | --- | --- |
@@ -81,7 +82,7 @@ Optional components are grouped like this in the app.
 | Rook's RaidVisuals | OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see |
 | BigWigs | Boss ability timers and raid warnings (prodigeomix fork) |
 
-### More raid & character addons
+### Raid & Character Addons
 
 | Component | What it does |
 | --- | --- |
@@ -94,7 +95,7 @@ Optional components are grouped like this in the app.
 | Rinse | Helps identify and dispel removable debuffs on party and raid members |
 | ChronicleCompanion | Adds extended unit data to combat logs for ChronicleClassic (requires Nampower) |
 
-### Client tools & compatibility
+### Client Tools & Compatibility
 
 | Component | What it does |
 | --- | --- |
@@ -161,12 +162,16 @@ The Toolkit never changes your antivirus settings. Compare the detected file and
 
 ## Downloads and security
 
-- Components are downloaded from their upstream GitHub releases or the OctoWoW git host (`octowow.st`) only. Other hosts are rejected.
+- Catalog components come from their upstream repositories. **Add from Git link** reads the default branch of a public HTTPS repository and previews detected WoW addons before installing them.
 - Downloads are size-limited and redirect-limited, and setup stops if an upstream source changes mid-install so you can retry against the current revision.
-- Everything installs into your OctoWoW folder. The Toolkit doesn't need administrator access when that folder is writable.
+- The Toolkit installs game addons and mods into your OctoWoW folder. A writable game folder allows installation without administrator access.
+
+## Build from source
+
+On Windows, run `powershell.exe -NoProfile -File .\toolkit\Build.ps1` from the repository root. The build fetches the pinned WebView2 SDK from NuGet and writes `dist\Toolkit\TwilightHammerToolkit.exe`. The root `build.ps1` builds the standalone Sync editions.
 
 ## Credits
 
 The Toolkit packages and installs work by many other authors. Each component comes from its own upstream project and keeps its own license. Thanks to the authors of BigWigs (prodigeomix), RollFor, _LazyPig, AutoMarker, SmartLoot, BetterCharacterStats, Rinse, DopingControl, ChronicleCompanion, Chronicle Sidekick, Nampower, ClassicAPI, UnitXP_SP3, VanillaFixes, VanillaHelpers, SuperWoW, SuperAPI, Aegis Exchange, Aux, OctoAuctionator, and the rest of the OctoWoW community.
 
-The modern interface uses Microsoft Edge WebView2. See `WebView2-LICENSE.txt` and `WebView2-NOTICE.txt` for its license and notices.
+The modern interface uses Microsoft Edge WebView2. The Windows release ZIP includes its license and notices in `README.txt`.
