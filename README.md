@@ -1,10 +1,10 @@
 # Twilight Hammer Toolkit
 
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
-<img width="668" height="900" alt="image" src="https://github.com/user-attachments/assets/99a3605f-5b9b-4b88-802d-191c86275dd5" />
+
 
 Current version: **v0.1.8**
-
+<img width="668" height="900" alt="image" src="https://github.com/user-attachments/assets/99a3605f-5b9b-4b88-802d-191c86275dd5" />
 - **Guild Portal:** https://twilighthammer.hccpride.workers.dev/
 - **Releases:** https://github.com/obs1deus/twilighthammertoolkit/releases
 
