@@ -3,7 +3,7 @@
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
 
 
-Current version: **v0.1.22**
+Current version: **v0.1.23**
 
 
 ![Twilight Hammer Toolkit v0.1.18 showing Addons & Tools and installed addon badges](toolkit/screenshot.png)
