@@ -16,6 +16,6 @@ For Guild Sync and Bank and Guild Sync, the uploader stores its authorization en
 
 To stop future uploads, open **Addons & Tools → Twilight Hammer Sync → Uninstall**. This removes the uploader and the scheduled task and offers to remove the game addon. Uninstalling leaves previously uploaded records in the portal.
 
-The Toolkit renders its interface with Microsoft Edge WebView2. External services have separate privacy policies. See the [GitHub privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement), [Discord privacy policy](https://discord.com/privacy), and [Microsoft privacy statement](https://privacy.microsoft.com/privacystatement).
+The Toolkit renders its interface with Microsoft Edge WebView2. If the Evergreen Runtime is missing and you choose to install it, the Toolkit contacts Microsoft to download its installer. External services have separate privacy policies. See the [GitHub privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement), [Discord privacy policy](https://discord.com/privacy), and [Microsoft privacy statement](https://privacy.microsoft.com/privacystatement).
 
 For privacy questions, contact the [Toolkit maintainer](https://github.com/obs1deus).

@@ -5,7 +5,7 @@ The project is applying for free code signing provided by [SignPath.io](https://
 - **Maintainer, committer, reviewer, and release approver** — [obs1deus](https://github.com/obs1deus).
 - **Account security** — Maintainers must use multi-factor authentication for GitHub and SignPath. The maintainer reviews outside contributions before merging and manually approves each production signing request.
 - **Build provenance** — Release candidates are built from this repository on GitHub-hosted Windows runners. The [build workflow](.github/workflows/toolkit-build.yml) uploads the unsigned Toolkit executable as an Actions artifact. The production signing policy will require verified GitHub build origin and maintainer approval.
-- **Signing scope** — Signing is intended for Toolkit binaries built from this repository. Upstream addons and client mods retain their own publisher and distribution terms.
+- **Signing scope** — Signing is intended for Toolkit binaries built from this repository. Upstream addons and client mods retain their own publisher and distribution terms. The Toolkit includes the WebView2 SDK assemblies and loader required by the Windows interface. Microsoft supplies the Evergreen Runtime separately, and the Toolkit verifies the Microsoft bootstrapper signature before running it.
 - **Privacy** — See the [privacy policy](PRIVACY.md) for network requests, Sync editions, and how to stop uploads.
 
 ## Release procedure

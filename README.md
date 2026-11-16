@@ -35,7 +35,7 @@ Current version: **v0.1.23**
 - An OctoWoW install (the folder containing `WoW.exe`)
 - Close OctoWoW for client mods, data patches, client tweaks, and Sync setup. Addon-only installs and updates can run with the game open.
 
-The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the Toolkit opens a native Windows interface for the built-in catalog, Sync, and client tweaks.
+The Toolkit uses the Microsoft Edge WebView2 Evergreen Runtime installed on Windows. If it is missing, the Toolkit offers to download and run Microsoft's signed installer on first launch. If setup is skipped or WebView2 cannot start, the Toolkit opens a native Windows interface for the built-in catalog, Sync, and client tweaks.
 
 ## Getting started
 

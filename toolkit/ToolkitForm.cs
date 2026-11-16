@@ -41,9 +41,11 @@ internal sealed class ToolkitForm : Form {
         ToolkitLog.Write("toolkit","Started Toolkit v"+ToolkitPackages.Version+".");
         string error;
         try {
-            ToolkitBrowserRuntime.Prepare();
-            error=RunRendered();
-            if(error==null)return;
+            if (EvergreenWebView.EnsureInstalled()) {
+                ToolkitBrowserRuntime.Prepare();
+                error=RunRendered();
+                if(error==null)return;
+            } else error="Evergreen Runtime setup was skipped.";
         } catch(Exception failed) {error=failed.Message;}
         ToolkitLog.Write("toolkit","WebView2 unavailable. Opened the Windows interface.","warn");
         using(var window=new ToolkitForm()) {
