@@ -159,6 +159,7 @@ internal sealed class RenderedToolkit : Form {
                 case "view-log": ToolkitLog.Open();break;
                 case "install-toolkit-update": if(!busy&&toolkitRelease!=null)await InstallToolkitUpdate(toolkitRelease);break;
                 case "install": if(!busy)await Install(request,GamePath(game));break;
+                case "update-addons": if(!busy)await UpdateAddons(request,GamePath(game));break;
                 case "install-repository": if(!busy)await InstallRepository(GamePath(game),TextField(request,"repository"));break;
                 case "remove-addon": if(!busy)await RemoveAddon(GamePath(game),TextField(request,"addon"));break;
                 case "review-install":
@@ -182,21 +183,11 @@ internal sealed class RenderedToolkit : Form {
     private static bool IsChecked(Dictionary<string,object> row,string key) {return Object.Equals(Field(row,key),true);}
     private void FitContent(Dictionary<string,object> request) {
         if(WindowState!=FormWindowState.Normal)return;
-        double height,width,viewport;
-        if(!Double.TryParse(TextField(request,"height"),out height)||height<300||height>10000||
-           !Double.TryParse(TextField(request,"width"),out width)||width<600||width>2000||
-           !Double.TryParse(TextField(request,"viewport"),out viewport)||viewport<300)return;
-        var area=Screen.FromControl(this).WorkingArea;
-        // Relate WebView CSS pixels to WinForms coordinates, including display scaling.
+        double viewport;
+        if(!Double.TryParse(TextField(request,"viewport"),out viewport)||viewport<300)return;
         if(cssToWindowScale==0)cssToWindowScale=browser.Width/viewport;
-        double scale=cssToWindowScale;
-        int maxHeight=area.Height-16;
-        double zoom=Math.Min(1,Math.Min((maxHeight-4)/(height*scale),(browser.Width-2)/(width*scale)));
+        double zoom=Math.Min(1,(browser.Width-2)/(688*cssToWindowScale));
         if(Math.Abs(browser.ZoomFactor-zoom)>0.002)browser.ZoomFactor=zoom;
-
-        int target=Math.Min(maxHeight,Math.Max(MinimumSize.Height,(int)Math.Ceiling(height*scale*browser.ZoomFactor)+4));
-        if(Math.Abs(target-ClientSize.Height)>1)ClientSize=new Size(ClientSize.Width,target);
-        if(Bottom>area.Bottom-8)Top=Math.Max(area.Top+8,area.Bottom-8-Height);
     }
     private static decimal Number(Dictionary<string,object> row,string key,decimal min,decimal max) {
         decimal value;
@@ -249,7 +240,8 @@ internal sealed class RenderedToolkit : Form {
             Post(new{status="Installation cancelled.",busy=false});
             return;
         }
-        Post(new{status="Preparing installation…",busy=true});
+        Post(new{status="Preparing installation…",busy=true,
+            updating=plan.Where(package=>ToolkitInstall.ComponentExists(folder,package)).Select(package=>package.Name).ToArray()});
         ToolkitLog.Write("install","Applying "+String.Join(", ",review)+".");
         updateEpoch++;
         var progress=new Progress<string>(message=>Post(new{status=message}));
@@ -283,7 +275,7 @@ internal sealed class RenderedToolkit : Form {
                 Post(new{status="Repository install cancelled."});
                 return;
             }
-            Post(new{status="Installing repository addons…"});
+            Post(new{status="Applying repository changes…",updating=addons.Where(installed.Contains).Select(name=>"git:"+name).ToArray()});
             updateEpoch++;
             await Task.Run(()=>ToolkitInstall.InstallRepository(game,stage,link.Trim(),addons));
             ToolkitLog.Write("repository","Applied "+String.Join(", ",addons)+".");
@@ -296,6 +288,70 @@ internal sealed class RenderedToolkit : Form {
             busy=false;
             Post(new{busy=false});
         }
+    }
+    private async Task UpdateAddons(Dictionary<string,object> request,string game) {
+        var input=Field(request,"keys") as IList;
+        if(input==null||input.Count==0||input.Count>1000)throw new IOException("No addon updates selected.");
+        var keys=new HashSet<string>(input.Cast<object>().Select(Convert.ToString),StringComparer.Ordinal);
+        var addons=ToolkitInstall.Addons(game);
+        var repositoryGroups=addons.Where(addon=>addon.Source!=null&&keys.Contains("git:"+addon.Name))
+            .GroupBy(addon=>addon.Source).ToArray();
+        var packages=catalog.Values.Where(package=>keys.Contains(package.Name)&&ToolkitInstall.ComponentExists(game,package))
+            .Select(package=>new {Package=package,Plan=Plan(new Dictionary<string,object>{{"components",new[]{package.Name}}},game,false)}).ToArray();
+        var review=packages.Select(item=>item.Package.Name)
+            .Concat(repositoryGroups.SelectMany(group=>group.Select(addon=>addon.Name))).ToArray();
+        if(review.Length==0)throw new IOException("No installed components match this update.");
+        busy=true;
+        var tweaks=new ClientTweaks();
+        bool requiresClose=packages.Any(item=>ToolkitInstall.RequiresClosedGame("Skip Sync",item.Plan,tweaks));
+        string note=requiresClose?"Close OctoWoW for client mods or patches. Addon-only updates can still run.":ReloadHint;
+        if(!await ConfirmInstall("Review updates",null,review,note,"Update All")){
+            busy=false;
+            Post(new{busy=false});
+            return;
+        }
+        updateEpoch++;
+        Post(new{updating=keys.ToArray(),status="Updating selected components…"});
+        var finished=new List<string>();
+        int failures=0;
+        foreach(var item in packages){
+            try {
+                await Task.Run(()=>ToolkitInstall.Run(game,"Skip Sync",item.Plan,tweaks,message=>{}));
+                var updated=item.Plan.Select(package=>package.Name).ToArray();
+                finished.AddRange(updated);
+                Post(new{updated});
+            } catch(Exception error) {
+                failures++;
+                Post(new{updateFailed=new[]{item.Package.Name}});
+                ToolkitLog.Write("updates",item.Package.Name+": "+error.Message,"warn");
+            }
+        }
+        foreach(var group in repositoryGroups){
+            string stage=Path.Combine(Path.GetTempPath(),"TwilightRepository-"+Guid.NewGuid().ToString("N"));
+            try {
+                var updated=await Task.Run(()=>{
+                    var names=ToolkitPackages.StageRepository(group.Key,stage);
+                    if(group.Any(addon=>!names.Contains(addon.Name,StringComparer.OrdinalIgnoreCase)))
+                        throw new IOException("A selected addon is missing from its repository.");
+                    ToolkitInstall.InstallRepository(game,stage,group.Key,names);
+                    return names.Select(name=>"git:"+name).ToArray();
+                });
+                finished.AddRange(updated);
+                Post(new{updated});
+            } catch(Exception error) {
+                failures++;
+                Post(new{updateFailed=group.Select(addon=>"git:"+addon.Name).ToArray()});
+                ToolkitLog.Write("updates","Repository update failed: "+error.Message,"warn");
+            } finally {
+                try {if(Directory.Exists(stage))Directory.Delete(stage,true);}
+                catch(IOException) { }
+                catch(UnauthorizedAccessException) { }
+            }
+        }
+        busy=false;
+        string status=failures==0?"Updates complete.":failures+" update operations failed. See the Toolkit log.";
+        if(finished.Count>0)status+=" "+ReloadHint;
+        Post(new{status,busy=false});
     }
     private async Task RemoveAddon(string game,string name) {
         var addon=ToolkitInstall.Addons(game).FirstOrDefault(row=>row.Name==name);

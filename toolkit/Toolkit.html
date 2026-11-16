@@ -94,7 +94,12 @@
  html,body{margin:0;min-height:100%;background:#181522;color-scheme:dark;}
  html,body{overflow:hidden}
  #th-toolkit{padding:0!important;background:none;color-scheme:dark!important}
- #th-toolkit .shell{min-width:688px;max-width:none;margin:0;min-height:100vh;box-shadow:none}
+ #th-toolkit .shell{min-width:688px;max-width:none;margin:0;height:100vh;display:flex;flex-direction:column;box-shadow:none}
+ #th-toolkit .shell>form{flex:1;min-height:0;display:flex;flex-direction:column}
+ #th-toolkit .shell>form>.body{flex:1;min-height:0;overflow:auto;align-content:start;scrollbar-color:#665575 transparent;scrollbar-width:thin}
+ #th-toolkit .shell>form>.body:has([data-addon-panel="installed"]:not([hidden])){grid-template-rows:auto auto auto minmax(95px,1fr)}
+ #th-toolkit [data-addon-panel="installed"]{display:flex;flex-direction:column;min-height:0}
+ #th-toolkit [data-addon-inventory]{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#665575 transparent}
  #th-toolkit header{position:relative;min-height:94px;user-select:none}
  #th-toolkit .splash{display:none}
  @media(prefers-reduced-motion:no-preference){
@@ -142,6 +147,11 @@
  #th-toolkit .remove-addon{display:grid;place-items:center;width:24px;height:24px;padding:0;border-color:transparent;background:transparent;color:var(--subtle);font-size:15px}
  #th-toolkit .remove-addon:hover{background:#49303a;color:#f7b8bd}
  #th-toolkit .inventory-pages{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
+ #th-toolkit .inventory-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-bottom:6px}
+ #th-toolkit button[data-addon-update]:enabled:hover,#th-toolkit button[data-bulk-action=true]:enabled:hover{border-color:var(--gold);background:#edca91;color:#302116}
+ #th-toolkit .updating::after{content:'';display:inline-block;width:.75em;height:.75em;margin-left:.5em;vertical-align:baseline;border:1.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:th-update-spin .8s linear infinite}
+ @keyframes th-update-spin{to{transform:rotate(360deg)}}
+ @media(prefers-reduced-motion:reduce){#th-toolkit .updating::after{animation:none}}
  #th-toolkit .repository-form label{display:grid;gap:6px}
  #th-toolkit .repository-form input{width:100%}
  #th-toolkit button:disabled{opacity:.6;cursor:wait}
@@ -220,7 +230,7 @@
      </fieldset>
     </div>
     <label class="auction" data-auction-picker>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
-    <section data-addon-panel="installed" aria-label="Installed AddOns" hidden><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
+    <section data-addon-panel="installed" aria-label="Installed AddOns" hidden><div class="inventory-controls"><label>View <select data-inventory-mode><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label></div><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
    </div>
    <div class="body" data-tweaks hidden>
     <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
@@ -331,6 +341,7 @@
    tab.setAttribute('aria-pressed', String(active));
    form.querySelector('[data-' + tab.dataset.tab + ']').hidden = !active;
   });
+  count(false);
  }));
  const tweakFields = [...form.querySelectorAll('[data-tweaks] fieldset')];
  function toggleTweaks() {
@@ -423,6 +434,8 @@
  const auctionChoices=[...form.elements.auction.options].filter(option=>option.value);
  const submitButton=form.querySelector('[type=submit]');
  let installedStatuses={}, installedAddons=[], availableUpdates={}, scanPath, page=0, operationBusy=false, checkingUpdates=false;
+ let addonView='recommended';
+ const updating=new Set();
  const removableComponents=new Set({{ADDON_COMPONENTS}});
  function removeButton(){
   const button=document.createElement('button');
@@ -449,37 +462,49 @@
  });
  const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
  function selectAddonView(view){
+  addonView=view;
   addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
   root.querySelectorAll('[data-addon-panel]').forEach(panel=>{panel.hidden=panel.dataset.addonPanel!==view;});
   root.querySelector('[data-auction-picker]').hidden=view!=='recommended';
+  count(false);
  }
  addonTabs.forEach(tab=>tab.addEventListener('click',()=>selectAddonView(tab.dataset.addonTab)));
  const inventory=root.querySelector('[data-addon-inventory]');
  const pages=root.querySelector('.inventory-pages');
  const previousPage=pages.querySelector('[data-page-back]');
  const nextPage=pages.querySelector('[data-page-next]');
- previousPage.addEventListener('click',()=>{page--;renderInventory();});
- nextPage.addEventListener('click',()=>{page++;renderInventory();});
+ const mode=root.querySelector('[data-inventory-mode]');
+ try {if(localStorage.getItem('toolkit.inventoryMode')==='scroll')mode.value='scroll';} catch {}
+ mode.addEventListener('change',()=>{
+  try {localStorage.setItem('toolkit.inventoryMode',mode.value);} catch {}
+  page=0;inventory.scrollTop=0;renderInventory();
+ });
+ previousPage.addEventListener('click',()=>{page--;inventory.scrollTop=0;renderInventory();});
+ nextPage.addEventListener('click',()=>{page++;inventory.scrollTop=0;renderInventory();});
+ const addonKey=addon=>addon.Source?'git:'+addon.Name:addon.CatalogName;
  function renderInventory(){
-  const pageSize=8;
+  const pageSize=6;
   const totalPages=Math.max(1,Math.ceil(installedAddons.length/pageSize));
   page=Math.min(Math.max(page,0),totalPages-1);
-  pages.hidden=totalPages===1;
+  const scrolling=mode.value==='scroll';
+  pages.hidden=scrolling||totalPages===1;
   previousPage.disabled=page===0;
   nextPage.disabled=page===totalPages-1;
   pages.querySelector('[data-page-number]').textContent=(page+1)+' / '+totalPages;
+  const scrollTop=inventory.scrollTop;
   inventory.replaceChildren();
   if(!installedAddons.length){inventory.textContent='No installed addons found in this game folder.';return;}
-  for(const addon of installedAddons.slice(page*pageSize,(page+1)*pageSize)){
+  for(const addon of scrolling?installedAddons:installedAddons.slice(page*pageSize,(page+1)*pageSize)){
    const row=document.createElement('div');
    row.className='inventory-row';
    const label=document.createElement('div');
    const title=document.createElement('strong');
    title.textContent=addon.Name;
-   const updateKey=addon.Source?'git:'+addon.Name:addon.CatalogName;
+   const updateKey=addonKey(addon);
+   const active=updating.has(updateKey);
    const badge=badgeFor(label);
    badge.hidden=false;
-   badge.textContent=availableUpdates[updateKey]?'Update available':'Installed';
+   badge.textContent=active?'Updating…':availableUpdates[updateKey]?'Update available':'Installed';
    badge.dataset.filesOnly=String(Boolean(availableUpdates[updateKey]));
    const detail=document.createElement('small');
    detail.className='muted';
@@ -489,10 +514,12 @@
    row.append(label);
    const actions=document.createElement('div');
    actions.className='inventory-actions';
-   if(addon.Source||addon.CatalogName){
+   if(active||availableUpdates[updateKey]){
     const update=document.createElement('button');
     update.type='button';
-    update.textContent='Update';
+    update.dataset.addonUpdate='';
+    update.classList.toggle('updating',active);
+    update.textContent=active?'Updating…':'Update';
     update.setAttribute('aria-label','Update '+addon.Name);
     update.disabled=operationBusy;
     update.addEventListener('click',()=>{
@@ -510,6 +537,7 @@
    row.append(actions);
    inventory.append(row);
   }
+  inventory.scrollTop=scrollTop;
  }
  function showInstalled(statuses){
   installedStatuses=statuses;
@@ -517,9 +545,12 @@
   for(const [name,badge] of componentBadges){
    const state=statuses[name];
    const addon=keys.get(name);
-   const update=state&&availableUpdates[addon?.Source?'git:'+addon.Name:name];
+   const key=addon?.Source?addonKey(addon):name;
+   const active=updating.has(key)||updating.has(name);
+   const update=state&&availableUpdates[key];
    badge.hidden=!state;
-   badge.textContent=update?'Update available':state||'';
+   badge.textContent=active?'Updating…':update?'Update available':state||'';
+   badge.classList.toggle('updating',active);
    badge.dataset.filesOnly=String(state==='Files present'||Boolean(update));
    badge.title=state==='Files present'?'Mod file found. It is not listed in dlls.txt.':'';
   }
@@ -554,6 +585,13 @@
  window.addEventListener('focus',scanInstalled);
  const manual = new Set();
  const dependencies = {{DEPENDENCIES}};
+ const componentsPage=root.querySelector('[data-components]');
+ const catalogNames=new Set([...checks.map(input=>input.value),...auctionChoices.map(option=>option.value)]);
+ function bulkKeys(){
+  const registered=installedAddons.filter(addon=>addonView==='installed'||addon.CatalogName).map(addonKey);
+  const keys=addonView==='installed'?registered:[...registered,...[...catalogNames].filter(name=>installedStatuses[name])];
+  return [...new Set(keys)].filter(key=>availableUpdates[key]);
+ }
  function plan() {
   const names = new Set();
   const seen = new Set();
@@ -576,8 +614,10 @@
   const total=picks.length;
   const updates=picks.some(name=>installedStatuses[name]);
   const installs=picks.some(name=>!installedStatuses[name])||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked;
-  submitButton.textContent=updates?(installs?'Install & update':'Update'):'Install';
-  submitButton.disabled=operationBusy||(!updates&&!installs&&!form.elements.applyTweaks.checked);
+  const bulk=!componentsPage.hidden&&(addonView==='installed'||(!installs&&bulkKeys().length>0));
+  submitButton.dataset.bulkAction=String(bulk);
+  submitButton.textContent=bulk?'Update All':installs?'Install':updates?'Update':'Install';
+  submitButton.disabled=operationBusy||(bulk?!bulkKeys().length:!updates&&!installs);
   if(writeStatus)status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
  }
  checks.forEach(input => input.addEventListener('change', () => {
@@ -588,6 +628,10 @@
  edition.addEventListener('change',()=>count());
  form.elements.applyTweaks.addEventListener('change',()=>count());
  function request(action) {
+  if(action==='install'&&submitButton.dataset.bulkAction==='true'){
+   send('update-addons',{game:gameField.value,keys:bulkKeys()});
+   return;
+  }
   send(action, {
    game: form.elements.game.value, edition: form.elements.edition.value,
    components: [...manual, form.elements.auction.value].filter(Boolean),
@@ -721,9 +765,20 @@
    showInstalled(installedStatuses);
   }
   if(data.updated){
-   data.updated.forEach(name=>delete availableUpdates[name]);
-   if(data.repositoryApplied){page=0;selectAddonView('installed');}
-   if(data.installPlanApplied){manual.clear();form.elements.auction.selectedIndex=0;}
+   data.updated.forEach(name=>{delete availableUpdates[name];updating.delete(name);});
+   if(data.repositoryApplied&&addonView!=='installed'){page=0;selectAddonView('installed');}
+   if(data.installPlanApplied){
+    manual.clear();form.elements.auction.selectedIndex=0;
+    form.elements.applyTweaks.checked=false;toggleTweaks();
+   }
+   showInstalled(installedStatuses);
+  }
+  if(data.updating){
+   data.updating.forEach(name=>updating.add(name));
+   showInstalled(installedStatuses);
+  }
+  if(data.updateFailed){
+   data.updateFailed.forEach(name=>updating.delete(name));
    showInstalled(installedStatuses);
   }
   if(data.review){
@@ -745,8 +800,8 @@
   if(data.busy!==undefined) {
    operationBusy=data.busy;
    catalogRemoval.forEach(([,button])=>{button.disabled=operationBusy;});
-   count(false);
-   renderInventory();
+   if(!data.busy)updating.clear();
+   showInstalled(installedStatuses);
    uninstallButton.disabled=data.busy;
    addRepository.disabled=data.busy;
    if(!data.busy)scanInstalled();
@@ -789,18 +844,10 @@
  });
  setInterval(()=>checkUpdates(true),30*60*1000);
  send('ready');
- const shell=root.querySelector('.shell');
- const header=shell.querySelector('header');
  function fitWindow(){
-  send('fit',{
-   width:688,
-   height:header.offsetHeight+form.offsetHeight+2,
-   viewport:innerWidth
-  });
+  send('fit',{viewport:innerWidth});
  }
- const layout=new ResizeObserver(fitWindow);
- layout.observe(header);
- layout.observe(form);
+ fitWindow();
  window.addEventListener('resize',fitWindow);
 })();
 </script>

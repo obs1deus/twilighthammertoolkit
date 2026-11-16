@@ -1,4 +1,4 @@
-Twilight Hammer Toolkit v0.1.21
+Twilight Hammer Toolkit v0.1.22
 
 Open TwilightHammerToolkit.exe and choose the game folder.
 Addon-only changes can run while OctoWoW is open. Run /reload afterward
