@@ -12,6 +12,8 @@ Current version: **v0.1.22**
 - **Guild Portal:** https://twilighthammer.hccpride.workers.dev/
 - **Releases:** https://github.com/obs1deus/twilighthammertoolkit/releases
 
+- [Roadmap](ROADMAP.md)
+
 ## Features
 
 - **Twilight Hammer Sync** installer with three editions (Guild Sync, Auction Only, Bank and Guild Sync) and a background uploader.
