@@ -1,6 +1,9 @@
-Twilight Hammer Toolkit v0.1.19
+Twilight Hammer Toolkit v0.1.20
 
-Close OctoWoW, open TwilightHammerToolkit.exe, and choose the game folder.
+Open TwilightHammerToolkit.exe and choose the game folder.
+Addon-only changes can run while OctoWoW is open. Run /reload afterward
+or restart if a newly installed addon is missing. Close the game for
+client mods, patches, client tweaks, and Sync setup.
 Use the settings gear beside Check for updates to change the saved game folder.
 The preview-style interface uses Microsoft Edge WebView2. If WebView2 cannot
 start, Toolkit opens the native Windows interface instead.
@@ -25,7 +28,8 @@ Setup saves the previous executable, config, and replaced package files under
 .twilight-toolkit\backups in your game folder.
 
 Check for updates
-Checks Toolkit releases on GitHub and checks catalog addons and client tools.
+Checks Toolkit releases on GitHub, catalog components, and Git addons with
+a saved source. Installed AddOns displays addon versions when available.
 Installs made outside the Toolkit can show an
 unknown version. The Toolkit update link opens the GitHub release page.
 

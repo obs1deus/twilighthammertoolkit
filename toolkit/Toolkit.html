@@ -127,7 +127,13 @@
  #th-toolkit .must-have .component{display:grid;grid-template-columns:18px minmax(0,1fr) 14px;grid-template-rows:1fr auto}
  #th-toolkit .must-have .component::after{grid-row:1;grid-column:3}
  #th-toolkit .must-have .installed-badge{grid-row:2;grid-column:2;justify-self:start;margin:0}
- #th-toolkit .panels [data-add-repository]{margin-top:10px}
+ #th-toolkit .addon-nav{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+ #th-toolkit .addon-nav [data-add-repository]{margin-left:auto}
+ #th-toolkit .addon-nav [aria-pressed=true]{border-color:var(--gold)}
+ #th-toolkit .inventory-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+ #th-toolkit .inventory-row small{display:block;overflow-wrap:anywhere}
+ #th-toolkit .inventory-row button{flex:none}
+ #th-toolkit .inventory-pages{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
  #th-toolkit .repository-form label{display:grid;gap:6px}
  #th-toolkit .repository-form input{width:100%}
  #th-toolkit button:disabled{opacity:.6;cursor:wait}
@@ -150,6 +156,7 @@
  #th-toolkit .sync{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
  #th-toolkit .sync [data-sync-description]{grid-column:1/-1;min-height:2.9em}
  #th-toolkit .sync [data-uninstall]{justify-self:start;text-align:left;padding:0}
+ #th-toolkit .sync-summary{display:flex;align-items:center;justify-content:space-between;gap:10px}
  #th-toolkit .security-content .removal-option{display:flex;align-items:center;gap:8px}
  #th-toolkit .update-results{margin:0;padding:0;list-style:none}
  #th-toolkit .update-results li{padding:6px 0;border-bottom:1px solid var(--line)}
@@ -161,7 +168,7 @@
    <div class="brand-copy"><h2>Twilight Hammer Toolkit <span class="version">v{{VERSION}}</span></h2><p class="muted">OctoWoW addons and client tools</p></div>
    <nav class="header-links" aria-label="Twilight Hammer links">
     <a href="https://twilighthammer.hccpride.workers.dev/" target="_blank" rel="noopener noreferrer">Guild Portal <span class="external" aria-hidden="true">↗</span></a>
-    <a href="https://github.com/obs1deus/twilighthammer-sync" target="_blank" rel="noopener noreferrer">GitHub <span class="external" aria-hidden="true">↗</span></a>
+    <a href="https://github.com/obs1deus/twilighthammertoolkit" target="_blank" rel="noopener noreferrer">GitHub <span class="external" aria-hidden="true">↗</span></a>
    </nav>
   </header>
   <form>
@@ -173,13 +180,15 @@
    </nav>
    <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button></div>
    <div class="body" data-components>
-    <div class="sync"><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Uploads the guild roster, professions, and auction scans. Requires Discord sign-in on the guild portal.</p><button class="security-link" type="button" data-uninstall>Uninstall Sync</button></div>
+    <div class="sync sync-summary" data-sync-summary hidden><h3>Twilight Hammer Sync <span class="installed-badge">Installed</span></h3><button class="security-link" type="button" data-uninstall>Uninstall</button></div>
+    <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
     <fieldset class="must-have"><legend>Must Haves</legend>
       <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1">TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
       <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2">Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
       <label class="component"><input type="checkbox" value="BigWigs" aria-describedby="th-toolkit-tip-3" aria-labelledby="th-toolkit-label-3"><span id="th-toolkit-label-3">BigWigs <small class="muted">prodigeomix</small></span><span class="tooltip-description" id="th-toolkit-tip-3">Shows boss ability timers and raid warnings. This is the prodigeomix fork.</span></label>
     </fieldset>
-    <div class="panels">
+    <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended AddOns</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed AddOns</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
+    <div class="panels" data-addon-panel="recommended">
      <fieldset><legend>Raid &amp; Character Addons</legend>
       <label class="component"><input type="checkbox" value="_LazyPig" aria-describedby="th-toolkit-tip-4" aria-labelledby="th-toolkit-label-4"><span id="th-toolkit-label-4">_LazyPig</span><span class="tooltip-description" id="th-toolkit-tip-4">Adds configurable shortcuts and automation for common tasks such as dismounting and accepting invites.</span></label>
       <label class="component"><input type="checkbox" value="DopingControl" aria-describedby="th-toolkit-tip-5" aria-labelledby="th-toolkit-label-5"><span id="th-toolkit-label-5">DopingControl</span><span class="tooltip-description" id="th-toolkit-tip-5">Checks raid consumables, buffs, debuffs, resistances, hit, and enchants before a pull.</span></label>
@@ -189,7 +198,6 @@
       <label class="component"><input type="checkbox" value="BetterCharacterStats" aria-describedby="th-toolkit-tip-9" aria-labelledby="th-toolkit-label-9"><span id="th-toolkit-label-9">BetterCharacterStats</span><span class="tooltip-description" id="th-toolkit-tip-9">Expands the character panel with more detailed combat stats.</span></label>
       <label class="component"><input type="checkbox" value="Rinse" aria-describedby="th-toolkit-tip-10" aria-labelledby="th-toolkit-label-10"><span id="th-toolkit-label-10">Rinse</span><span class="tooltip-description" id="th-toolkit-tip-10">Helps identify and dispel removable debuffs on party and raid members.</span></label>
       <label class="component"><input type="checkbox" value="ChronicleCompanion" aria-describedby="th-toolkit-tip-20" aria-labelledby="th-toolkit-label-20"><span id="th-toolkit-label-20">ChronicleCompanion</span><span class="tooltip-description" id="th-toolkit-tip-20">Adds extended unit data to combat logs for ChronicleClassic. Requires the WoW 1.12 client and Nampower.</span></label>
-      <button type="button" class="security-link" data-add-repository>+ Add from Git link</button>
      </fieldset>
      <fieldset><legend>Client Tools &amp; Compatibility</legend>
       <label class="component"><input type="checkbox" value="Nampower" aria-describedby="th-toolkit-tip-11" aria-labelledby="th-toolkit-label-11"><span id="th-toolkit-label-11">Nampower</span><span class="tooltip-description" id="th-toolkit-tip-11">Client mod that improves spell handling and provides extra functions for compatible addons.</span></label>
@@ -204,7 +212,8 @@
       <label class="component"><input type="checkbox" value="Chronicle Sidekick" aria-describedby="th-toolkit-tip-21" aria-labelledby="th-toolkit-label-21"><span id="th-toolkit-label-21">Chronicle Sidekick <small class="muted">Windows app</small></span><span class="tooltip-description" id="th-toolkit-tip-21">Uploads OctoWoW combat logs to Chronicle from the Windows tray. Requires a Chronicle sign-in to upload.</span></label>
      </fieldset>
     </div>
-    <label class="auction">Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
+    <label class="auction" data-auction-picker>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
+    <section data-addon-panel="installed" aria-label="Installed AddOns" hidden><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
    </div>
    <div class="body" data-tweaks hidden>
     <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
@@ -225,7 +234,7 @@
      <label class="tweak-row"><span>Background sounds<small class="muted">Keep game audio playing while the window is in the background.</small></span><input type="checkbox" name="audio" checked></label>
     </fieldset>
    </div>
-   <footer><output class="muted" aria-live="polite">0 optional components selected</output><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit">Preview install</button><div class="status-detail" hidden></div></footer>
+   <footer><output class="muted" aria-live="polite">0 optional components selected</output><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit" disabled>Install</button><div class="status-detail" hidden></div></footer>
   </form>
  </section>
  <dialog class="security-dialog" aria-labelledby="repository-heading" data-repository-dialog>
@@ -394,25 +403,103 @@
   input.value,
   badgeFor(input.closest('.must-have')?input.closest('.component'):document.getElementById(input.getAttribute('aria-labelledby')))
  ]);
- componentBadges.push(['Twilight Hammer Sync',badgeFor(root.querySelector('.sync h3'))]);
+ const componentVersions=checks.map(input=>{
+  const version=document.createElement('small');
+  version.className='muted';
+  version.hidden=true;
+  document.getElementById(input.getAttribute('aria-labelledby')).append(version);
+  return [input.value,version];
+ });
  const auctionChoices=[...form.elements.auction.options].filter(option=>option.value);
+ const submitButton=form.querySelector('[type=submit]');
+ let installedStatuses={}, installedAddons=[], availableUpdates={}, scanPath, page=0, operationBusy=false;
+ const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
+ function selectAddonView(view){
+  addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
+  root.querySelectorAll('[data-addon-panel]').forEach(panel=>{panel.hidden=panel.dataset.addonPanel!==view;});
+  root.querySelector('[data-auction-picker]').hidden=view!=='recommended';
+ }
+ addonTabs.forEach(tab=>tab.addEventListener('click',()=>selectAddonView(tab.dataset.addonTab)));
+ const inventory=root.querySelector('[data-addon-inventory]');
+ const pages=root.querySelector('.inventory-pages');
+ const previousPage=pages.querySelector('[data-page-back]');
+ const nextPage=pages.querySelector('[data-page-next]');
+ previousPage.addEventListener('click',()=>{page--;renderInventory();});
+ nextPage.addEventListener('click',()=>{page++;renderInventory();});
+ function renderInventory(){
+  const pageSize=8;
+  const totalPages=Math.max(1,Math.ceil(installedAddons.length/pageSize));
+  page=Math.min(Math.max(page,0),totalPages-1);
+  pages.hidden=totalPages===1;
+  previousPage.disabled=page===0;
+  nextPage.disabled=page===totalPages-1;
+  pages.querySelector('[data-page-number]').textContent=(page+1)+' / '+totalPages;
+  inventory.replaceChildren();
+  if(!installedAddons.length){inventory.textContent='No installed addons found in this game folder.';return;}
+  for(const addon of installedAddons.slice(page*pageSize,(page+1)*pageSize)){
+   const row=document.createElement('div');
+   row.className='inventory-row';
+   const label=document.createElement('div');
+   const title=document.createElement('strong');
+   title.textContent=addon.Name;
+   const updateKey=addon.Source?'git:'+addon.Name:addon.CatalogName;
+   const badge=badgeFor(label);
+   badge.hidden=false;
+   badge.textContent=availableUpdates[updateKey]?'Update available':'Installed';
+   badge.dataset.filesOnly=String(Boolean(availableUpdates[updateKey]));
+   const detail=document.createElement('small');
+   detail.className='muted';
+   detail.textContent=[addon.Version?'Version '+addon.Version:'Version unavailable',addon.Source].filter(Boolean).join(' · ');
+   label.prepend(title);
+   label.append(detail);
+   row.append(label);
+   if(addon.Source||addon.CatalogName){
+    const update=document.createElement('button');
+    update.type='button';
+    update.textContent='Update';
+    update.setAttribute('aria-label','Update '+addon.Name);
+    update.disabled=operationBusy;
+    update.addEventListener('click',()=>{
+     const game=gameField.value;
+     if(addon.Source)send('install-repository',{game,repository:addon.Source});
+     else send('install',{game,components:[addon.CatalogName],edition:'Skip Sync',single:true});
+    });
+    row.append(update);
+   }
+   inventory.append(row);
+  }
+ }
  function showInstalled(statuses){
+  installedStatuses=statuses;
+  const keys=new Map(installedAddons.map(addon=>[addon.CatalogName,addon]));
   for(const [name,badge] of componentBadges){
    const state=statuses[name];
+   const addon=keys.get(name);
+   const update=state&&availableUpdates[addon?.Source?'git:'+addon.Name:name];
    badge.hidden=!state;
-   badge.textContent=state||'';
-   badge.dataset.filesOnly=String(state==='Files present');
+   badge.textContent=update?'Update available':state||'';
+   badge.dataset.filesOnly=String(state==='Files present'||Boolean(update));
    badge.title=state==='Files present'?'Mod file found. It is not listed in dlls.txt.':'';
+  }
+  for(const [name,version] of componentVersions){
+   const value=keys.get(name)?.Version;
+   version.hidden=!value;
+   version.textContent=value?'v'+value.replace(/^v/i,''):'';
   }
   for(const option of auctionChoices){
    option.textContent=option.value+(statuses[option.value]?' · Installed':'');
   }
   const found=auctionChoices.filter(option=>statuses[option.value]).map(option=>option.value);
   form.elements.auction.options[0].textContent=found.length?'Keep current setup ('+found.join(', ')+')':'Keep my current setup';
+  renderInventory();
+  count(false);
  }
  let scanTimer;
  const scanInstalled=()=>send('installed',{game:gameField.value});
  gameField.addEventListener('input',()=>{
+  installedAddons=[];
+  availableUpdates={};
+  scanPath=null;
   showInstalled({});
   clearTimeout(scanTimer);
   scanTimer=setTimeout(scanInstalled,220);
@@ -422,28 +509,37 @@
  const dependencies = {{DEPENDENCIES}};
  function plan() {
   const names = new Set();
+  const seen = new Set();
   function add(name) {
-   if (names.has(name)) return;
+   if (seen.has(name)) return;
+   seen.add(name);
    (dependencies[name] || []).forEach(add);
-   names.add(name);
+   if(manual.has(name)||installedStatuses[name]!=='Installed')names.add(name);
   }
   manual.forEach(add);
   return names;
  }
- function count() {
+ function count(writeStatus=true) {
   const names = plan();
   checks.forEach(input => {
    input.checked = names.has(input.value);
    input.disabled = names.has(input.value) && !manual.has(input.value);
   });
-  const total = names.size + Number(Boolean(form.elements.auction.value));
-  status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
+  const picks=[...names,form.elements.auction.value].filter(Boolean);
+  const total=picks.length;
+  const updates=picks.some(name=>installedStatuses[name]);
+  const installs=picks.some(name=>!installedStatuses[name])||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked;
+  submitButton.textContent=updates?(installs?'Install & update':'Update'):'Install';
+  submitButton.disabled=operationBusy||(!updates&&!installs&&!form.elements.applyTweaks.checked);
+  if(writeStatus)status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
  }
  checks.forEach(input => input.addEventListener('change', () => {
   if (input.checked) manual.add(input.value); else manual.delete(input.value);
   count();
  }));
- form.elements.auction.addEventListener('change', count);
+ form.elements.auction.addEventListener('change',()=>count());
+ edition.addEventListener('change',()=>count());
+ form.elements.applyTweaks.addEventListener('change',()=>count());
  function request(action) {
   send(action, {
    game: form.elements.game.value, edition: form.elements.edition.value,
@@ -526,10 +622,19 @@
    gameField.value=data.game;
    confirmedFolder=data.gameValid?data.game:undefined;
    showFolderSettings(!data.gameValid,data.gameValid&&folderSettings.contains(document.activeElement));
+   installedAddons=[];availableUpdates={};scanPath=null;page=0;
    showInstalled({});
    scanInstalled();
   }
-  if(data.componentStatuses&&data.installPath===gameField.value)showInstalled(data.componentStatuses);
+  if(data.componentStatuses&&data.installPath===gameField.value){
+   installedAddons=data.addons||[];
+   scanPath=data.scanPath;
+   const installed=Boolean(data.syncInstalled);
+   root.querySelector('[data-sync-summary]').hidden=!installed;
+   root.querySelector('[data-sync-setup]').hidden=installed;
+   if(installed&&edition.value!=='Skip Sync'){edition.value='Skip Sync';describeSync();}
+   showInstalled(data.componentStatuses);
+  }
   if(data.renderAdvice){
    const {distance,ramGiB,threads}=data.renderAdvice;
    recommendedDistance=distance;
@@ -539,6 +644,16 @@
   if(data.toolkitFolder!==undefined)security.querySelector('[data-toolkit-folder]').textContent=data.toolkitFolder;
   if(data.securityResult!==undefined)securityResults.textContent=data.securityResult;
   if(data.status!==undefined)status.textContent=data.status;
+  if(data.availableUpdates&&data.updatePath===scanPath){
+   availableUpdates=data.availableUpdates;
+   showInstalled(installedStatuses);
+  }
+  if(data.updated){
+   data.updated.forEach(name=>delete availableUpdates[name]);
+   if(data.repositoryApplied){page=0;selectAddonView('installed');}
+   if(data.installPlanApplied){manual.clear();form.elements.auction.selectedIndex=0;}
+   showInstalled(installedStatuses);
+  }
   if(data.review){
    const {title,source,items,note}=data.review;
    installReview.querySelector('#install-review-title').textContent=title;
@@ -555,8 +670,10 @@
    installReview.showModal();
   }
   if(data.busy!==undefined) {
+   operationBusy=data.busy;
    root.querySelector('[data-check]').disabled=data.busy;
-   root.querySelector('[type=submit]').disabled=data.busy;
+   count(false);
+   renderInventory();
    uninstallButton.disabled=data.busy;
    addRepository.disabled=data.busy;
    if(!data.busy)scanInstalled();

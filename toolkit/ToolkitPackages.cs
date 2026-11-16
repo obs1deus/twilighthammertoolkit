@@ -25,8 +25,8 @@ internal sealed class Release {
     internal string Version, Url, File, Digest = "", ArchiveTag = "";
 }
 internal static class ToolkitPackages {
-    internal const string GitHub = "https://github.com/obs1deus/twilighthammer-sync";
-    internal const string Version = "0.1.19";
+    internal const string GitHub = "https://github.com/obs1deus/twilighthammertoolkit";
+    internal const string Version = "0.1.20";
     internal static readonly Package[] Catalog = {
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),
@@ -53,7 +53,7 @@ internal static class ToolkitPackages {
         new Package("Aux","Auction House","OldManAlpha/aux-addon",null,"aux-addon","Auction search, pricing and auction posting tools."),
         new Package("OctoAuctionator","Auction House","octo:John-The-Baptist/OctoAuctionator",null,"OctoAuctionator","Auctionator’s Buy, Sell, and More tabs for OctoWoW.")
     };
-    internal static readonly Package Self = new Package("Toolkit","","obs1deus/twilighthammer-sync",@"^TwilightHammerToolkit\.exe$","","");
+    internal static readonly Package Self = new Package("Toolkit","","obs1deus/twilighthammertoolkit",@"^TwilightHammerToolkit\.exe$","","");
     private static readonly JavaScriptSerializer Json = new JavaScriptSerializer();
     private static readonly HashSet<string> AddonExtensions = new HashSet<string>(".toc .lua .xml .blp .tga .jpg .jpeg .png .wav .ogg .mp3 .ttf .otf .txt .md .gif .dds".Split(' '),StringComparer.OrdinalIgnoreCase);
 

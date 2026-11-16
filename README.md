@@ -3,7 +3,7 @@
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
 
 
-Current version: **v0.1.19**
+Current version: **v0.1.20**
 
 
 ![Twilight Hammer Toolkit v0.1.18 showing AddOns & Tools and installed addon badges](toolkit/screenshot.png)
@@ -29,14 +29,14 @@ Current version: **v0.1.19**
 
 - Windows
 - An OctoWoW install (the folder containing `WoW.exe`)
-- OctoWoW closed while you install
+- Close OctoWoW for client mods, data patches, client tweaks, and Sync setup. Addon-only installs and updates can run with the game open.
 
 The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the Toolkit opens a native Windows interface for the built-in catalog, Sync, and client tweaks.
 
 ## Getting started
 
 1. Download the latest zip from [Releases](https://github.com/obs1deus/twilighthammertoolkit/releases) and extract it.
-2. Close OctoWoW and run `TwilightHammerToolkit.exe`.
+2. Run `TwilightHammerToolkit.exe`.
 3. Choose your game folder. To change it later, click the gear beside **Check for updates**.
 4. Pick a Sync edition, or choose **Skip Sync** if you only want addons or client tweaks.
 5. Tick any optional components you want. Everything starts unchecked.
@@ -44,6 +44,7 @@ The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the 
 7. Review the install plan and confirm.
 
 If you installed DLL mods, start the game with **VanillaFixes** so they load.
+After addon-only installs or updates, run `/reload`. If a newly installed addon is missing from the game's addon list, restart OctoWoW.
 
 ## Twilight Hammer Sync
 
@@ -147,7 +148,7 @@ Before applying changes, the Toolkit saves the previous executable, config, and 
 
 ## Updates
 
-**Check for updates** looks for new Toolkit releases on GitHub and for new versions of the catalog addons and client tools the Toolkit installed. Installs made outside the Toolkit may show an unknown version. The Toolkit update link opens the GitHub release page.
+**Check for updates** checks the Toolkit, supported catalog components, and Git installs with a saved source. **Installed AddOns** lists addons from the selected game folder and reads their versions from their addon manifests. Git installs from earlier Toolkit versions may need the repository link added again to enable update checks. The Toolkit update link opens the GitHub release page.
 
 ## Windows Security
 

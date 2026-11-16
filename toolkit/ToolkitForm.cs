@@ -284,7 +284,7 @@ internal sealed class ToolkitForm : Form {
         syncCopy.Controls.Add(Link("Uninstall Sync",async()=>await UninstallSync()));
         StylePicker(edition);
         edition.Items.AddRange(new object[]{"Guild Sync","Auction Only","Bank and Guild Sync","Skip Sync"});
-        edition.SelectedIndex=0;edition.AccessibleName="Twilight Hammer Sync edition";
+        edition.SelectedIndex=3;edition.AccessibleName="Twilight Hammer Sync edition";
         edition.Width=165;edition.Anchor=AnchorStyles.Right;sync.Controls.Add(edition,1,0);
         content.Controls.Add(sync,0,0);
         content.Controls.Add(Group("Must-have raid addons",3),0,1);

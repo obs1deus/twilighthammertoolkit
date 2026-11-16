@@ -5,6 +5,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Web.Script.Serialization;
+
+internal sealed class RepositoryAddon {
+    public string Source {get;set;}
+    public string Fingerprint {get;set;}
+}
+
+internal sealed class InstalledAddon {
+    public string Name {get;set;}
+    public string Version {get;set;}
+    public string Source {get;set;}
+    public string CatalogName {get;set;}
+}
 
 internal static class ToolkitInstall {
     internal static readonly string SidekickFolder=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"TwilightHammerToolkit","ChronicleSidekick");
@@ -23,6 +36,43 @@ internal static class ToolkitInstall {
         if(package.Name=="VanillaFixes")return File.Exists(Path.Combine(game,"VanillaFixes.exe"))&&File.Exists(Path.Combine(game,"VfPatcher.dll"));
         if(package.Folder=="game")return File.Exists(Path.Combine(game,ModLibrary(package)));
         return File.Exists(Path.Combine(game,"Interface","AddOns",package.Folder,package.Folder+".toc"));
+    }
+    private static string RepositoryState(string game) {
+        return Path.Combine(game,".twilight-toolkit","repositories.json");
+    }
+    internal static Dictionary<string,RepositoryAddon> Repositories(string game) {
+        string file=RepositoryState(game);
+        var result=new Dictionary<string,RepositoryAddon>(StringComparer.OrdinalIgnoreCase);
+        if(!File.Exists(file))return result;
+        var entries=new JavaScriptSerializer().Deserialize<Dictionary<string,RepositoryAddon>>(File.ReadAllText(file));
+        foreach(var pair in entries)if(pair.Value!=null)result[pair.Key]=pair.Value;
+        return result;
+    }
+    internal static string TocVersion(string file) {
+        const string prefix="## Version:";
+        string line=File.ReadLines(file).FirstOrDefault(value=>value.StartsWith(prefix,StringComparison.OrdinalIgnoreCase));
+        return line==null?null:line.Substring(prefix.Length).Trim();
+    }
+    internal static InstalledAddon[] Addons(string game) {
+        string root=Path.Combine(game,"Interface","AddOns");
+        if(!Directory.Exists(root))return new InstalledAddon[0];
+        var repositories=Repositories(game);
+        return Directory.EnumerateDirectories(root).Select(folder=>{
+            string name=Path.GetFileName(folder);
+            string toc=Path.Combine(folder,name+".toc");
+            if(!File.Exists(toc))return null;
+            var package=ToolkitPackages.Catalog.FirstOrDefault(p=>p.Folder.Equals(name,StringComparison.OrdinalIgnoreCase));
+            RepositoryAddon repository;
+            repositories.TryGetValue(name,out repository);
+            return new InstalledAddon{Name=name,Version=TocVersion(toc),Source=repository==null?null:repository.Source,
+                CatalogName=package==null?null:package.Name};
+        }).Where(addon=>addon!=null).OrderBy(addon=>addon.Name,StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+    internal static bool SyncInstalled(string game) {
+        string uploader=SyncRemoval.UploaderFolder;
+        string config=Path.Combine(uploader,"native-game.txt");
+        return File.Exists(Path.Combine(uploader,"TwilightHammerUploader.exe"))&&File.Exists(config)&&
+            File.ReadAllText(config).Trim().TrimEnd('\\').Equals(game.TrimEnd('\\'),StringComparison.OrdinalIgnoreCase);
     }
     internal static Dictionary<string,string> ComponentStatuses(string game) {
         var statuses=new Dictionary<string,string>();
@@ -53,11 +103,14 @@ internal static class ToolkitInstall {
         }
         return true;
     }
-    internal static void InstallRepository(string game,string stage) {
-        EnsureClosed();
+    internal static void InstallRepository(string game,string stage,string source,string[] addons) {
+        var repositories=Repositories(game);
+        foreach(string addon in addons)
+            repositories[addon]=new RepositoryAddon{Source=source,Fingerprint=RepositoryFingerprint(stage,addon)};
+        SaveRepositories(stage,repositories);
         string backup=Path.Combine(game,".twilight-toolkit","backups","repository-"+Guid.NewGuid().ToString("N"));
         var files=Directory.EnumerateFiles(stage,"*",SearchOption.AllDirectories)
-            .Select(source=>new {Source=source,Relative=source.Substring(stage.Length+1)}).ToArray();
+            .Select(file=>new {Source=file,Relative=file.Substring(stage.Length+1)}).ToArray();
         foreach(var file in files) {
             CheckForLinks(game,ToolkitPackages.SafePath(game,file.Relative));
             CheckForLinks(game,ToolkitPackages.SafePath(backup,file.Relative));
@@ -71,6 +124,16 @@ internal static class ToolkitInstall {
             throw;
         }
     }
+    private static void SaveRepositories(string stage,Dictionary<string,RepositoryAddon> repositories) {
+        ToolkitPackages.Save(stage,Path.Combine(".twilight-toolkit","repositories.json"),
+            Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(repositories)));
+    }
+    internal static string RepositoryFingerprint(string stage,string addon) {
+        string folder=ToolkitPackages.SafePath(stage,Path.Combine("Interface","AddOns",addon));
+        return ToolkitPackages.Hash(Encoding.UTF8.GetBytes(String.Join("\n",Directory.GetFiles(folder,"*",SearchOption.AllDirectories)
+            .OrderBy(file=>file,StringComparer.OrdinalIgnoreCase)
+            .Select(file=>file.Substring(folder.Length+1)+":"+ToolkitPackages.Hash(File.ReadAllBytes(file))))));
+    }
     private static void CheckForLinks(string game,string path) {
         string root=Path.GetFullPath(game).TrimEnd(Path.DirectorySeparatorChar);
         for(string current=path;!current.Equals(root,StringComparison.OrdinalIgnoreCase);current=Path.GetDirectoryName(current)) {
@@ -82,7 +145,8 @@ internal static class ToolkitInstall {
         }
     }
     internal static void Run(string game,string edition,Package[] packages,ClientTweaks tweaks,Action<string> progress) {
-        EnsureClosed();
+        bool requiresClose=RequiresClosedGame(edition,packages,tweaks);
+        if(requiresClose)EnsureClosed();
         string work=Path.Combine(Path.GetTempPath(),"TwilightToolkit-"+Guid.NewGuid().ToString("N"));
         string stage=Path.Combine(work,"stage");
         string backup=Path.Combine(game,".twilight-toolkit","backups",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N").Substring(0,6));
@@ -102,6 +166,15 @@ internal static class ToolkitInstall {
                     throw new IOException(package.Name+": "+error.Message,error);
                 }
             }
+            if(packages.Length>0&&File.Exists(RepositoryState(game))) {
+                var repositories=Repositories(game);
+                bool changed=false;
+                foreach(var package in packages) {
+                    string toc=Path.Combine(stage,"Interface","AddOns",package.Folder,package.Folder+".toc");
+                    if(File.Exists(toc))changed=repositories.Remove(package.Folder)||changed;
+                }
+                if(changed)SaveRepositories(stage,repositories);
+            }
             string[] dlls=Directory.GetFiles(stage,"*.dll");
             string[] loaders={"nampower.dll","ClassicAPI.dll","UnitXP_SP3.dll","VanillaHelpers.dll","SuperWoWhook.dll"};
             dlls=dlls.Select(Path.GetFileName).Where(file=>loaders.Contains(file,StringComparer.OrdinalIgnoreCase)).ToArray();
@@ -113,7 +186,7 @@ internal static class ToolkitInstall {
             }
             if(packages.Length>0)ToolkitPackages.Save(stage,Path.Combine(".twilight-toolkit","versions.txt"),
                 Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,installed.Select(kv=>kv.Key+"\t"+kv.Value))));
-            EnsureClosed();
+            if(requiresClose)EnsureClosed();
             progress("Installing selected components…");
             foreach(var file in Directory.EnumerateFiles(stage,"*",SearchOption.AllDirectories)) {
                 string relative=file.Substring(stage.Length+1);
@@ -151,6 +224,9 @@ internal static class ToolkitInstall {
             try {Directory.Delete(work,true);} catch(IOException) { } catch(UnauthorizedAccessException) { }
         }
     }
+    internal static bool RequiresClosedGame(string edition,Package[] packages,ClientTweaks tweaks) {
+        return edition!="Skip Sync"||tweaks.Enabled||packages.Any(package=>package.Folder=="game"||package.Folder=="Data");
+    }
     private static void Restore(List<KeyValuePair<string,string>> changes) {
         for(int i=changes.Count-1;i>=0;i--) {
             var change=changes[i];
@@ -179,6 +255,6 @@ internal static class ToolkitInstall {
     }
     private static void EnsureClosed() {
         if(new[]{"WoW","WoW_Modernized","WoW_tweaked"}.Any(name=>Process.GetProcessesByName(name).Length>0))
-            throw new IOException("Close OctoWoW before installing or applying client tweaks.");
+            throw new IOException("Close OctoWoW before changing client mods, data patches, client tweaks, or Sync.");
     }
 }

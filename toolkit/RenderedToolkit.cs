@@ -68,6 +68,7 @@ internal sealed class RenderedToolkit : Form {
     private readonly JavaScriptSerializer json=new JavaScriptSerializer();
     private readonly Dictionary<string,Package> catalog=ToolkitPackages.Catalog.ToDictionary(p=>p.Name);
     private bool busy;
+    private const string ReloadHint="Run /reload in OctoWoW. If a newly installed addon is missing, restart the game.";
     private TaskCompletionSource<bool> installReview;
     private double cssToWindowScale;
     private string releaseUrl;
@@ -227,13 +228,14 @@ internal sealed class RenderedToolkit : Form {
         }
         var review=new List<string>();
         if(edition!="Skip Sync")review.Add(edition);
-        review.AddRange(plan.Select(package=>package.Name));
+        review.AddRange(plan.Select(package=>(ToolkitInstall.ComponentExists(folder,package)?"Update ":"Install ")+package.Name));
         if(tweaks.Enabled)review.Add("Client tweaks · render distance "+tweaks.Render+
             (tweaks.AlwaysAutoLoot?" · always auto-loot":"")+
             " (backs up the game executable and configuration)");
         if(review.Count==0){Post(new{status="Choose a component or enable Client Tweaks."});return;}
         busy=true;
-        if(!await ConfirmInstall("Review installation",null,review,null)) {
+        bool requiresClose=ToolkitInstall.RequiresClosedGame(edition,plan,tweaks);
+        if(!await ConfirmInstall("Review changes",null,review,requiresClose?"Close OctoWoW before applying these changes.":ReloadHint)) {
             busy=false;
             Post(new{status="Installation cancelled.",busy=false});
             return;
@@ -242,7 +244,9 @@ internal sealed class RenderedToolkit : Form {
         var progress=new Progress<string>(message=>Post(new{status=message}));
         await Task.Run(()=>ToolkitInstall.Run(folder,edition,plan,tweaks,message=>((IProgress<string>)progress).Report(message)));
         busy=false;
-        Post(new{status=plan.Any(p=>p.Folder=="game")?"Setup complete. Launch through VanillaFixes to load DLL mods.":"Setup complete.",busy=false});
+        Post(new{status=plan.Any(p=>p.Folder=="game")?"Setup complete. Launch through VanillaFixes to load DLL mods.":
+            requiresClose?"Setup complete. Start OctoWoW to see your changes.":"Setup complete. "+ReloadHint,
+            busy=false,updated=plan.Select(package=>package.Name).ToArray(),installPlanApplied=!IsChecked(request,"single")});
     }
     private async Task Uninstall(string game,bool removeAddon) {
         string folder=removeAddon?GamePath(game):null;
@@ -259,14 +263,16 @@ internal sealed class RenderedToolkit : Form {
         Post(new{status="Reading addon repository…",busy=true});
         try {
             var addons=await Task.Run(()=>ToolkitPackages.StageRepository(link,stage));
-            if(!await ConfirmInstall("Review repository addons",link.Trim(),addons,
-                "The Toolkit backs up matching files before replacing them. WoW runs addon code when you enable it.")) {
+            var installed=new HashSet<string>(ToolkitInstall.Addons(game).Select(addon=>addon.Name),StringComparer.OrdinalIgnoreCase);
+            if(!await ConfirmInstall("Review repository addons",link.Trim(),addons.Select(name=>(installed.Contains(name)?"Update ":"Install ")+name),
+                "The Toolkit backs up matching files before replacing them. "+ReloadHint)) {
                 Post(new{status="Repository install cancelled."});
                 return;
             }
             Post(new{status="Installing repository addons…"});
-            await Task.Run(()=>ToolkitInstall.InstallRepository(game,stage));
-            Post(new{status="Installed "+String.Join(", ",addons)+"."});
+            await Task.Run(()=>ToolkitInstall.InstallRepository(game,stage,link.Trim(),addons));
+            Post(new{status="Applied changes to "+String.Join(", ",addons)+". "+ReloadHint,repositoryApplied=true,
+                updated=addons.Select(name=>"git:"+name).ToArray()});
         } finally {
             try {if(Directory.Exists(stage))Directory.Delete(stage,true);}
             catch(IOException) { }
@@ -292,13 +298,21 @@ internal sealed class RenderedToolkit : Form {
         var result=await Task.Run(()=>ToolkitUpdates.Check(folder,message=>((IProgress<string>)progress).Report(message)));
         releaseUrl=result.ToolkitUrl;
         busy=false;
-        Post(new{status=result.Lines[0],busy=false,update=releaseUrl!=null,updateLines=result.Lines});
+        Post(new{status=result.Lines[0],busy=false,update=releaseUrl!=null,updateLines=result.Lines,
+            updatePath=folder,availableUpdates=result.Available});
     }
     private void Post(object message) {if(!IsDisposed)browser.CoreWebView2.PostWebMessageAsJson(json.Serialize(message));}
     private async Task ReadInstalled(string game) {
         try {
-            var statuses=await Task.Run(()=>ToolkitInstall.ComponentStatuses(game.Trim().Trim('"')));
-            Post(new {installPath=game,componentStatuses=statuses});
+            string path=game.Trim().Trim('"');
+            if(String.IsNullOrWhiteSpace(path)) {
+                Post(new{installPath=game,componentStatuses=new Dictionary<string,string>(),addons=new InstalledAddon[0],syncInstalled=false});
+                return;
+            }
+            path=Path.GetFullPath(path);
+            var inventory=await Task.Run(()=>new{installPath=game,scanPath=path,
+                componentStatuses=ToolkitInstall.ComponentStatuses(path),addons=ToolkitInstall.Addons(path),syncInstalled=ToolkitInstall.SyncInstalled(path)});
+            Post(inventory);
         } catch(IOException) {Post(new {installPath=game,componentStatuses=new Dictionary<string,string>()});}
           catch(UnauthorizedAccessException) {Post(new {installPath=game,componentStatuses=new Dictionary<string,string>()});}
     }

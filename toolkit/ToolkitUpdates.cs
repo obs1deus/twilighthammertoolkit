@@ -5,6 +5,7 @@ using System.Linq;
 
 internal sealed class ToolkitUpdateResult {
     internal readonly List<string> Lines=new List<string>();
+    internal readonly Dictionary<string,bool> Available=new Dictionary<string,bool>();
     internal string ToolkitUrl;
 }
 
@@ -24,7 +25,10 @@ internal static class ToolkitUpdates {
         } catch {result.Lines.Add("Could not verify a Toolkit release on GitHub.");}
 
         var recorded=ToolkitInstall.Installed(game);
-        var targets=ToolkitPackages.Catalog.Where(p=>recorded.ContainsKey(p.Name)||ToolkitInstall.ComponentExists(game,p)).ToArray();
+        var addons=ToolkitInstall.Addons(game);
+        var repositories=ToolkitInstall.Repositories(game);
+        var targets=ToolkitPackages.Catalog.Where(p=>!repositories.ContainsKey(p.Folder)&&
+            (recorded.ContainsKey(p.Name)||ToolkitInstall.ComponentExists(game,p))).ToArray();
         if(targets.Length==0)result.Lines.Add("No catalog addons or client tools found in the selected game folder.");
         foreach(var package in targets) {
             progress("Checking "+package.Name+"…");
@@ -40,9 +44,32 @@ internal static class ToolkitUpdates {
                     status=release.Version==installed?"up to date":"update available";
                 else
                     status=CompareUntracked(game,package,release);
+                result.Available[package.Name]=status=="update available";
                 result.Lines.Add(package.Name+": "+status);
             } catch(Exception error) {
                 result.Lines.Add(package.Name+": could not verify ("+error.Message+")");
+            }
+        }
+        foreach(var group in addons.Where(addon=>addon.Source!=null).GroupBy(addon=>addon.Source)) {
+            string stage=Path.Combine(Path.GetTempPath(),"TwilightToolkit-Check-"+Guid.NewGuid().ToString("N"));
+            try {
+                progress("Checking "+String.Join(", ",group.Select(addon=>addon.Name))+"…");
+                var found=ToolkitPackages.StageRepository(group.Key,stage);
+                foreach(var addon in group) {
+                    if(!found.Contains(addon.Name,StringComparer.OrdinalIgnoreCase)) {
+                        result.Lines.Add(addon.Name+": no longer present in the repository.");
+                        continue;
+                    }
+                    bool newer=ToolkitInstall.RepositoryFingerprint(stage,addon.Name)!=repositories[addon.Name].Fingerprint;
+                    result.Available["git:"+addon.Name]=newer;
+                    result.Lines.Add(addon.Name+": "+(newer?"update available":"up to date"));
+                }
+            } catch(Exception error) {
+                result.Lines.Add(group.Key+": could not verify ("+error.Message+")");
+            } finally {
+                try {if(Directory.Exists(stage))Directory.Delete(stage,true);}
+                catch(IOException) { }
+                catch(UnauthorizedAccessException) { }
             }
         }
         return result;
@@ -53,7 +80,15 @@ internal static class ToolkitUpdates {
         Directory.CreateDirectory(stage);
         try {
             ToolkitPackages.Stage(package,release,stage);
-            return MatchesUpstream(game,stage,ToolkitInstall.SidekickFolder)?"matches upstream":"differs from latest upstream files";
+            if(MatchesUpstream(game,stage,ToolkitInstall.SidekickFolder))return "matches upstream";
+            string relative=Path.Combine("Interface","AddOns",package.Folder,package.Folder+".toc");
+            string local=Path.Combine(game,relative), upstream=Path.Combine(stage,relative);
+            Version installed,latest;
+            if(File.Exists(local)&&File.Exists(upstream)&&
+               Version.TryParse((ToolkitInstall.TocVersion(local)??"").TrimStart('v','V'),out installed)&&
+               Version.TryParse((ToolkitInstall.TocVersion(upstream)??"").TrimStart('v','V'),out latest)&&latest>installed)
+                return "update available";
+            return "differs from latest upstream files";
         } finally {
             try {Directory.Delete(stage,true);}
             catch(IOException) {}
