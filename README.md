@@ -177,6 +177,10 @@ The Toolkit never changes your antivirus settings. Compare the detected file and
 
 On Windows, run `powershell.exe -NoProfile -File .\toolkit\Build.ps1` from the repository root. The build fetches the pinned WebView2 SDK from NuGet and writes `dist\Toolkit\TwilightHammerToolkit.exe`. The root `build.ps1` builds the standalone Sync editions.
 
+## License
+
+The Toolkit and Twilight Hammer Sync source in this repository are available under the [MIT License](LICENSE). Third-party components retain their own licenses.
+
 ## Credits
 
 The Toolkit packages and installs work by many other authors. Each component comes from its own upstream project and keeps its own license. Thanks to the authors of BigWigs (prodigeomix), RollFor, _LazyPig, AutoMarker, SmartLoot, BetterCharacterStats, Rinse, DopingControl, ChronicleCompanion, Chronicle Sidekick, Nampower, ClassicAPI, UnitXP_SP3, VanillaFixes, VanillaHelpers, SuperWoW, SuperAPI, Aegis Exchange, Aux, OctoAuctionator, and the rest of the OctoWoW community.
