@@ -1,4 +1,4 @@
-Twilight Hammer Toolkit v0.1.18
+Twilight Hammer Toolkit v0.1.19
 
 Close OctoWoW, open TwilightHammerToolkit.exe, and choose the game folder.
 Use the settings gear beside Check for updates to change the saved game folder.

@@ -26,12 +26,12 @@ internal sealed class Release {
 }
 internal static class ToolkitPackages {
     internal const string GitHub = "https://github.com/obs1deus/twilighthammer-sync";
-    internal const string Version = "0.1.18";
+    internal const string Version = "0.1.19";
     internal static readonly Package[] Catalog = {
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),
         new Package("BigWigs","Must-have raid addons","prodigeomix/BigWigs",@"^BigWigs-.*\.zip$", "BigWigs","Boss timers and raid warnings from the prodigeomix fork."),
-        new Package("_LazyPig","Raid & character addons","loicberland/_LazyPig-master",null,"_LazyPig","Configurable shortcuts and automation for common tasks."),
+        new Package("_LazyPig","Raid & character addons","obs1deus/_lazypig_updated",null,"_LazyPig","Configurable shortcuts and automation for common tasks."),
         new Package("DopingControl","Raid & character addons","octo:ShempError/DopingControl",null,"DopingControl","Checks raid consumables, buffs, resistances, hit and enchants."),
         new Package("AutoMarker","Raid & character addons","MarcelineVQ/AutoMarker",null,"AutoMarker","Assigns raid icons to configured enemies."),
         new Package("RollFor","Raid & character addons","prodigeomix/RollFor",@"^RollFor-.*\.zip$","RollFor","Manages loot rolls and records who rolled."),
