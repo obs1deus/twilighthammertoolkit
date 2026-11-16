@@ -66,8 +66,9 @@
 <style>
 #th-toolkit [hidden]{display:none!important}
 #th-toolkit .setup-nav{display:flex;align-items:center;gap:6px;padding:10px 24px 0}
-#th-toolkit .setup-nav [data-check]{margin-left:auto}
+#th-toolkit .setup-nav .settings-actions{margin-left:auto;display:flex;align-items:center;gap:6px}
 #th-toolkit .setup-nav [data-settings]{width:36px;padding-inline:0;font-size:18px;line-height:1.1}
+#th-toolkit .setup-nav [data-toolkit-release]{font-weight:700}
 #th-toolkit .setup-nav [data-settings][aria-expanded=true]{border-color:var(--gold)}
 #th-toolkit .setup-nav button[aria-pressed=true]{background:var(--raised);border-color:var(--gold)}
 #th-toolkit .version{display:inline-block;vertical-align:middle;margin-left:5px;padding:2px 6px;border:1px solid var(--line);border-radius:4px;font-size:11px;font-weight:600;letter-spacing:0;color:var(--subtle)}
@@ -133,6 +134,13 @@
  #th-toolkit .inventory-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
  #th-toolkit .inventory-row small{display:block;overflow-wrap:anywhere}
  #th-toolkit .inventory-row button{flex:none}
+ #th-toolkit .inventory-actions{display:flex;align-items:center;gap:6px}
+ #th-toolkit .removable-component{position:relative;min-width:0}
+ #th-toolkit .removable-component>.component{height:100%;padding-right:29px}
+ #th-toolkit .removable-component>.component::after{visibility:hidden}
+ #th-toolkit .removable-component>.remove-addon{position:absolute;right:3px;top:3px}
+ #th-toolkit .remove-addon{display:grid;place-items:center;width:24px;height:24px;padding:0;border-color:transparent;background:transparent;color:var(--subtle);font-size:15px}
+ #th-toolkit .remove-addon:hover{background:#49303a;color:#f7b8bd}
  #th-toolkit .inventory-pages{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
  #th-toolkit .repository-form label{display:grid;gap:6px}
  #th-toolkit .repository-form input{width:100%}
@@ -175,10 +183,9 @@
    <nav class="setup-nav" aria-label="Toolkit controls">
     <button type="button" data-tab="components" aria-pressed="true">AddOns &amp; Tools</button>
     <button type="button" data-tab="tweaks" aria-pressed="false">Client Tweaks</button>
-    <button type="button" data-check>Check for updates</button>
-    <button type="button" data-settings aria-label="Game folder settings" aria-controls="game-folder-settings" aria-expanded="true" title="Game folder settings">⚙</button>
+    <div class="settings-actions"><button type="button" class="primary" data-toolkit-release hidden><span aria-hidden="true">↑</span> Update Available</button><button type="button" data-settings aria-label="Toolkit settings" aria-controls="game-folder-settings" aria-expanded="true" title="Toolkit settings">⚙</button></div>
    </nav>
-   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button></div>
+   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
    <div class="body" data-components>
     <div class="sync sync-summary" data-sync-summary hidden><h3>Twilight Hammer Sync <span class="installed-badge">Installed</span></h3><button class="security-link" type="button" data-uninstall>Uninstall</button></div>
     <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
@@ -255,7 +262,7 @@
     <ul class="update-results" data-review-items></ul>
     <p class="muted" data-review-note hidden></p>
    </div>
-   <footer><button value="cancel" autofocus>Cancel</button><button value="install" class="primary">Install</button></footer>
+   <footer><button value="cancel" autofocus>Cancel</button><button value="install" class="primary" data-review-action>Install</button></footer>
   </form>
  </dialog>
  <dialog class="security-dialog" data-security-dialog aria-labelledby="th-security-title">
@@ -289,11 +296,14 @@
    <footer><button value="cancel" autofocus>Cancel</button><button type="button" class="primary" data-confirm-removal>Uninstall</button></footer>
   </form>
  </dialog>
- <dialog class="security-dialog" data-updates aria-labelledby="th-update-title">
-  <form method="dialog">
-   <div class="security-content"><h2 id="th-update-title">Update results</h2><ul class="update-results"></ul></div>
-   <footer><button type="button" data-get-update hidden>Open Toolkit release ↗</button><button class="primary" autofocus>Close</button></footer>
-  </form>
+ <dialog class="security-dialog install-review" data-toolkit-update-dialog aria-labelledby="toolkit-update-title">
+  <div class="security-content">
+   <h2 id="toolkit-update-title"></h2>
+   <p class="muted">You’re running v{{VERSION}}.</p>
+   <ul class="update-results" data-toolkit-notes></ul>
+   <p class="muted" data-self-update-status aria-live="polite">The Toolkit downloads the update and restarts.</p>
+  </div>
+  <footer><button type="button" class="security-link" data-release-notes>Release notes ↗</button><button type="button" data-update-later>Later</button><button type="button" class="primary" data-install-update>Install Update</button></footer>
  </dialog>
  <div class="floating-tip" aria-hidden="true" hidden></div>
 </div>
@@ -412,7 +422,31 @@
  });
  const auctionChoices=[...form.elements.auction.options].filter(option=>option.value);
  const submitButton=form.querySelector('[type=submit]');
- let installedStatuses={}, installedAddons=[], availableUpdates={}, scanPath, page=0, operationBusy=false;
+ let installedStatuses={}, installedAddons=[], availableUpdates={}, scanPath, page=0, operationBusy=false, checkingUpdates=false;
+ const removableComponents=new Set({{ADDON_COMPONENTS}});
+ function removeButton(){
+  const button=document.createElement('button');
+  button.type='button';
+  button.className='remove-addon';
+  button.textContent='🗑︎';
+  return button;
+ }
+ function bindRemoval(button,name){
+  button.title='Remove '+name;
+  button.setAttribute('aria-label',button.title);
+  button.onclick=()=>send('remove-addon',{game:gameField.value,addon:name});
+  button.disabled=operationBusy;
+ }
+ const catalogRemoval=checks.filter(input=>removableComponents.has(input.value)).map(input=>{
+  const row=input.closest('.component');
+  const wrapper=document.createElement('div');
+  wrapper.className='removable-component';
+  row.before(wrapper);
+  const trash=removeButton();
+  trash.hidden=true;
+  wrapper.append(row,trash);
+  return [input.value,trash];
+ });
  const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
  function selectAddonView(view){
   addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
@@ -453,6 +487,8 @@
    label.prepend(title);
    label.append(detail);
    row.append(label);
+   const actions=document.createElement('div');
+   actions.className='inventory-actions';
    if(addon.Source||addon.CatalogName){
     const update=document.createElement('button');
     update.type='button';
@@ -464,8 +500,14 @@
      if(addon.Source)send('install-repository',{game,repository:addon.Source});
      else send('install',{game,components:[addon.CatalogName],edition:'Skip Sync',single:true});
     });
-    row.append(update);
+    actions.append(update);
    }
+   if(addon.Name.toLowerCase()!=='twilighthammersync'){
+    const trash=removeButton();
+    bindRemoval(trash,addon.Name);
+    actions.append(trash);
+   }
+   row.append(actions);
    inventory.append(row);
   }
  }
@@ -485,6 +527,11 @@
    const value=keys.get(name)?.Version;
    version.hidden=!value;
    version.textContent=value?'v'+value.replace(/^v/i,''):'';
+  }
+  for(const [name,trash] of catalogRemoval){
+   const addon=keys.get(name);
+   trash.hidden=!addon;
+   if(addon)bindRemoval(trash,addon.Name);
   }
   for(const option of auctionChoices){
    option.textContent=option.value+(statuses[option.value]?' · Installed':'');
@@ -553,7 +600,31 @@
    }
   });
  }
- root.querySelector('[data-check]').addEventListener('click',()=>request('updates'));
+ const updateCheck=root.querySelector('[data-check]');
+ const toolkitRelease=root.querySelector('[data-toolkit-release]');
+ const toolkitUpdateDialog=root.querySelector('[data-toolkit-update-dialog]');
+ const installUpdate=toolkitUpdateDialog.querySelector('[data-install-update]');
+ const updateStatus=toolkitUpdateDialog.querySelector('[data-self-update-status]');
+ let selfUpdating=false;
+ let pendingBackgroundCheck=false;
+ function checkUpdates(background){
+  if(!operationBusy&&!checkingUpdates)send('updates',{game:gameField.value,background});
+ }
+ updateCheck.addEventListener('click',()=>checkUpdates(false));
+ toolkitRelease.addEventListener('click',()=>{
+  updateStatus.textContent='The Toolkit downloads the update and restarts.';
+  toolkitUpdateDialog.showModal();
+ });
+ toolkitUpdateDialog.querySelector('[data-release-notes]').addEventListener('click',()=>send('release'));
+ toolkitUpdateDialog.querySelector('[data-update-later]').addEventListener('click',()=>toolkitUpdateDialog.close());
+ toolkitUpdateDialog.addEventListener('cancel',event=>{if(selfUpdating)event.preventDefault();});
+ installUpdate.addEventListener('click',()=>{
+  selfUpdating=true;
+  installUpdate.disabled=true;
+  toolkitUpdateDialog.querySelector('[data-update-later]').disabled=true;
+  send('install-toolkit-update');
+ });
+ root.querySelector('[data-view-log]').addEventListener('click',()=>send('view-log'));
  const addRepository=root.querySelector('[data-add-repository]');
  const repositoryDialog=root.querySelector('[data-repository-dialog]');
  const repositoryForm=repositoryDialog.querySelector('form');
@@ -589,8 +660,6 @@
  });
  const security=root.querySelector('[data-security-dialog]');
  const removal=root.querySelector('[data-removal]');
- const updateDialog=root.querySelector('[data-updates]');
- updateDialog.querySelector('[data-get-update]').addEventListener('click',()=>send('release'));
  const uninstallButton=root.querySelector('[data-uninstall]');
  uninstallButton.addEventListener('click',()=>{
   removal.querySelector('[data-remove-addon]').checked=false;
@@ -616,6 +685,7 @@
  root.addEventListener('keydown',event=>{if(event.key==='F1'){event.preventDefault();showSecurity();}});
  const detail=root.querySelector('.status-detail');
  const installReview=root.querySelector('[data-install-review]');
+ let initialCheck=true;
  installReview.addEventListener('close',()=>send('review-install',{confirmed:installReview.returnValue==='install'}));
  bridge.addEventListener('message',({data})=>{
   if(data.game!==undefined){
@@ -625,6 +695,8 @@
    installedAddons=[];availableUpdates={};scanPath=null;page=0;
    showInstalled({});
    scanInstalled();
+   if(initialCheck||data.gameValid)pendingBackgroundCheck=true;
+   initialCheck=false;
   }
   if(data.componentStatuses&&data.installPath===gameField.value){
    installedAddons=data.addons||[];
@@ -655,8 +727,9 @@
    showInstalled(installedStatuses);
   }
   if(data.review){
-   const {title,source,items,note}=data.review;
+   const {title,source,items,note,action}=data.review;
    installReview.querySelector('#install-review-title').textContent=title;
+   installReview.querySelector('[data-review-action]').textContent=action||'Install';
    installReview.querySelector('[data-review-origin]').hidden=!source;
    installReview.querySelector('[data-review-source]').textContent=source||'';
    installReview.querySelector('[data-review-note]').hidden=!note;
@@ -671,34 +744,50 @@
   }
   if(data.busy!==undefined) {
    operationBusy=data.busy;
-   root.querySelector('[data-check]').disabled=data.busy;
+   catalogRemoval.forEach(([,button])=>{button.disabled=operationBusy;});
    count(false);
    renderInventory();
    uninstallButton.disabled=data.busy;
    addRepository.disabled=data.busy;
    if(!data.busy)scanInstalled();
   }
-  if(data.syncRemoved){edition.value='Skip Sync';describeSync();}
-  if(data.updateLines){
-   const list=updateDialog.querySelector('.update-results');
-   list.replaceChildren(...data.updateLines.map(text=>{
-    const item=document.createElement('li');
-    item.textContent=text;
-    return item;
-   }));
-   updateDialog.querySelector('[data-get-update]').hidden=!data.update;
-   if(!updateDialog.open)updateDialog.showModal();
+  if(data.checkingUpdates!==undefined)checkingUpdates=data.checkingUpdates;
+  if(pendingBackgroundCheck&&!operationBusy&&!checkingUpdates){
+   pendingBackgroundCheck=false;
+   checkUpdates(true);
   }
-  if(data.warning||data.update){
+  updateCheck.disabled=operationBusy||checkingUpdates;
+  toolkitRelease.disabled=operationBusy;
+  if(data.toolkitAvailable!==undefined){
+   toolkitRelease.hidden=!data.toolkitAvailable;
+   if(data.toolkitAvailable){
+    const {version,notes}=data.toolkitAvailable;
+    toolkitUpdateDialog.querySelector('h2').textContent='Toolkit '+version+' available';
+    toolkitUpdateDialog.querySelector('[data-toolkit-notes]').replaceChildren(...notes.map(text=>{
+     const line=document.createElement('li');
+     line.textContent=text;
+     return line;
+    }));
+   }
+  }
+  if(data.selfUpdateProgress!==undefined){
+   selfUpdating=Boolean(data.busy);
+   updateStatus.textContent=data.selfUpdateProgress;
+   installUpdate.disabled=selfUpdating;
+   toolkitUpdateDialog.querySelector('[data-update-later]').disabled=selfUpdating;
+  }
+  if(data.syncRemoved){edition.value='Skip Sync';describeSync();}
+  if(data.warning){
    detail.replaceChildren();
    const button=document.createElement('button');
    button.type='button';
-   button.textContent=data.update?'Open Toolkit release ↗':'Windows Security help';
-   button.addEventListener('click',()=>{if(data.update)send('release');else showSecurity();});
+   button.textContent='Windows Security help';
+   button.addEventListener('click',showSecurity);
    detail.append(button);
    detail.hidden=false;
   } else if(data.status!==undefined)detail.hidden=true;
  });
+ setInterval(()=>checkUpdates(true),30*60*1000);
  send('ready');
  const shell=root.querySelector('.shell');
  const header=shell.querySelector('header');

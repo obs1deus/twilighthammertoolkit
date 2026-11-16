@@ -7,6 +7,13 @@ internal sealed class ToolkitUpdateResult {
     internal readonly List<string> Lines=new List<string>();
     internal readonly Dictionary<string,bool> Available=new Dictionary<string,bool>();
     internal string ToolkitUrl;
+    internal Release ToolkitRelease;
+    internal string Summary {
+        get {
+            int count=Available.Values.Count(value=>value);
+            return Lines[0]+(count==0?"":" "+count+(count==1?" component update available.":" component updates available."));
+        }
+    }
 }
 
 internal static class ToolkitUpdates {
@@ -20,10 +27,12 @@ internal static class ToolkitUpdates {
                 result.Lines.Add("Toolkit: the latest release has no comparable version.");
             else if(candidate>new Version(ToolkitPackages.Version)) {
                 result.ToolkitUrl=ToolkitPackages.GitHub+"/releases/tag/"+Uri.EscapeDataString(release.Version);
+                result.ToolkitRelease=release;
                 result.Lines.Add("Toolkit "+release.Version+" is available.");
             } else result.Lines.Add("Toolkit is current.");
         } catch {result.Lines.Add("Could not verify a Toolkit release on GitHub.");}
 
+        if(game==null){ToolkitLog.Write("updates",result.Summary);return result;}
         var recorded=ToolkitInstall.Installed(game);
         var addons=ToolkitInstall.Addons(game);
         var repositories=ToolkitInstall.Repositories(game);
@@ -72,6 +81,7 @@ internal static class ToolkitUpdates {
                 catch(UnauthorizedAccessException) { }
             }
         }
+        foreach(string line in result.Lines)ToolkitLog.Write("updates",line,line.Contains("could not verify")?"warn":"info");
         return result;
     }
 

@@ -1,10 +1,11 @@
-Twilight Hammer Toolkit v0.1.20
+Twilight Hammer Toolkit v0.1.21
 
 Open TwilightHammerToolkit.exe and choose the game folder.
 Addon-only changes can run while OctoWoW is open. Run /reload afterward
 or restart if a newly installed addon is missing. Close the game for
 client mods, patches, client tweaks, and Sync setup.
-Use the settings gear beside Check for updates to change the saved game folder.
+Use the settings gear to change the saved game folder, check for updates,
+or open the log.
 The preview-style interface uses Microsoft Edge WebView2. If WebView2 cannot
 start, Toolkit opens the native Windows interface instead.
 Select your Guild Sync, Auction Only, or Bank and Guild Sync edition.
@@ -30,8 +31,9 @@ Setup saves the previous executable, config, and replaced package files under
 Check for updates
 Checks Toolkit releases on GitHub, catalog components, and Git addons with
 a saved source. Installed AddOns displays addon versions when available.
-Installs made outside the Toolkit can show an
-unknown version. The Toolkit update link opens the GitHub release page.
+Checks run at launch and every 30 minutes while the Toolkit is open.
+Update Available opens the changelog and installs a verified new executable.
+The trash button backs up removed addons and keeps saved game settings.
 
 Windows Security
 If Windows blocks an upstream file, click Windows Security in the footer for

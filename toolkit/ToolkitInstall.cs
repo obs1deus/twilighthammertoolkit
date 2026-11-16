@@ -68,6 +68,45 @@ internal static class ToolkitInstall {
                 CatalogName=package==null?null:package.Name};
         }).Where(addon=>addon!=null).OrderBy(addon=>addon.Name,StringComparer.OrdinalIgnoreCase).ToArray();
     }
+    internal static void RemoveAddon(string game,string name) {
+        if(String.IsNullOrWhiteSpace(name)||Path.GetFileName(name)!=name||
+           name.Equals("TwilightHammerSync",StringComparison.OrdinalIgnoreCase))
+            throw new IOException("Choose an installed addon to remove.");
+        string folder=ToolkitPackages.SafePath(game,Path.Combine("Interface","AddOns",name));
+        if(!File.Exists(Path.Combine(folder,name+".toc")))throw new IOException("This addon is no longer installed.");
+        string backup=ToolkitPackages.SafePath(game,Path.Combine(".twilight-toolkit","backups","removed-"+Guid.NewGuid().ToString("N"),name));
+        string state=RepositoryState(game),versionFile=State(game);
+        CheckForLinks(game,folder);
+        CheckForLinks(game,backup);
+        CheckForLinks(game,state);
+        CheckForLinks(game,versionFile);
+        var repositories=Repositories(game);
+        var installed=Installed(game);
+        var catalog=ToolkitPackages.Catalog.FirstOrDefault(package=>package.Folder.Equals(name,StringComparison.OrdinalIgnoreCase));
+        Directory.CreateDirectory(Path.GetDirectoryName(backup));
+        Directory.Move(folder,backup);
+        var changes=new List<KeyValuePair<string,string>>();
+        string stage=Path.Combine(Path.GetDirectoryName(backup),"metadata");
+        try {
+            if(repositories.Remove(name)) {
+                SaveRepositories(stage,repositories);
+                Replace(RepositoryState(stage),state,Path.Combine(Path.GetDirectoryName(backup),"repositories.json"),changes);
+            }
+            if(catalog!=null&&installed.Remove(catalog.Name)) {
+                ToolkitPackages.Save(stage,Path.Combine(".twilight-toolkit","versions.txt"),
+                    Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,installed.Select(pair=>pair.Key+"\t"+pair.Value))));
+                Replace(State(stage),versionFile,Path.Combine(Path.GetDirectoryName(backup),"versions.txt"),changes);
+            }
+        } catch {
+            Restore(changes);
+            Directory.Move(backup,folder);
+            throw;
+        } finally {
+            try {if(Directory.Exists(stage))Directory.Delete(stage,true);}
+            catch(IOException) { }
+            catch(UnauthorizedAccessException) { }
+        }
+    }
     internal static bool SyncInstalled(string game) {
         string uploader=SyncRemoval.UploaderFolder;
         string config=Path.Combine(uploader,"native-game.txt");

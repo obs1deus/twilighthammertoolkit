@@ -42,6 +42,17 @@ foreach($arch in @('x86','x64','arm64')){
 $options+="/resource:$(Join-Path $PSScriptRoot 'Toolkit.html'),Toolkit.html"
 $options+=@('guild.exe','auction.exe','bank.exe') | ForEach-Object {"/resource:$(Join-Path $stage $_),$_"}
 $source=Get-ChildItem $PSScriptRoot -Filter '*.cs' -File | Select-Object -ExpandProperty FullName
-& $compiler @options @source
+$version=[regex]::Match([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'ToolkitPackages.cs')),'const string Version = "([0-9]+\.[0-9]+\.[0-9]+)"').Groups[1].Value
+if(!$version){throw 'Toolkit version was not found'}
+$versionFile=Join-Path $stage 'ToolkitVersion.cs'
+[IO.File]::WriteAllText($versionFile,@"
+using System.Reflection;
+[assembly: AssemblyTitle("Twilight Hammer Toolkit")]
+[assembly: AssemblyProduct("Twilight Hammer Toolkit")]
+[assembly: AssemblyVersion("$version.0")]
+[assembly: AssemblyFileVersion("$version.0")]
+[assembly: AssemblyInformationalVersion("$version")]
+"@)
+& $compiler @options @source $versionFile
 if($LASTEXITCODE){throw 'Toolkit build failed'}
 Write-Output (Join-Path $out 'TwilightHammerToolkit.exe')

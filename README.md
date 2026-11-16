@@ -3,7 +3,7 @@
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
 
 
-Current version: **v0.1.20**
+Current version: **v0.1.21**
 
 
 ![Twilight Hammer Toolkit v0.1.18 showing AddOns & Tools and installed addon badges](toolkit/screenshot.png)
@@ -37,7 +37,7 @@ The modern interface uses Microsoft Edge WebView2. If WebView2 can't start, the 
 
 1. Download the latest zip from [Releases](https://github.com/obs1deus/twilighthammertoolkit/releases) and extract it.
 2. Run `TwilightHammerToolkit.exe`.
-3. Choose your game folder. To change it later, click the gear beside **Check for updates**.
+3. Choose your game folder. To change it later, open the settings gear.
 4. Pick a Sync edition, or choose **Skip Sync** if you only want addons or client tweaks.
 5. Tick any optional components you want. Everything starts unchecked.
 6. Optionally turn on **Apply client tweaks** and adjust the values.
@@ -148,7 +148,11 @@ Before applying changes, the Toolkit saves the previous executable, config, and 
 
 ## Updates
 
-**Check for updates** checks the Toolkit, supported catalog components, and Git installs with a saved source. **Installed AddOns** lists addons from the selected game folder and reads their versions from their addon manifests. Git installs from earlier Toolkit versions may need the repository link added again to enable update checks. The Toolkit update link opens the GitHub release page.
+The Toolkit checks for updates at launch and every 30 minutes while open. Use **Check for updates** under the settings gear to check manually. When a Toolkit release is available, **Update Available** opens the changelog and offers **Install Update**. The Toolkit verifies the new executable before replacing the current copy and reopening.
+
+**Installed AddOns** shows addon versions from their manifests. Git installs from earlier releases may need their repository links added again to enable update checks. The trash button moves addon files into the Toolkit backup folder and keeps saved game settings. Built-in recommendations stay in the catalog after removal.
+
+Open **View log** under the settings gear for timestamps, update checks, installation events, and errors. The Toolkit keeps its current log and one previous log in its Windows app data folder.
 
 ## Windows Security
 

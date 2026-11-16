@@ -22,11 +22,11 @@ internal sealed class Package {
     }
 }
 internal sealed class Release {
-    internal string Version, Url, File, Digest = "", ArchiveTag = "";
+    internal string Version, Url, File, Notes, Digest = "", ArchiveTag = "";
 }
 internal static class ToolkitPackages {
     internal const string GitHub = "https://github.com/obs1deus/twilighthammertoolkit";
-    internal const string Version = "0.1.20";
+    internal const string Version = "0.1.21";
     internal static readonly Package[] Catalog = {
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),
@@ -141,7 +141,8 @@ internal static class ToolkitPackages {
                 string name=StringField(asset,"name");
                 if(!Regex.IsMatch(name,package.Match,RegexOptions.IgnoreCase))continue;
                 if(package.Folder=="sidekick"&&!name.Contains(architecture=="ARM64"?"-arm64.":"-amd64."))continue;
-                return new Release {Version=StringField(release,"tag_name"),File=name,Url=StringField(asset,"browser_download_url"),Digest=StringField(asset,"digest")};
+                return new Release {Version=StringField(release,"tag_name"),File=name,Url=StringField(asset,"browser_download_url"),
+                    Digest=StringField(asset,"digest"),Notes=StringField(release,"body")};
             }
             throw new IOException("No matching release asset.");
         }

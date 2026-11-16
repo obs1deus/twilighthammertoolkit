@@ -25,21 +25,27 @@ internal sealed class ToolkitForm : Form {
     private readonly CheckBox autoLoot=Check("Always auto-loot (hold Shift for manual loot)");
     private readonly NumericUpDown plates=Number(1,100,30), fov=Number(60,150,110), render=Number(777,3000,2200), clutter=Number(0,1000,300), camera=Number(1,100,75);
     private bool changing, operationRunning;
+    private bool checkingUpdates;
     private string releaseUrl;
     private readonly HashSet<string> explicitlySelected=new HashSet<string>();
     private readonly Dictionary<string,Package> packages=ToolkitPackages.Catalog.ToDictionary(p=>p.Name);
 
     [STAThread]
-    private static void Main() {
+    private static void Main(string[] args) {
         ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        if(args.Length>0&&args[0]=="--apply-toolkit-update"){ToolkitSelfUpdate.Apply(args);return;}
+        if(args.Length==2&&args[0]=="--clean-toolkit-update")
+            Task.Run(()=>ToolkitSelfUpdate.Clean(args[1]));
+        ToolkitLog.Write("toolkit","Started Toolkit v"+ToolkitPackages.Version+".");
         string error;
         try {
             ToolkitBrowserRuntime.Prepare();
             error=RunRendered();
             if(error==null)return;
         } catch(Exception failed) {error=failed.Message;}
+        ToolkitLog.Write("toolkit","WebView2 unavailable. Opened the Windows interface.","warn");
         using(var window=new ToolkitForm()) {
             window.status.Text="WebView2 unavailable. Using the Windows controls. "+error;
             Application.Run(window);
@@ -108,16 +114,25 @@ internal sealed class ToolkitForm : Form {
         game.Dock=DockStyle.Fill; game.AccessibleName="OctoWoW folder";
         game.BackColor=Card;game.ForeColor=Ink;game.BorderStyle=BorderStyle.FixedSingle;
         game.Margin=new Padding(6,7,6,3);
-        var path=new TableLayoutPanel {Dock=DockStyle.Fill,AutoSize=true,ColumnCount=4,Padding=new Padding(22,9,22,8),Margin=Padding.Empty};
+        var path=new TableLayoutPanel {Dock=DockStyle.Fill,AutoSize=true,ColumnCount=5,Padding=new Padding(22,9,22,8),Margin=Padding.Empty};
         path.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         path.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
+        path.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         path.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         path.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         path.Controls.Add(LabelText("OctoWoW folder",Ink),0,0);
         path.Controls.Add(game,1,0);
         path.Controls.Add(ButtonText("Browse…",Browse),2,0);
-        updates=ButtonText("Check for updates",async()=>await CheckUpdates());
-        path.Controls.Add(updates,3,0);
+        updates=ButtonText("Check for updates",async()=>await CheckUpdates(false));
+        var tools=Row();
+        tools.WrapContents=false;
+        tools.Controls.Add(updates);
+        tools.Controls.Add(ButtonText("View log",ToolkitLog.Open));
+        tools.Visible=false;
+        path.Controls.Add(tools,3,0);
+        var settings=ButtonText("⚙",()=>tools.Visible=!tools.Visible);
+        settings.AccessibleName="Toolkit settings";
+        path.Controls.Add(settings,4,0);
         shell.Controls.Add(path,0,1);
 
         shell.Controls.Add(Navigation(Components(),Tweaks(),SecurityHelp()),0,2);
@@ -137,6 +152,10 @@ internal sealed class ToolkitForm : Form {
         FormClosing+=delegate(object sender,FormClosingEventArgs eventArgs) {
             if(operationRunning&&eventArgs.CloseReason==CloseReason.UserClosing)eventArgs.Cancel=true;
         };
+        var updateTimer=new Timer {Interval=30*60*1000};
+        updateTimer.Tick+=async delegate{await CheckUpdates(true);};
+        Shown+=async delegate{updateTimer.Start();await CheckUpdates(true);};
+        FormClosed+=delegate{updateTimer.Dispose();};
         SetRoundedRegion();
         if(ClientAnimationsEnabled()) {
             Opacity=.82;
@@ -456,7 +475,8 @@ internal sealed class ToolkitForm : Form {
     }
     private void Busy(bool busy) {
         operationRunning=busy;
-        install.Enabled=updates.Enabled=!busy;
+        install.Enabled=!busy;
+        updates.Enabled=!busy&&!checkingUpdates;
         UseWaitCursor=busy;
     }
     private async Task Apply() {
@@ -496,18 +516,26 @@ internal sealed class ToolkitForm : Form {
         finally{Busy(false);}
     }
 
-    private async Task CheckUpdates() {
+    private async Task CheckUpdates(bool background) {
+        if(operationRunning||checkingUpdates)return;
+        checkingUpdates=true;
+        updates.Enabled=false;
         try {
-            string folder=GamePath();
-            Busy(true);status.Text="Checking GitHub and addon sources…";toolkitUpdate.Visible=false;releaseUrl=null;
-            var progress=new Progress<string>(message=>status.Text=message);
-            var result=await Task.Run(()=>ToolkitUpdates.Check(folder,message=>((IProgress<string>)progress).Report(message)));
+            string folder;
+            try {folder=GamePath();} catch(IOException) {folder=null;}
+            if(!background)status.Text="Checking for updates…";
+            var result=await Task.Run(()=>ToolkitUpdates.Check(folder,message=>{}));
+            if(IsDisposed)return;
             releaseUrl=result.ToolkitUrl;
             toolkitUpdate.Visible=releaseUrl!=null;
-            status.Text=result.Lines[0];
-            MessageBox.Show(this,String.Join(Environment.NewLine,result.Lines),"Update results",MessageBoxButtons.OK,MessageBoxIcon.Information);
-        } catch(Exception error) {status.Text=error.Message;}
-        finally {Busy(false);}
+            if(!operationRunning&&folder!=null&&String.Equals(folder,game.Text.Trim().Trim('"'),StringComparison.OrdinalIgnoreCase))
+                foreach(var pair in picks) {
+                    bool available;
+                    pair.Value.Text=pair.Key+(result.Available.TryGetValue(pair.Key,out available)&&available?" · Update available":"");
+                }
+            if(!background&&!operationRunning)status.Text=result.Summary;
+        } catch(Exception error) {if(!background&&!operationRunning&&!IsDisposed)status.Text=error.Message;}
+        finally {checkingUpdates=false;if(!IsDisposed)updates.Enabled=!operationRunning;}
     }
 
     private void Browse() {

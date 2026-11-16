@@ -68,10 +68,13 @@ internal sealed class RenderedToolkit : Form {
     private readonly JavaScriptSerializer json=new JavaScriptSerializer();
     private readonly Dictionary<string,Package> catalog=ToolkitPackages.Catalog.ToDictionary(p=>p.Name);
     private bool busy;
+    private bool checkingUpdates;
+    private int updateEpoch;
     private const string ReloadHint="Run /reload in OctoWoW. If a newly installed addon is missing, restart the game.";
     private TaskCompletionSource<bool> installReview;
     private double cssToWindowScale;
     private string releaseUrl;
+    private Release toolkitRelease;
     internal string StartupError;
 
     internal RenderedToolkit() {
@@ -110,7 +113,9 @@ internal sealed class RenderedToolkit : Form {
         using(var stream=GetType().Assembly.GetManifestResourceStream("Toolkit.html"))
         using(var reader=new StreamReader(stream)) {
             var dependencies=catalog.Values.Where(p=>p.Requires.Length>0).ToDictionary(p=>p.Name,p=>p.Requires);
-            document=Encoding.UTF8.GetBytes(reader.ReadToEnd().Replace("{{VERSION}}",ToolkitPackages.Version).Replace("{{DEPENDENCIES}}",json.Serialize(dependencies)));
+            var addons=catalog.Values.Where(p=>p.Folder!="game"&&p.Folder!="Data"&&p.Folder!="sidekick").Select(p=>p.Name).ToArray();
+            document=Encoding.UTF8.GetBytes(reader.ReadToEnd().Replace("{{VERSION}}",ToolkitPackages.Version)
+                .Replace("{{DEPENDENCIES}}",json.Serialize(dependencies)).Replace("{{ADDON_COMPONENTS}}",json.Serialize(addons)));
         }
         view.AddWebResourceRequestedFilter(InterfaceUrl+"*",CoreWebView2WebResourceContext.All);
         view.WebResourceRequested+=delegate(object sender,CoreWebView2WebResourceRequestedEventArgs e){
@@ -151,17 +156,21 @@ internal sealed class RenderedToolkit : Form {
                 case "copy-toolkit": CopyFolder(AppDomain.CurrentDomain.BaseDirectory,"Toolkit folder");break;
                 case "security-check": CheckFiles(request,game);break;
                 case "release": if(releaseUrl!=null)Open(releaseUrl);break;
+                case "view-log": ToolkitLog.Open();break;
+                case "install-toolkit-update": if(!busy&&toolkitRelease!=null)await InstallToolkitUpdate(toolkitRelease);break;
                 case "install": if(!busy)await Install(request,GamePath(game));break;
                 case "install-repository": if(!busy)await InstallRepository(GamePath(game),TextField(request,"repository"));break;
+                case "remove-addon": if(!busy)await RemoveAddon(GamePath(game),TextField(request,"addon"));break;
                 case "review-install":
                     if(installReview!=null)installReview.TrySetResult(IsChecked(request,"confirmed"));
                     break;
                 case "uninstall":
                     if(!busy)await Uninstall(game,IsChecked(request,"removeAddon"));
                     break;
-                case "updates": if(!busy)await Updates(GamePath(game));break;
+                case "updates": if(!busy&&!checkingUpdates)await Updates(game,IsChecked(request,"background"));break;
             }
         } catch(Exception error) {
+            ToolkitLog.Write("toolkit","Action failed ("+error.GetType().Name+").","error");
             busy=false;
             Post(new {status=error.Message,busy=false,warning=error is IOException||error is UnauthorizedAccessException});
         }
@@ -241,8 +250,11 @@ internal sealed class RenderedToolkit : Form {
             return;
         }
         Post(new{status="Preparing installation…",busy=true});
+        ToolkitLog.Write("install","Applying "+String.Join(", ",review)+".");
+        updateEpoch++;
         var progress=new Progress<string>(message=>Post(new{status=message}));
         await Task.Run(()=>ToolkitInstall.Run(folder,edition,plan,tweaks,message=>((IProgress<string>)progress).Report(message)));
+        ToolkitLog.Write("install","Installation completed.");
         busy=false;
         Post(new{status=plan.Any(p=>p.Folder=="game")?"Setup complete. Launch through VanillaFixes to load DLL mods.":
             requiresClose?"Setup complete. Start OctoWoW to see your changes.":"Setup complete. "+ReloadHint,
@@ -252,7 +264,9 @@ internal sealed class RenderedToolkit : Form {
         string folder=removeAddon?GamePath(game):null;
         busy=true;
         Post(new{status="Removing the Sync uploader…",busy=true});
+        updateEpoch++;
         await Task.Run(()=>SyncRemoval.Run(folder,removeAddon));
+        ToolkitLog.Write("sync",removeAddon?"Removed uploader and addon.":"Removed uploader.");
         busy=false;
         Post(new{status=removeAddon?"Sync uploader, scheduled task, and WoW addon removed.":"Sync uploader and scheduled task removed.",
             busy=false,syncRemoved=true});
@@ -270,7 +284,9 @@ internal sealed class RenderedToolkit : Form {
                 return;
             }
             Post(new{status="Installing repository addons…"});
+            updateEpoch++;
             await Task.Run(()=>ToolkitInstall.InstallRepository(game,stage,link.Trim(),addons));
+            ToolkitLog.Write("repository","Applied "+String.Join(", ",addons)+".");
             Post(new{status="Applied changes to "+String.Join(", ",addons)+". "+ReloadHint,repositoryApplied=true,
                 updated=addons.Select(name=>"git:"+name).ToArray()});
         } finally {
@@ -281,25 +297,82 @@ internal sealed class RenderedToolkit : Form {
             Post(new{busy=false});
         }
     }
-    private async Task<bool> ConfirmInstall(string title,string source,IEnumerable<string> items,string note) {
+    private async Task RemoveAddon(string game,string name) {
+        var addon=ToolkitInstall.Addons(game).FirstOrDefault(row=>row.Name==name);
+        if(addon==null||addon.Name.Equals("TwilightHammerSync",StringComparison.OrdinalIgnoreCase))
+            throw new IOException("Choose an installed addon to remove.");
+        busy=true;
+        if(!await ConfirmInstall("Remove addon?",null,new[]{name},"The Toolkit moves the addon to a backup. Your saved addon settings stay in place.","Remove")) {
+            busy=false;
+            Post(new{busy=false});
+            return;
+        }
+        updateEpoch++;
+        await Task.Run(()=>ToolkitInstall.RemoveAddon(game,name));
+        ToolkitLog.Write("addons","Removed "+name+" and backed up its files.");
+        busy=false;
+        Post(new{status="Removed "+name+". Run /reload in OctoWoW.",busy=false,
+            updated=new[]{"git:"+name,addon.CatalogName}.Where(key=>key!=null).ToArray()});
+    }
+    private async Task<bool> ConfirmInstall(string title,string source,IEnumerable<string> items,string note,string action="Install") {
         var review=new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         installReview=review;
         try {
-            Post(new{busy=true,review=new{title,source,items=items.ToArray(),note}});
+            Post(new{busy=true,review=new{title,source,items=items.ToArray(),note,action}});
             return await review.Task;
         } finally {
             installReview=null;
         }
     }
-    private async Task Updates(string folder) {
-        busy=true;releaseUrl=null;
-        Post(new{status="Checking GitHub and addon sources…",busy=true});
-        var progress=new Progress<string>(message=>Post(new{status=message,busy=true}));
-        var result=await Task.Run(()=>ToolkitUpdates.Check(folder,message=>((IProgress<string>)progress).Report(message)));
-        releaseUrl=result.ToolkitUrl;
-        busy=false;
-        Post(new{status=result.Lines[0],busy=false,update=releaseUrl!=null,updateLines=result.Lines,
-            updatePath=folder,availableUpdates=result.Available});
+    private async Task Updates(string game,bool background) {
+        checkingUpdates=true;
+        ToolkitLog.Write("updates",background?"Background update check started.":"Manual update check started.");
+        int epoch=updateEpoch;
+        Post(new{checkingUpdates=true});
+        if(!background)Post(new{status="Checking for updates…"});
+        try {
+            string path=game.Trim().Trim('"');
+            string folder=IsGameFolder(path)?Path.GetFullPath(path):null;
+            var result=await Task.Run(()=>ToolkitUpdates.Check(folder,message=>{}));
+            releaseUrl=result.ToolkitUrl;
+            toolkitRelease=result.ToolkitRelease;
+            Post(new{toolkitAvailable=toolkitRelease==null?null:new {
+                version=toolkitRelease.Version,notes=AbbreviatedNotes(toolkitRelease.Notes)}});
+            if(epoch==updateEpoch)Post(new{updatePath=folder,availableUpdates=result.Available});
+            if(!background&&!busy)Post(new{status=result.Summary});
+        } catch(Exception error) {
+            ToolkitLog.Write("updates","Update check failed ("+error.GetType().Name+").","warn");
+            if(!background&&!busy)Post(new{status=error.Message});
+        } finally {
+            checkingUpdates=false;
+            Post(new{checkingUpdates=false});
+        }
+    }
+    private static string[] AbbreviatedNotes(string notes) {
+        return (notes??"").Split('\n').Select(line=>line.Trim()).Where(line=>line.Length>0&&!line.StartsWith("#"))
+            .Take(5).Select(line=>{
+                string clean=System.Text.RegularExpressions.Regex.Replace(line.TrimStart('-','*',' '),@"\[([^\]]+)\]\([^)]+\)","$1")
+                    .Replace("**","").Replace("`","");
+                return clean.Length>200?clean.Substring(0,197)+"…":clean;
+            }).ToArray();
+    }
+    private async Task InstallToolkitUpdate(Release release) {
+        busy=true;
+        Post(new{busy=true,selfUpdateProgress="Downloading and verifying the update…"});
+        ToolkitLog.Write("selfUpdater","Downloading "+release.Version+".");
+        string staged=null;
+        try {
+            string target=Application.ExecutablePath;
+            staged=await Task.Run(()=>ToolkitSelfUpdate.Prepare(release,target));
+            ToolkitSelfUpdate.Start(staged,target);
+            busy=false;
+            Close();
+        } catch(Exception error) {
+            if(staged!=null)try {File.Delete(staged);} catch(IOException) { } catch(UnauthorizedAccessException) { }
+            ToolkitLog.Write("selfUpdater","Update failed ("+error.GetType().Name+").","error");
+            busy=false;
+            Post(new{busy=false,selfUpdateProgress=error.Message});
+        }
     }
     private void Post(object message) {if(!IsDisposed)browser.CoreWebView2.PostWebMessageAsJson(json.Serialize(message));}
     private async Task ReadInstalled(string game) {
