@@ -55,4 +55,7 @@ using System.Reflection;
 "@)
 & $compiler @options @source $versionFile
 if($LASTEXITCODE){throw 'Toolkit build failed'}
+Copy-Item -LiteralPath (Join-Path $sync 'LICENSE'),(Join-Path $PSScriptRoot 'README.txt') -Destination $out -Force
+Copy-Item -LiteralPath (Join-Path $sdk 'LICENSE.txt') -Destination (Join-Path $out 'WebView2-LICENSE.txt') -Force
+Copy-Item -LiteralPath (Join-Path $sdk 'NOTICE.txt') -Destination (Join-Path $out 'WebView2-NOTICE.txt') -Force
 Write-Output (Join-Path $out 'TwilightHammerToolkit.exe')

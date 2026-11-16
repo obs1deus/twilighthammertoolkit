@@ -235,7 +235,14 @@ internal sealed class RenderedToolkit : Form {
         if(review.Count==0){Post(new{status="Choose a component or enable Client Tweaks."});return;}
         busy=true;
         bool requiresClose=ToolkitInstall.RequiresClosedGame(edition,plan,tweaks);
-        if(!await ConfirmInstall("Review changes",null,review,requiresClose?"Close OctoWoW before applying these changes.":ReloadHint)) {
+        string note=requiresClose?"Close OctoWoW before applying these changes.":ReloadHint;
+        if(edition!="Skip Sync") {
+            string data="Y'Shaarj Alliance auction listings, including in-game sellers when available, for the public Auction House";
+            if(edition!="Auction Only")data+=", plus the Twilight Hammer roster and captured professions";
+            if(edition=="Bank and Guild Sync")data+=", plus Twilightbank inventory and gold";
+            note+=" Sync installs a scheduled task that sends "+data+" to the Twilight Hammer portal. Choose Skip Sync to continue without uploads.";
+        }
+        if(!await ConfirmInstall("Review changes",null,review,note)) {
             busy=false;
             Post(new{status="Installation cancelled.",busy=false});
             return;

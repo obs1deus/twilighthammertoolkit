@@ -68,6 +68,19 @@ internal static class TwilightSetup {
             }
         }
         if (!IsGame(game)) throw new InvalidOperationException("Choose the OctoWoW folder containing WoW.exe.");
+        if (requestedGame == null) {
+            string data = "Y'Shaarj Alliance auction listings, including in-game sellers when available, for the public Auction House.";
+#if !AUCTION_ONLY
+            data += " Also sends the Twilight Hammer guild roster and captured professions after authorization through Discord.";
+#endif
+#if BANK_ENABLED
+            data += " Also sends Twilightbank inventory and gold.";
+#endif
+            string message = "Setup installs a scheduled task that reads OctoWoW game files and uploads eligible captures to "
+                + Portal + ".\n\n" + data + "\n\nChoose No to skip installation. Use Uninstall Sync in the Toolkit to stop future uploads.";
+            if (MessageBox.Show(message, Title, MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                return false;
+        }
 #if !AUCTION_ONLY
         string approval = Authorize();
         if (approval == null) return false;

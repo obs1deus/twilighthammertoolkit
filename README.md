@@ -13,6 +13,8 @@ Current version: **v0.1.23**
 - **Releases:** https://github.com/obs1deus/twilighthammertoolkit/releases
 
 - [Roadmap](ROADMAP.md)
+- [Code signing policy](CODE_SIGNING.md)
+- [Privacy policy](PRIVACY.md)
 
 ## Features
 
@@ -185,4 +187,4 @@ The Toolkit and Twilight Hammer Sync source in this repository are available und
 
 The Toolkit packages and installs work by many other authors. Each component comes from its own upstream project and keeps its own license. Thanks to the authors of BigWigs (prodigeomix), RollFor, _LazyPig, AutoMarker, SmartLoot, BetterCharacterStats, Rinse, DopingControl, ChronicleCompanion, Chronicle Sidekick, Nampower, ClassicAPI, UnitXP_SP3, VanillaFixes, VanillaHelpers, SuperWoW, SuperAPI, Aegis Exchange, Aux, OctoAuctionator, and the rest of the OctoWoW community.
 
-The modern interface uses Microsoft Edge WebView2. The Windows release ZIP includes its license and notices in `README.txt`.
+The modern interface uses Microsoft Edge WebView2. The build copies the SDK license and notices into the Toolkit output folder for distribution with the EXE.
