@@ -13,7 +13,7 @@ Choose Skip Sync if you only want addons or client tweaks. Optional
 components start unchecked. Setup uses Windows components and does not
 require Node.js, PowerShell, or administrator access to a writable game folder.
 
-AddOns & Tools
+Addons & Tools
 The Toolkit downloads the selected components from their upstream sources.
 It adds required components to the install plan automatically and reuses
 detected prerequisites when possible. Use VanillaFixes to start the game
@@ -30,7 +30,7 @@ Setup saves the previous executable, config, and replaced package files under
 
 Check for updates
 Checks Toolkit releases on GitHub, catalog components, and Git addons with
-a saved source. Installed AddOns displays addon versions when available.
+a saved source. Installed Addons displays addon versions when available.
 Checks run at launch and every 30 minutes while the Toolkit is open.
 Update Available opens the changelog and installs a verified new executable.
 The trash button backs up removed addons and keeps saved game settings.
@@ -45,7 +45,7 @@ Windows. Auction Only is open to everyone. Guild Sync requires a one-time Discor
 sign-in and device authorization on the portal. Bank and Guild Sync additionally
 requires a guild officer or admin to approve the Twilightbank uploader.
 Existing Twilight Hammer Sync setup is replaced if you choose a Sync edition.
-To remove it, click Uninstall Sync under AddOns & Tools. This removes the
+To remove it, click Uninstall Sync under Addons & Tools. This removes the
 uploader and scheduled task. You can also remove the addon. Saved captures,
 sync logs, and portal data are kept.
 

@@ -6,7 +6,7 @@ A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer
 Current version: **v0.1.22**
 
 
-![Twilight Hammer Toolkit v0.1.18 showing AddOns & Tools and installed addon badges](toolkit/screenshot.png)
+![Twilight Hammer Toolkit v0.1.18 showing Addons & Tools and installed addon badges](toolkit/screenshot.png)
 
 
 - **Guild Portal:** https://twilighthammer.hccpride.workers.dev/
@@ -71,9 +71,9 @@ Check that the addon is enabled at character selection. With SuperWoW installed,
 
 **Uninstalling Sync**
 
-Click **Uninstall Sync** under AddOns & Tools. This removes the uploader and its scheduled task, and you can optionally remove the WoW addon too (close OctoWoW first). Saved captures, sync logs, and portal data are kept.
+Click **Uninstall Sync** under Addons & Tools. This removes the uploader and its scheduled task, and you can optionally remove the WoW addon too (close OctoWoW first). Saved captures, sync logs, and portal data are kept.
 
-## AddOns & Tools
+## Addons & Tools
 
 Optional components are grouped like this in the app.
 
@@ -152,7 +152,7 @@ Before applying changes, the Toolkit saves the previous executable, config, and 
 
 The Toolkit checks for updates at launch and every 30 minutes while open. Use **Check for updates** under the settings gear to check manually. When a Toolkit release is available, **Update Available** opens the changelog and offers **Install Update**. The Toolkit verifies the new executable before replacing the current copy and reopening.
 
-**Installed AddOns** shows addon versions from their manifests. Choose **Pages** or **Scroll** without resizing the window. **Update All** installs available updates in the active view. Selecting a new addon keeps the main action labeled **Install**, even when the same plan includes updates. Git installs from earlier releases may need their repository links added again to enable update checks. The trash button moves addon files into the Toolkit backup folder and keeps saved game settings. Built-in recommendations stay in the catalog after removal.
+**Installed Addons** shows addon versions from their manifests. Choose **Pages** or **Scroll** without resizing the window. **Update All** installs available updates in the active view. Selecting a new addon keeps the main action labeled **Install**, even when the same plan includes updates. Git installs from earlier releases may need their repository links added again to enable update checks. The trash button moves addon files into the Toolkit backup folder and keeps saved game settings. Built-in recommendations stay in the catalog after removal.
 
 Open **View log** under the settings gear for timestamps, update checks, installation events, and errors. The Toolkit keeps its current log and one previous log in its Windows app data folder.
 

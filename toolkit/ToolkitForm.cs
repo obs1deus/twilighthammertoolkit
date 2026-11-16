@@ -288,7 +288,7 @@ internal sealed class ToolkitForm : Form {
     }
 
     private TabPage Components() {
-        var page=Page("AddOns & Tools");
+        var page=Page("Addons & Tools");
         var scroll=new Panel{Dock=DockStyle.Fill,AutoScroll=true};
         var content=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,Padding=new Padding(22,4,22,10)};
         content.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
