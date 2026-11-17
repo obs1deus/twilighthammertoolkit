@@ -300,7 +300,33 @@
  #th-toolkit .shell:has(>form[data-page=play]) .hero-content{gap:13px}
  #th-toolkit .shell:has(>form[data-page=play]) [data-play-status]{font-size:14px}
  #th-toolkit .shell:has(>form[data-page=play]) [data-play]{min-width:194px;justify-content:center}
-</style><div id="th-toolkit" data-frame="{{FRAME}}">
+ #th-toolkit .toolbar .theme-setting{flex:0 1 auto}
+ #th-toolkit[data-theme=horde]{--surface:#191414;--raised:#2a1e1d;--line:#5a3933;--gold:#f0b07b;--ink:#f3e6db;--subtle:#ccb4a7}
+ #th-toolkit[data-theme=horde] :is(.shell,.catalog-heading,.sync-dock){background:#191414}
+ #th-toolkit[data-theme=horde] .shell::after{border-color:#8a5645}
+ #th-toolkit[data-theme=horde] .launcher-sidebar{background:linear-gradient(155deg,#38201c,#191414 58%);border-right-color:#684239}
+ #th-toolkit[data-theme=horde] .launcher-brand{border-color:#674037}
+ #th-toolkit[data-theme=horde] .launcher-sidebar button:is(:hover,:focus-visible){background:#3b2521}
+ #th-toolkit[data-theme=horde] .launcher-sidebar button:is([aria-pressed=true],[aria-expanded=true]){background:#542820;border-color:#a85d47;color:#ffdbb9}
+ #th-toolkit[data-theme=horde] .launcher-sidebar button .launcher-icon{color:#d6a894}
+ #th-toolkit[data-theme=horde] .window-actions{background:#261717e6;border-color:#865444}
+ #th-toolkit[data-theme=horde] .launcher-hero{background:linear-gradient(90deg,#211412,#2c1712d9 25%,transparent 70%),url('/launcher-horde.jpg') center 32%/cover no-repeat #241615;border-color:#754636}
+ #th-toolkit[data-theme=horde] .shell:has(>form[data-page=play])>.launcher-hero{background:linear-gradient(0deg,#1b1211ce,transparent 52%),linear-gradient(90deg,#1b110fb0,transparent 70%),url('/launcher-horde.jpg') 66% center/cover no-repeat #241615}
+ #th-toolkit[data-theme=horde] :is(button.primary,.launcher-hero [data-play]){background:linear-gradient(#ac4d3b,#793025);border-color:#d47a58;color:#fff0de}
+ #th-toolkit[data-theme=horde] :is(button.primary,.launcher-hero [data-play]):enabled:hover{background:#bd5941}
+ #th-toolkit[data-theme=horde] input[type=checkbox]{accent-color:#c76c55}
+ #th-toolkit[data-theme=horde] :is(.addon-nav button:not(.security-link),.toolbar button,.toolbar input,.toolbar select,.inventory-controls select,.inventory-actions [data-addon-update]){background:#30201c;border-color:#725045;color:#f0dfd0}
+ #th-toolkit[data-theme=horde] .addon-nav button[aria-pressed=true]{border-color:#e2976d;background:#542c23}
+ #th-toolkit[data-theme=horde] fieldset.must-have{border-color:#b77b50;background:linear-gradient(115deg,#4b2b21,#2e1c1a)}
+ #th-toolkit[data-theme=horde] :is(.must-have label.component,.panels .catalog-row>.component){background:linear-gradient(105deg,#31221e,#251a18);border-color:#6a4336}
+ #th-toolkit[data-theme=horde] :is(.must-have label.component,.panels .catalog-row>.component):is(:hover,:focus-within){background:#3e2823;border-color:#a77760}
+ #th-toolkit[data-theme=horde] :is(.must-have label.component,.panels .catalog-row>.component):has(input:checked){background:#4c2a23;border-color:#ca8059;box-shadow:inset 3px 0 #dd8b62}
+ #th-toolkit[data-theme=horde] :is(.launcher-action,.inventory-glyph,.inventory-search,.floating-tip,.security-dialog,.patch-info,.must-have .featured-icon){background:#33211d;border-color:#795044;color:#f0c7ae}
+ #th-toolkit[data-theme=horde] .inventory-row:hover{background:#2d1e1b}
+ #th-toolkit[data-theme=horde] .inventory-search:focus-within{border-color:#df9470;box-shadow:0 0 0 2px #df947033}
+ #th-toolkit[data-theme=horde] .splash{background:radial-gradient(ellipse at center,#552b20,#271916 48%,#191414 76%)}
+ #th-toolkit[data-theme=horde] .splash-mark{background:#41261f;border-color:#aa6448}
+</style><div id="th-toolkit" data-frame="{{FRAME}}" data-theme="alliance">
  <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
   <header class="launcher-hero"><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
@@ -321,7 +347,7 @@
     <button type="button" data-settings aria-controls="game-folder-settings" aria-expanded="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m10 3-1 3-2 1-3-.5-1 3 2.3 2v2L3 16l2 2.5 3-.6 2 1 1 2.1h3l1-2.5 2-1 3 .5 1-3-2.3-2v-2L21 8l-2-2.5-3 .6-2-1L13 3z"/></svg>Settings</button>
     <button type="button" data-toolkit-release hidden>Update Available</button>
    </nav>
-   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><label>Launch client <select data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option></select></label><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
+   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><label>Launch client <select data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option></select></label><label class="theme-setting">Theme <select data-launcher-theme title="Changes launcher appearance only"><option value="alliance">Alliance</option><option value="horde">Horde</option></select></label><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
    <div class="body" data-components data-mode="components"><div class="catalog-heading"><h2 class="section-title" data-section-title>Addons</h2>
     <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
     </div>
@@ -582,6 +608,18 @@
   return bytes>=1073741824?(bytes/1073741824).toFixed(2)+' GB':
    (bytes/1048576).toFixed(1)+' MB';
  }
+ const themeControl=root.querySelector('[data-launcher-theme]');
+ const themePreference='toolkit.launcherTheme';
+ function setLauncherTheme(value){
+  const theme=value==='horde'?'horde':'alliance';
+  root.dataset.theme=theme;
+  themeControl.value=theme;
+ }
+ try {setLauncherTheme(localStorage.getItem(themePreference));} catch {setLauncherTheme('alliance');}
+ themeControl.addEventListener('change',()=>{
+  setLauncherTheme(themeControl.value);
+  try {localStorage.setItem(themePreference,themeControl.value);} catch {}
+ });
  const launchClient=root.querySelector('[data-launch-client]');
  const savedClient=localStorage.getItem('launcher-client');
  if([...launchClient.options].some(item=>item.value===savedClient))launchClient.value=savedClient;
@@ -611,8 +649,8 @@
   }
   showPlayStatus(!ready?'Choose your game folder in Settings':
    patchApplying?'Updating OctoWoW…':update?'Game update available':checking?'Checking OctoWoW for updates…':
-   patch.State==='current'?'Ready to play · Y’Shaarj · Alliance':
-   'Patch status unavailable · Y’Shaarj · Alliance',ready&&!update&&!checking&&patch.State==='current');
+   patch.State==='current'?'Ready to play · Y’Shaarj':
+   'Patch status unavailable · Y’Shaarj',ready&&!update&&!checking&&patch.State==='current');
  }
  playButton.addEventListener('click',()=>{
   if(playButton.disabled)return;

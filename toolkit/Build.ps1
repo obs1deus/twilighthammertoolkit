@@ -40,7 +40,7 @@ foreach($arch in @('x86','x64','arm64')){
     $options+="/resource:$file,WebView2Loader.$arch.dll"
 }
 $options+="/resource:$(Join-Path $PSScriptRoot 'Toolkit.html'),Toolkit.html"
-foreach($asset in @('LauncherHero.jpg','LauncherHammers.png','OctoWoWLogo.webp')){
+foreach($asset in @('LauncherHero.jpg','LauncherHorde.jpg','LauncherHammers.png','OctoWoWLogo.webp')){
     $options+="/resource:$(Join-Path $PSScriptRoot $asset),$asset"
 }
 $options+=@('guild.exe','auction.exe','bank.exe') | ForEach-Object {"/resource:$(Join-Path $stage $_),$_"}

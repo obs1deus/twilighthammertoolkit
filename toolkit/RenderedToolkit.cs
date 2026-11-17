@@ -126,6 +126,7 @@ internal sealed class RenderedToolkit : Form {
                     e.Response=environment.CreateWebResourceResponse(new MemoryStream(document,false),200,"OK","Content-Type: text/html; charset=utf-8");
                     return;
                 case InterfaceUrl+"launcher-hero.jpg": resource="LauncherHero.jpg";mime="image/jpeg";break;
+                case InterfaceUrl+"launcher-horde.jpg": resource="LauncherHorde.jpg";mime="image/jpeg";break;
                 case InterfaceUrl+"launcher-hammers.png": resource="LauncherHammers.png";mime="image/png";break;
                 case InterfaceUrl+"octowow-logo.webp": resource="OctoWoWLogo.webp";mime="image/webp";break;
                 default:
