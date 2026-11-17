@@ -89,7 +89,6 @@ internal sealed class RenderedToolkit : Form {
         browser.Dock=DockStyle.Fill;
         browser.DefaultBackgroundColor=BackColor;
         Controls.Add(browser);
-        SetShape();
         Shown+=async delegate {
             try {await Initialize();}
             catch(Exception error) {StartupError=error.Message;Close();}
@@ -115,7 +114,8 @@ internal sealed class RenderedToolkit : Form {
             var dependencies=catalog.Values.Where(p=>p.Requires.Length>0).ToDictionary(p=>p.Name,p=>p.Requires);
             var addons=catalog.Values.Where(p=>p.Folder!="game"&&p.Folder!="Data"&&p.Folder!="sidekick").Select(p=>p.Name).ToArray();
             document=Encoding.UTF8.GetBytes(reader.ReadToEnd().Replace("{{VERSION}}",ToolkitPackages.Version)
-                .Replace("{{DEPENDENCIES}}",json.Serialize(dependencies)).Replace("{{ADDON_COMPONENTS}}",json.Serialize(addons)));
+                .Replace("{{DEPENDENCIES}}",json.Serialize(dependencies)).Replace("{{ADDON_COMPONENTS}}",json.Serialize(addons))
+                .Replace("{{FRAME}}",nativeFrame?"native":"fallback"));
         }
         view.AddWebResourceRequestedFilter(InterfaceUrl+"*",CoreWebView2WebResourceContext.All);
         view.WebResourceRequested+=delegate(object sender,CoreWebView2WebResourceRequestedEventArgs e){
@@ -601,7 +601,42 @@ internal sealed class RenderedToolkit : Form {
             return parameters;
         }
     }
-    protected override void OnSizeChanged(EventArgs args) {base.OnSizeChanged(args);SetShape();}
+    private bool nativeFrame;
+    private const int CalcClientArea = 0x0083;
+    [DllImport("dwmapi.dll")]private static extern int DwmSetWindowAttribute(IntPtr window,int attribute,ref int value,int length);
+    [DllImport("user32.dll")]private static extern bool SetWindowPos(IntPtr window,IntPtr after,int x,int y,int width,int height,uint flags);
+
+    protected override void OnHandleCreated(EventArgs args) {
+        base.OnHandleCreated(args);
+        const int CornerPreference=33,BorderColor=34;
+        const uint RefreshFrame=0x0037;
+        int round=2;
+        nativeFrame=DwmSetWindowAttribute(Handle,CornerPreference,ref round,sizeof(int))==0;
+        if(nativeFrame) {
+            Region=null;
+            int plum=0x005b4352;
+            DwmSetWindowAttribute(Handle,BorderColor,ref plum,sizeof(int));
+            SetWindowPos(Handle,IntPtr.Zero,0,0,0,0,RefreshFrame);
+        } else SetShape();
+    }
+
+    protected override void WndProc(ref Message message) {
+        if(nativeFrame&&message.Msg==CalcClientArea&&message.LParam!=IntPtr.Zero) {
+            // A one-pixel non-client frame gives DWM a surface for its border and shadow.
+            for(int edge=0;edge<4;edge++) {
+                int offset=edge*sizeof(int);
+                Marshal.WriteInt32(message.LParam,offset,Marshal.ReadInt32(message.LParam,offset)+(edge<2?1:-1));
+            }
+            message.Result=IntPtr.Zero;
+            return;
+        }
+        base.WndProc(ref message);
+    }
+
+    protected override void OnSizeChanged(EventArgs args) {
+        base.OnSizeChanged(args);
+        if(IsHandleCreated&&!nativeFrame)SetShape();
+    }
     private void SetShape() {
         if(Width<40||Height<40||WindowState==FormWindowState.Minimized)return;
         using(var path=new GraphicsPath()) {
