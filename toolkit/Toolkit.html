@@ -198,13 +198,14 @@
  #th-toolkit .launcher-sidebar [data-settings]{margin-top:auto}
  #th-toolkit .launcher-sidebar [data-toolkit-release]{color:var(--gold);border-color:#684d37}
  #th-toolkit .launcher-hero{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-height:206px;padding:25px 28px;background:linear-gradient(90deg,#1c1327 1%,#21152ce6 23%,#23172b38 65%),url('/launcher-hero.jpg') center 35%/cover no-repeat;border-bottom:1px solid #59415e}
- #th-toolkit .launcher-hero h1{font:700 47px/1 Georgia,serif;letter-spacing:-.045em;margin:0;color:#f6eee5}
+ #th-toolkit .launcher-hero h1{line-height:0;margin:0}
+ #th-toolkit .octowow-logo{display:block;width:auto;height:88px;max-width:100%;object-fit:contain;filter:drop-shadow(0 4px 12px #0e0814b3)}
  #th-toolkit .launcher-hero [data-play-status]{margin:0;color:#d5cadf}
  #th-toolkit .launcher-hero [data-play-status][data-ready=true]{color:#b6df95}
  #th-toolkit .launcher-hero [data-play]{border-color:#e7ba71;background:linear-gradient(#f5d598,#d49a47);color:#2b1b13;padding:9px 26px;font-weight:750;font-size:16px}
  #th-toolkit .launcher-hero [data-play]:enabled:hover{background:#ffe2a8}
  #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero{flex:1;justify-content:flex-end;gap:14px;min-height:0;padding:40px 42px clamp(40px,10vh,90px);border-bottom:0;background:linear-gradient(0deg,#15101ee8 0%,transparent 54%),linear-gradient(90deg,#160f2599,transparent 68%),url('/launcher-hero.jpg') 68% center/cover no-repeat #181121}
- #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero h1{font-size:clamp(48px,7vw,84px)}
+ #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero .octowow-logo{height:clamp(100px,18vh,166px)}
  #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero [data-play]{padding:12px 34px;font-size:18px}
  #th-toolkit .shell>form[data-page=play]{flex:0 0 auto}
  #th-toolkit .shell>form>.body{padding:15px 21px;gap:12px}
@@ -296,7 +297,7 @@
  <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
   <header class="launcher-hero"><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
-   <h1>OctoWoW</h1>
+   <h1><img class="octowow-logo" src="/octowow-logo.webp" alt="OctoWoW"></h1>
    <p data-play-status role="status">Choose your game folder</p>
    <button type="button" data-play disabled><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg><span data-play-label>Play Now</span></button>
    <div class="patch-info" data-patch-info hidden><strong data-patch-summary></strong><p data-patch-details></p></div>

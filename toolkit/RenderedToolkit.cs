@@ -127,6 +127,7 @@ internal sealed class RenderedToolkit : Form {
                     return;
                 case InterfaceUrl+"launcher-hero.jpg": resource="LauncherHero.jpg";mime="image/jpeg";break;
                 case InterfaceUrl+"launcher-hammers.png": resource="LauncherHammers.png";mime="image/png";break;
+                case InterfaceUrl+"octowow-logo.webp": resource="OctoWoWLogo.webp";mime="image/webp";break;
                 default:
                     e.Response=environment.CreateWebResourceResponse(null,404,"Not Found","");
                     return;
