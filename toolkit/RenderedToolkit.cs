@@ -83,7 +83,7 @@ internal sealed class RenderedToolkit : Form {
         FormBorderStyle=FormBorderStyle.None;
         StartPosition=FormStartPosition.CenterScreen;
         var area=Screen.PrimaryScreen.WorkingArea;
-        ClientSize=new Size(Math.Min(740,area.Width-16),Math.Min(980,area.Height-20));
+        ClientSize=new Size(Math.Min(1100,area.Width-16),Math.Min(865,area.Height-20));
         MinimumSize=new Size(650,540);
         BackColor=Color.FromArgb(24,21,34);
         browser.Dock=DockStyle.Fill;
@@ -121,6 +121,8 @@ internal sealed class RenderedToolkit : Form {
         view.WebResourceRequested+=delegate(object sender,CoreWebView2WebResourceRequestedEventArgs e){
             e.Response=e.Request.Uri==InterfaceUrl?
                 environment.CreateWebResourceResponse(new MemoryStream(document,false),200,"OK","Content-Type: text/html; charset=utf-8"):
+                e.Request.Uri==InterfaceUrl+"launcher-hero.jpg"?
+                environment.CreateWebResourceResponse(GetType().Assembly.GetManifestResourceStream("LauncherHero.jpg"),200,"OK","Content-Type: image/jpeg"):
                 environment.CreateWebResourceResponse(null,404,"Not Found","");
         };
         view.Navigate(InterfaceUrl);
@@ -148,6 +150,7 @@ internal sealed class RenderedToolkit : Form {
                     break;
                 case "browse": if(!busy)Browse(game);break;
                 case "save-folder": SaveGameFolder(game);break;
+                case "play": if(!busy)LaunchGame(game,TextField(request,"client"));break;
                 case "installed": await ReadInstalled(game);break;
                 case "security-open": Open("windowsdefender:");break;
                 case "security-history": Open("windowsdefender://threat/");break;
@@ -186,7 +189,7 @@ internal sealed class RenderedToolkit : Form {
         double viewport;
         if(!Double.TryParse(TextField(request,"viewport"),out viewport)||viewport<300)return;
         if(cssToWindowScale==0)cssToWindowScale=browser.Width/viewport;
-        double zoom=Math.Min(1,(browser.Width-2)/(688*cssToWindowScale));
+        double zoom=Math.Min(1,(browser.Width-2)/(900*cssToWindowScale));
         if(Math.Abs(browser.ZoomFactor-zoom)>0.002)browser.ZoomFactor=zoom;
     }
     private static decimal Number(Dictionary<string,object> row,string key,decimal min,decimal max) {
@@ -484,6 +487,39 @@ internal sealed class RenderedToolkit : Form {
         path=path.Trim().Trim('"');
         if(!IsGameFolder(path))throw new IOException("Choose the OctoWoW folder containing WoW.exe.");
         return Path.GetFullPath(path);
+    }
+    internal static string ResolveGameClient(string folder,string client) {
+        string[] candidates;
+        switch(client) {
+            case "auto": candidates=new[]{"WoW_Modernized.exe","WoW.exe"};break;
+            case "modernized": candidates=new[]{"WoW_Modernized.exe"};break;
+            case "standard": candidates=new[]{"WoW.exe"};break;
+            case "vanillafixes": candidates=new[]{"VanillaFixes.exe"};break;
+            default: throw new IOException("Choose a launch client in Settings.");
+        }
+        foreach(string name in candidates) {
+            string executable=Path.Combine(folder,name);
+            if(File.Exists(executable))return executable;
+        }
+        throw new IOException("The selected launch client isn't in the game folder.");
+    }
+    private void LaunchGame(string game,string client) {
+        try {
+            string folder=GamePath(game);
+            string executable=ResolveGameClient(folder,client);
+            if(new[]{"WoW","WoW_Modernized","WoW_tweaked","VanillaFixes"}.Any(name=>Process.GetProcessesByName(name).Length>0)) {
+                Post(new{playStatus="Game already running"});
+                return;
+            }
+            using(var process=Process.Start(new ProcessStartInfo(executable){WorkingDirectory=folder,UseShellExecute=false})) {
+                if(process==null)throw new IOException("Windows could not start the game.");
+            }
+            ToolkitLog.Write("launcher","Started "+Path.GetFileName(executable)+".");
+            Post(new{playStatus="Game started"});
+        } catch(Exception error) {
+            ToolkitLog.Write("launcher","Launch failed ("+error.GetType().Name+").","warn");
+            Post(new{playStatus=error.Message});
+        }
     }
     private void CopyFolder(string folder,string label) {
         if(String.IsNullOrWhiteSpace(folder)) {

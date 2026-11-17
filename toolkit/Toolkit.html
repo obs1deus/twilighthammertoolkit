@@ -87,7 +87,7 @@
 #th-toolkit .pc-check [data-pc-result]{flex:1 1 210px}
 </style>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
 <style>
  html,body{margin:0;min-height:100%;background:#181522;color-scheme:dark;}
  html,body{overflow:hidden}
@@ -187,31 +187,72 @@
  #th-toolkit .security-content .removal-option{display:flex;align-items:center;gap:8px}
  #th-toolkit .update-results{margin:0;padding:0;list-style:none}
  #th-toolkit .update-results li{padding:6px 0;border-bottom:1px solid var(--line)}
+ #th-toolkit .shell{position:relative;padding-left:166px;min-width:900px;border-radius:12px;background:#15111c}
+ #th-toolkit .launcher-sidebar{position:absolute;left:0;top:0;bottom:0;width:166px;display:flex;flex-direction:column;gap:6px;padding:23px 12px 14px;background:linear-gradient(#23172e,#17121e 57%);border-right:1px solid #403047}
+ #th-toolkit .launcher-brand{display:grid;justify-items:center;gap:9px;padding:5px 0 24px;text-align:center;color:var(--gold);font-family:Georgia,serif;font-size:21px;line-height:1.02}
+ #th-toolkit .launcher-brand .crest{width:50px;height:50px;font-size:28px}
+ #th-toolkit .launcher-brand .version{font-family:'Segoe UI',sans-serif;font-size:10px;color:var(--subtle)}
+ #th-toolkit .launcher-sidebar button{display:flex;align-items:center;gap:9px;text-align:left;width:100%;background:transparent;border-color:transparent;padding:10px 12px}
+ #th-toolkit .launcher-sidebar button:is(:hover,:focus-visible){background:#30233a;color:#fff}
+ #th-toolkit .launcher-sidebar button[aria-pressed=true],#th-toolkit .launcher-sidebar button[aria-expanded=true]{background:#392747;border-color:#61466f;color:#ffe1aa}
+ #th-toolkit .launcher-sidebar [data-settings]{margin-top:auto}
+ #th-toolkit .launcher-sidebar [data-toolkit-release]{color:var(--gold);border-color:#684d37}
+ #th-toolkit .launcher-hero{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-height:206px;padding:25px 28px;background:linear-gradient(90deg,#1c1327 1%,#21152ce6 23%,#23172b38 65%),url('/launcher-hero.jpg') 63% 45%/cover;border-bottom:1px solid #59415e}
+ #th-toolkit .launcher-hero h1{font:700 47px/1 Georgia,serif;letter-spacing:-.045em;margin:0;color:#f6eee5}
+ #th-toolkit .launcher-hero [data-play-status]{margin:0;color:#d5cadf}
+ #th-toolkit .launcher-hero [data-play-status][data-ready=true]{color:#b6df95}
+ #th-toolkit .launcher-hero [data-play]{border-color:#e7ba71;background:linear-gradient(#f5d598,#d49a47);color:#2b1b13;padding:9px 26px;font-weight:750;font-size:16px}
+ #th-toolkit .launcher-hero [data-play]:enabled:hover{background:#ffe2a8}
+ #th-toolkit .shell>form>.body{padding:15px 21px;gap:12px}
+ #th-toolkit .section-title{margin:0;font-size:22px;letter-spacing:-.025em}
+ #th-toolkit fieldset.must-have{margin:0;border-color:#87653b;background:linear-gradient(120deg,#3a2934,#251c2c);padding:11px;gap:8px}
+ #th-toolkit .must-have legend{font-size:17px;font-weight:750}
+ #th-toolkit .must-have.compact{padding-block:7px}
+ #th-toolkit .must-have label.component{min-height:73px;align-content:center}
+ #th-toolkit .must-have.compact label.component{min-height:56px}
+ #th-toolkit .must-have .launcher-action{bottom:6px;top:auto;transform:none}
+ #th-toolkit .must-have .component:has(input){padding-bottom:31px}
+ #th-toolkit .must-have .catalog-row:has(.launcher-action[hidden]) .component{padding-bottom:8px}
+ #th-toolkit .must-have .catalog-row:has(.launcher-action:not([hidden])) .component{padding-right:8px}
+ #th-toolkit .must-have .catalog-row>.remove-addon{top:4px}
+ #th-toolkit .must-have .catalog-row:has(.remove-addon:not([hidden])) .component{padding-right:33px}
+ #th-toolkit .catalog-row{position:relative;min-width:0}
+ #th-toolkit .catalog-row>.component{height:100%;min-height:37px}
+ #th-toolkit .catalog-row:has(.launcher-action:not([hidden]))>.component{padding-right:64px}
+ #th-toolkit .catalog-row:has(.launcher-action:not([hidden])):has(.remove-addon:not([hidden]))>.component{padding-right:96px}
+ #th-toolkit .catalog-row>.launcher-action{position:absolute;right:3px;top:50%;transform:translateY(-50%);padding:3px 8px;font-size:11px;line-height:1.4}
+ #th-toolkit .catalog-row:has(.remove-addon:not([hidden]))>.launcher-action{right:34px}
+ #th-toolkit .catalog-row>.launcher-action[data-update=true]{color:var(--gold);border-color:#8b663e;background:#352635}
+ #th-toolkit .catalog-row>.launcher-action:enabled:hover{color:#251a1e;background:#edca91;border-color:#edca91}
+ #th-toolkit .must-have .catalog-row>.launcher-action{right:5px;top:auto;transform:none}
+ #th-toolkit .sync-dock{padding:0 21px 8px}
+ #th-toolkit .sync-dock .sync-summary{min-height:36px}
+ #th-toolkit footer .launcher-link{color:var(--subtle);text-decoration:none;white-space:nowrap}
+ #th-toolkit footer .launcher-link:hover{color:var(--gold)}
+ #th-toolkit .shell>form>.body:has([data-addon-panel="installed"]:not([hidden])){grid-template-rows:auto auto auto minmax(95px,1fr)}
+ #th-toolkit [data-mode=play] :is(.addon-nav,[data-addon-panel],[data-auction-picker]),#th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
+ #th-toolkit [data-mode=mods] .panels{grid-template-columns:1fr}
+ #th-toolkit .toolbar [data-launch-client]{max-width:200px}
 </style><div id="th-toolkit">
  <div class="splash" aria-hidden="true"><span class="splash-mark">⚒</span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
-  <header><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
-   <span class="crest" aria-hidden="true">⚒</span>
-   <div class="brand-copy"><h2>Twilight Hammer Toolkit <span class="version">v{{VERSION}}</span></h2><p class="muted">OctoWoW addons and client tools</p></div>
-   <nav class="header-links" aria-label="Twilight Hammer links">
-    <a href="https://twilighthammer.hccpride.workers.dev/" target="_blank" rel="noopener noreferrer">Guild Portal <span class="external" aria-hidden="true">↗</span></a>
-    <a href="https://github.com/obs1deus/twilighthammertoolkit" target="_blank" rel="noopener noreferrer">GitHub <span class="external" aria-hidden="true">↗</span></a>
-   </nav>
+  <header class="launcher-hero"><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
+   <h1>OctoWoW</h1>
+   <p data-play-status role="status">Choose your game folder</p>
+   <button type="button" data-play disabled>Play Now</button>
   </header>
   <form>
-   <nav class="setup-nav" aria-label="Toolkit controls">
-    <button type="button" data-tab="components" aria-pressed="true">Addons &amp; Tools</button>
+   <nav class="launcher-sidebar" aria-label="Launcher navigation">
+    <div class="launcher-brand"><span class="crest" aria-hidden="true">⚒</span><strong>Twilight<br>Hammer</strong><span class="version">v{{VERSION}} · Experimental</span></div>
+    <button type="button" data-tab="play" aria-pressed="false">Play</button>
+    <button type="button" data-tab="components" aria-pressed="true">Addons</button>
     <button type="button" data-tab="tweaks" aria-pressed="false">Client Tweaks</button>
-    <div class="settings-actions"><button type="button" class="primary" data-toolkit-release hidden><span aria-hidden="true">↑</span> Update Available</button><button type="button" data-settings aria-label="Toolkit settings" aria-controls="game-folder-settings" aria-expanded="true" title="Toolkit settings">⚙</button></div>
+    <button type="button" data-tab="mods" aria-pressed="false">Mods &amp; Tools</button>
+    <button type="button" data-settings aria-controls="game-folder-settings" aria-expanded="false">Settings</button>
+    <button type="button" data-toolkit-release hidden>Update Available</button>
    </nav>
-   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
-   <div class="body" data-components>
-    <section class="sync sync-summary" data-sync-summary hidden>
-     <button type="button" data-sync-toggle aria-controls="installed-sync-details" aria-expanded="false">Twilight Hammer Sync <span class="installed-badge">Installed</span><span class="sync-chevron" aria-hidden="true">⌄</span></button>
-     <button class="security-link" type="button" data-uninstall>Uninstall</button>
-     <div class="sync-details" id="installed-sync-details" hidden><strong data-installed-sync-edition></strong><p class="muted" data-installed-sync-description></p></div>
-    </section>
-    <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
+   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><label>Launch client <select data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option></select></label><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
+   <div class="body" data-components data-mode="components"><h2 class="section-title" data-section-title>Addons</h2>
     <fieldset class="must-have"><legend>Must Haves</legend>
       <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1">TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
       <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2">Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
@@ -219,7 +260,7 @@
     </fieldset>
     <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
     <div class="panels" data-addon-panel="recommended">
-     <fieldset><legend>Raid &amp; Character Addons</legend>
+     <fieldset data-raid-addons><legend>Raid &amp; Character Addons</legend>
       <label class="component"><input type="checkbox" value="_LazyPig" aria-describedby="th-toolkit-tip-4" aria-labelledby="th-toolkit-label-4"><span id="th-toolkit-label-4">_LazyPig</span><span class="tooltip-description" id="th-toolkit-tip-4">Adds configurable shortcuts and automation for common tasks such as dismounting and accepting invites.</span></label>
       <label class="component"><input type="checkbox" value="DopingControl" aria-describedby="th-toolkit-tip-5" aria-labelledby="th-toolkit-label-5"><span id="th-toolkit-label-5">DopingControl</span><span class="tooltip-description" id="th-toolkit-tip-5">Checks raid consumables, buffs, debuffs, resistances, hit, and enchants before a pull.</span></label>
       <label class="component"><input type="checkbox" value="AutoMarker" aria-describedby="th-toolkit-tip-6" aria-labelledby="th-toolkit-label-6"><span id="th-toolkit-label-6">AutoMarker</span><span class="tooltip-description" id="th-toolkit-tip-6">Automatically assigns raid target icons to configured enemies.</span></label>
@@ -264,7 +305,15 @@
      <label class="tweak-row"><span>Background sounds<small class="muted">Keep game audio playing while the window is in the background.</small></span><input type="checkbox" name="audio" checked></label>
     </fieldset>
    </div>
-   <footer><output class="muted" aria-live="polite">0 optional components selected</output><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit" disabled>Install</button><div class="status-detail" hidden></div></footer>
+   <div class="sync-dock">
+    <section class="sync sync-summary" data-sync-summary hidden>
+     <button type="button" data-sync-toggle aria-controls="installed-sync-details" aria-expanded="false">Twilight Hammer Sync <span class="installed-badge">Installed</span><span class="sync-chevron" aria-hidden="true">⌄</span></button>
+     <button class="security-link" type="button" data-uninstall>Uninstall</button>
+     <div class="sync-details" id="installed-sync-details" hidden><strong data-installed-sync-edition></strong><p class="muted" data-installed-sync-description></p></div>
+    </section>
+    <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
+   </div>
+   <footer><output class="muted" aria-live="polite">0 optional components selected</output><a class="launcher-link" href="https://twilighthammer.hccpride.workers.dev/" target="_blank" rel="noopener noreferrer">Guild Portal ↗</a><a class="launcher-link" href="https://github.com/obs1deus/twilighthammertoolkit" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit" disabled>Install</button><div class="status-detail" hidden></div></footer>
   </form>
  </section>
  <dialog class="security-dialog" aria-labelledby="repository-heading" data-repository-dialog>
@@ -359,11 +408,16 @@
  const checks = [...form.querySelectorAll('.component input[type=checkbox]')];
  const tabs = [...form.querySelectorAll('[data-tab]')];
  tabs.forEach(button => button.addEventListener('click', () => {
-  tabs.forEach(tab => {
-   const active = tab === button;
-   tab.setAttribute('aria-pressed', String(active));
-   form.querySelector('[data-' + tab.dataset.tab + ']').hidden = !active;
-  });
+  const mode=button.dataset.tab;
+  tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab===button)));
+  componentsPage.hidden=mode==='tweaks';
+  form.querySelector('[data-tweaks]').hidden=mode!=='tweaks';
+  componentsPage.dataset.mode=mode;
+  componentsPage.querySelector('[data-section-title]').textContent=
+    {play:'Play',components:'Addons',mods:'Mods & Tools'}[mode]||'Addons';
+  if(mode==='mods')selectAddonView('recommended');
+  showFolderSettings(false);
+  if(mode==='play')playButton.focus();
   count(false);
  }));
  const tweakFields = [...form.querySelectorAll('[data-tweaks] fieldset')];
@@ -434,6 +488,24 @@
  const settingsButton=root.querySelector('[data-settings]');
  const folderSettings=root.querySelector('#game-folder-settings');
  let confirmedFolder;
+ const playButton=root.querySelector('[data-play]');
+ const playStatus=root.querySelector('[data-play-status]');
+ const launchClient=root.querySelector('[data-launch-client]');
+ const savedClient=localStorage.getItem('launcher-client');
+ if([...launchClient.options].some(item=>item.value===savedClient))launchClient.value=savedClient;
+ launchClient.addEventListener('change',()=>localStorage.setItem('launcher-client',launchClient.value));
+ function showPlayStatus(message,ready=false){
+  playStatus.textContent=message;
+  playStatus.dataset.ready=String(ready);
+ }
+ function refreshPlayButton(){
+  const ready=Boolean(confirmedFolder&&confirmedFolder===gameField.value);
+  playButton.disabled=!ready||operationBusy;
+  showPlayStatus(ready?'Ready to play · Y’Shaarj · Alliance':'Choose your game folder in Settings',ready);
+ }
+ playButton.addEventListener('click',()=>{
+  if(!playButton.disabled)send('play',{game:confirmedFolder,client:launchClient.value});
+ });
  function showFolderSettings(open,focus=false){
   folderSettings.hidden=!open;
   settingsButton.setAttribute('aria-expanded',String(open));
@@ -486,15 +558,26 @@
   button.onclick=()=>send('remove-addon',{game:gameField.value,addon:name});
   button.disabled=operationBusy;
  }
- const catalogRemoval=checks.filter(input=>removableComponents.has(input.value)).map(input=>{
+ const catalogActions=checks.map(input=>{
   const row=input.closest('.component');
   const wrapper=document.createElement('div');
-  wrapper.className='removable-component';
+  wrapper.className='catalog-row removable-component';
   row.before(wrapper);
-  const trash=removeButton();
-  trash.hidden=true;
-  wrapper.append(row,trash);
-  return [input.value,trash];
+  wrapper.append(row);
+
+  const action=document.createElement('button');
+  action.type='button';
+  action.className='launcher-action';
+  action.hidden=true;
+  wrapper.append(action);
+
+  let trash=null;
+  if(removableComponents.has(input.value)){
+   trash=removeButton();
+   trash.hidden=true;
+   wrapper.append(trash);
+  }
+  return [input.value,{action,trash}];
  });
  const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
  function selectAddonView(view){
@@ -611,10 +694,27 @@
    version.hidden=!value;
    version.textContent=value?'v'+value.replace(/^v/i,''):'';
   }
-  for(const [name,trash] of catalogRemoval){
+  for(const [name,{action,trash}] of catalogActions){
    const addon=keys.get(name);
-   trash.hidden=!addon;
-   if(addon)bindRemoval(trash,addon.Name);
+   const key=addon?.Source?addonKey(addon):name;
+   const state=statuses[name];
+   const update=Boolean(state&&availableUpdates[key]);
+   const active=updating.has(key)||updating.has(name);
+   action.hidden=state==='Installed'&&!update&&!active;
+   action.disabled=operationBusy||!confirmedFolder||confirmedFolder!==gameField.value;
+   action.dataset.update=String(update);
+   action.classList.toggle('updating',active);
+   action.textContent=active?'Updating…':update?'Update':state==='Files present'?'Enable':'Install';
+   action.setAttribute('aria-label',action.textContent+' '+name);
+   action.onclick=()=>{
+    const game=confirmedFolder;
+    if(update&&addon?.Source)send('install-repository',{game,repository:addon.Source});
+    else send('install',{game,components:[name],edition:'Skip Sync',single:true});
+   };
+   if(trash){
+    trash.hidden=!addon;
+    if(addon)bindRemoval(trash,addon.Name);
+   }
   }
   for(const option of auctionChoices){
    option.textContent=option.value+(statuses[option.value]?' · Installed':'');
@@ -627,6 +727,7 @@
  let scanTimer;
  const scanInstalled=()=>send('installed',{game:gameField.value});
  gameField.addEventListener('input',()=>{
+  refreshPlayButton();
   installedAddons=[];
   availableUpdates={};
   scanPath=null;
@@ -676,7 +777,7 @@
   const installs=picks.some(name=>!installedStatuses[name])||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked;
   const pendingUpdates=bulkKeys();
   const inactiveSelection=(manual.size>0||auction)&&total===0;
-  const bulk=!componentsPage.hidden&&(addonView==='installed'||(!inactiveSelection&&!installs&&pendingUpdates.length>0));
+  const bulk=!componentsPage.hidden&&componentsPage.dataset.mode==='components'&&(addonView==='installed'||(!inactiveSelection&&!installs&&pendingUpdates.length>0));
   submitButton.dataset.bulkAction=String(bulk);
   submitButton.textContent=bulk?'Update All':installs?'Install':updates?'Update':'Install';
   submitButton.disabled=operationBusy||(bulk?!pendingUpdates.length:!updates&&!installs);
@@ -798,6 +899,7 @@
   if(data.game!==undefined){
    gameField.value=data.game;
    confirmedFolder=data.gameValid?data.game:undefined;
+   refreshPlayButton();
    showFolderSettings(!data.gameValid,data.gameValid&&folderSettings.contains(document.activeElement));
    installedAddons=[];availableUpdates={};scanPath=null;page=0;
    showInstalled({});
@@ -826,6 +928,7 @@
   if(data.toolkitFolder!==undefined)security.querySelector('[data-toolkit-folder]').textContent=data.toolkitFolder;
   if(data.securityResult!==undefined)securityResults.textContent=data.securityResult;
   if(data.status!==undefined)status.textContent=data.status;
+  if(data.playStatus!==undefined)showPlayStatus(data.playStatus,data.playStatus==='Game started'||data.playStatus==='Game already running');
   if(data.availableUpdates&&data.updatePath===scanPath){
    availableUpdates=data.availableUpdates;
    showInstalled(installedStatuses);
@@ -865,7 +968,7 @@
   }
   if(data.busy!==undefined) {
    operationBusy=data.busy;
-   catalogRemoval.forEach(([,button])=>{button.disabled=operationBusy;});
+   refreshPlayButton();
    if(!data.busy)updating.clear();
    showInstalled(installedStatuses);
    uninstallButton.disabled=data.busy;

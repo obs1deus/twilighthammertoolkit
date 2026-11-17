@@ -40,6 +40,7 @@ foreach($arch in @('x86','x64','arm64')){
     $options+="/resource:$file,WebView2Loader.$arch.dll"
 }
 $options+="/resource:$(Join-Path $PSScriptRoot 'Toolkit.html'),Toolkit.html"
+$options+="/resource:$(Join-Path $PSScriptRoot 'LauncherHero.jpg'),LauncherHero.jpg"
 $options+=@('guild.exe','auction.exe','bank.exe') | ForEach-Object {"/resource:$(Join-Path $stage $_),$_"}
 $source=Get-ChildItem $PSScriptRoot -Filter '*.cs' -File | Select-Object -ExpandProperty FullName
 $version=[regex]::Match([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'ToolkitPackages.cs')),'const string Version = "([0-9]+\.[0-9]+\.[0-9]+)"').Groups[1].Value
