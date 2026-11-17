@@ -95,7 +95,6 @@
  #th-toolkit .shell{min-width:688px;max-width:none;margin:0;height:100vh;display:flex;flex-direction:column;box-shadow:none}
  #th-toolkit .shell>form{flex:1;min-height:0;display:flex;flex-direction:column}
  #th-toolkit .shell>form>.body{flex:1;min-height:0;overflow:auto;align-content:start;scrollbar-color:#665575 transparent;scrollbar-width:thin}
- #th-toolkit .shell>form>.body:has([data-addon-panel="installed"]:not([hidden])){grid-template-rows:auto minmax(95px,1fr)}
  #th-toolkit [data-addon-panel="installed"]{display:flex;flex-direction:column;min-height:0}
  #th-toolkit [data-addon-inventory]{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#665575 transparent}
  #th-toolkit header{position:relative;min-height:94px;user-select:none}
@@ -139,7 +138,7 @@
  #th-toolkit .inventory-actions{display:flex;align-items:center;gap:6px}
  #th-toolkit .removable-component{position:relative;min-width:0}
  #th-toolkit .removable-component>.component{height:100%}
- #th-toolkit .removable-component:has(>.remove-addon:not([hidden]))>.component{padding-right:35px}
+ #th-toolkit .must-have .removable-component:has(>.remove-addon:not([hidden]))>.component{padding-right:35px}
  #th-toolkit .removable-component>.remove-addon{position:absolute;right:2px;top:50%;transform:translateY(-50%)}
  #th-toolkit .must-have .removable-component>.remove-addon{top:4px;transform:none}
  #th-toolkit .remove-addon{display:grid;place-items:center;width:28px;height:28px;padding:0;border-color:transparent;background:transparent;color:light-dark(#9b3447,#ed9aa7)}
@@ -223,8 +222,8 @@
  #th-toolkit .must-have .catalog-row:has(.remove-addon:not([hidden])) .component{padding-right:33px}
  #th-toolkit .catalog-row{position:relative;min-width:0}
  #th-toolkit .catalog-row>.component{height:100%;min-height:37px}
- #th-toolkit .catalog-row:has(.launcher-action:not([hidden]))>.component{padding-right:64px}
- #th-toolkit .catalog-row:has(.launcher-action:not([hidden])):has(.remove-addon:not([hidden]))>.component{padding-right:96px}
+ #th-toolkit .must-have .catalog-row:has(.launcher-action:not([hidden]))>.component{padding-right:64px}
+ #th-toolkit .must-have .catalog-row:has(.launcher-action:not([hidden])):has(.remove-addon:not([hidden]))>.component{padding-right:96px}
  #th-toolkit .catalog-row>.launcher-action{position:absolute;right:3px;top:50%;transform:translateY(-50%);padding:3px 8px;font-size:11px;line-height:1.4}
  #th-toolkit .catalog-row:has(.remove-addon:not([hidden]))>.launcher-action{right:34px}
  #th-toolkit .catalog-row>.launcher-action[data-update=true]{color:var(--gold);border-color:#8b663e;background:#352635}
@@ -234,7 +233,6 @@
  #th-toolkit .sync-dock .sync-summary{min-height:36px}
  #th-toolkit footer .launcher-link{color:var(--subtle);text-decoration:none;white-space:nowrap}
  #th-toolkit footer .launcher-link:hover{color:var(--gold)}
- #th-toolkit .shell>form>.body:has([data-addon-panel="installed"]:not([hidden])){grid-template-rows:auto minmax(95px,1fr)}
  #th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
  #th-toolkit [data-mode=mods] .panels{grid-template-columns:1fr}
  #th-toolkit .toolbar [data-launch-client]{max-width:200px}
@@ -272,23 +270,24 @@
  #th-toolkit [data-mode=components] .panels{grid-template-columns:1fr}
  #th-toolkit .panels fieldset{display:grid;gap:7px}
  #th-toolkit .panels legend{padding:0 0 5px;color:var(--subtle)}
- #th-toolkit .panels .catalog-row>.component{display:grid;grid-template-columns:16px minmax(126px,.9fr) minmax(100px,1.35fr);align-items:center;gap:9px;min-height:55px;padding:8px 12px;border:1px solid #4d3a55;border-radius:8px;background:linear-gradient(105deg,#251c30,#211727)}
+ #th-toolkit .panels .catalog-row>.component{display:grid;grid-template-columns:16px minmax(165px,2fr) minmax(0,3fr);align-items:center;gap:10px;min-height:55px;padding:8px 116px 8px 12px;border:1px solid #4d3a55;border-radius:8px;background:linear-gradient(105deg,#251c30,#211727)}
  #th-toolkit .panels .catalog-row>.component:hover,#th-toolkit .panels .catalog-row>.component:focus-within{border-color:#82678a;background:#302238}
- #th-toolkit .panels .catalog-row:has(.launcher-action:not([hidden]))>.component{padding-right:80px}
- #th-toolkit .panels .catalog-row:has(.remove-addon:not([hidden]))>.component{padding-right:42px}
- #th-toolkit .panels .catalog-row:has(.launcher-action:not([hidden])):has(.remove-addon:not([hidden]))>.component{padding-right:112px}
  #th-toolkit .panels .catalog-row>.remove-addon{right:8px}
  #th-toolkit .panels .catalog-row>.launcher-action{right:9px}
  #th-toolkit .panels .catalog-row:has(.remove-addon:not([hidden]))>.launcher-action{right:43px}
  #th-toolkit .catalog-description{color:var(--subtle);font-size:12px;line-height:1.35}
  #th-toolkit .panels .catalog-name{min-width:0;overflow-wrap:anywhere;font-weight:650}
- #th-toolkit .panels .catalog-name .installed-badge{margin:2px 4px 0 0}
+ #th-toolkit .panels .catalog-name .installed-badge{margin:2px 0 0 6px}
  #th-toolkit .panels .catalog-name small:not([hidden]){display:block;font-weight:400}
- #th-toolkit .catalog-heading{position:sticky;top:0;z-index:2;display:grid;gap:8px;margin:-15px -8px 0;padding:15px 8px 9px;background:#15111c;border-bottom:1px solid #45344e}
+ #th-toolkit .shell>form>.body[data-components]{grid-template-rows:auto minmax(0,1fr);overflow:hidden;padding:0;gap:0;align-content:stretch}
+ #th-toolkit .catalog-heading{display:grid;gap:8px;padding:15px 21px 10px;background:#15111c;border-bottom:1px solid var(--line)}
+ #th-toolkit .catalog-content{min-height:0;overflow:auto;display:grid;align-content:start;gap:12px;padding:12px 21px 16px;scrollbar-color:#665575 transparent;scrollbar-width:thin;scrollbar-gutter:stable}
+ #th-toolkit .catalog-content:has(>[data-addon-panel=installed]:not([hidden])){overflow:hidden;grid-template-rows:minmax(0,1fr);align-content:stretch}
  #th-toolkit .panels .catalog-row>.component:has(input:checked),#th-toolkit .must-have .component:has(input:checked){border-color:#b68c58;background:#37283a;box-shadow:inset 3px 0 #d8ac70}
  #th-toolkit .sync-dock{padding-top:8px;border-top:1px solid #44354a;background:#15111c}
  #th-toolkit .shell::after{box-shadow:inset 0 0 0 1px #110b1bcc,inset 0 0 12px #0c081156}
  #th-toolkit .must-have .catalog-description{display:none}
+ #th-toolkit .panels .catalog-name:has(>.featured-icon)>small:not(.catalog-version){display:none}
  #th-toolkit .panels .catalog-name>.featured-icon{display:inline-block;width:18px;height:18px;margin-right:6px;color:var(--gold);vertical-align:middle}
  #th-toolkit .patch-info{display:none}
  #th-toolkit .shell:has(>form[data-page=play]) .patch-info{display:block;max-width:min(410px,100%);margin-top:3px;padding:12px 15px;background:#201729e8;border:1px solid #7b6049;border-radius:8px;color:#f4d19a}
@@ -351,6 +350,7 @@
    <div class="body" data-components data-mode="components"><div class="catalog-heading"><h2 class="section-title" data-section-title>Addons</h2>
     <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
     </div>
+    <div class="catalog-content">
     <fieldset class="must-have"><legend>Must Haves</legend>
       <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 3 8 7 10 4-2 7-5.2 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
       <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/></svg>Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
@@ -382,6 +382,7 @@
     </div>
     <label class="auction" data-auction-picker>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
     <section data-addon-panel="installed" aria-label="Installed Addons" hidden><div class="inventory-controls"><label class="inventory-search"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg><input type="search" data-inventory-search aria-label="Search installed addons" placeholder="Search installed addons" autocomplete="off" spellcheck="false"></label><span class="muted inventory-count" data-inventory-count role="status"></span><label>View <select data-inventory-mode><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label></div><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
+    </div>
    </div>
    <div class="body" data-tweaks hidden>
     <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
@@ -544,7 +545,7 @@
  function bindTooltip(anchor, control, description) {
   const item = {anchor, description};
   anchor.addEventListener('pointerover', event => {
-   if (event.pointerType === 'touch') return;
+   if (event.pointerType === 'touch' || anchor.closest('.panels')) return;
    const next = event.target.closest('.inventory-actions') ? null : item;
    if (hovered === next) return;
    hovered = next;
@@ -555,7 +556,7 @@
    drawTooltip();
   });
   control.addEventListener('focus', () => {
-   if (control.matches(':focus-visible')) focused = item;
+   if (control.matches(':focus-visible') && !anchor.closest('.panels')) focused = item;
    drawTooltip();
   });
   control.addEventListener('blur', () => {
@@ -688,7 +689,7 @@
  ]));
  const componentVersions=checks.map(input=>{
   const version=document.createElement('small');
-  version.className='muted';
+  version.className='muted catalog-version';
   version.hidden=true;
   document.getElementById(input.getAttribute('aria-labelledby')).append(version);
   return [input.value,version];
@@ -763,6 +764,7 @@
   hovered=null;
   focused=null;
   drawTooltip();
+  if(addonView!==view)root.querySelector('.catalog-content').scrollTop=0;
   addonView=view;
   placeMustHaves();
   addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
