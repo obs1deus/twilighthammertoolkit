@@ -159,6 +159,8 @@ internal sealed class RenderedToolkit : Form {
                 case "browse": if(!busy)Browse(game);break;
                 case "save-folder": SaveGameFolder(game);break;
                 case "play": if(!busy)LaunchGame(game,TextField(request,"client"));break;
+                case "check-game-patch": await CheckGamePatch(game);break;
+                case "open-game-updater": if(!busy)OpenGameUpdater();break;
                 case "installed": await ReadInstalled(game);break;
                 case "security-open": Open("windowsdefender:");break;
                 case "security-history": Open("windowsdefender://threat/");break;
@@ -510,6 +512,26 @@ internal sealed class RenderedToolkit : Form {
             if(File.Exists(executable))return executable;
         }
         throw new IOException("The selected launch client isn't in the game folder.");
+    }
+    private async Task CheckGamePatch(string game) {
+        try {
+            string folder=GamePath(game);
+            var check=await Task.Run(()=>OctoPatch.Check(folder));
+            Post(new{patchCheck=check,patchGame=game});
+        } catch(Exception error) {
+            ToolkitLog.Write("launcher","Patch check failed ("+error.GetType().Name+").","warn");
+            Post(new{patchCheck=new OctoPatchInfo{State="unavailable"},patchGame=game});
+        }
+    }
+    private void OpenGameUpdater() {
+        string launcher=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"OctoLauncher","OctoLauncher.exe");
+        if(!File.Exists(launcher)) {
+            Open("https://octowow.st/git/OctoWoW/OctoLauncher/releases");
+            Post(new{patchInstruction="Install OctoLauncher, select this game folder, then apply the update there."});
+            return;
+        }
+        using(var process=Process.Start(new ProcessStartInfo(launcher){WorkingDirectory=Path.GetDirectoryName(launcher),UseShellExecute=true})) { }
+        Post(new{patchInstruction="In OctoLauncher, confirm the game folder and click Update. Download progress is shown there."});
     }
     private void LaunchGame(string game,string client) {
         try {

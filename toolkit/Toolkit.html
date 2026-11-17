@@ -289,13 +289,17 @@
  #th-toolkit .shell::after{box-shadow:inset 0 0 0 1px #110b1bcc,inset 0 0 12px #0c081156}
  #th-toolkit .must-have .catalog-description{display:none}
  #th-toolkit .panels .catalog-name>.featured-icon{display:inline-block;width:18px;height:18px;margin-right:6px;color:var(--gold);vertical-align:middle}
+ #th-toolkit .patch-info{display:none}
+ #th-toolkit .shell:has(>form[data-page=play]) .patch-info{display:block;max-width:min(410px,100%);margin-top:3px;padding:12px 15px;background:#201729e8;border:1px solid #7b6049;border-radius:8px;color:#f4d19a}
+ #th-toolkit .patch-info p{margin-top:4px;color:#e4d8e6;font-size:13px}
 </style><div id="th-toolkit">
  <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
   <header class="launcher-hero"><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
    <h1>OctoWoW</h1>
    <p data-play-status role="status">Choose your game folder</p>
-   <button type="button" data-play disabled><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg>Play Now</button>
+   <button type="button" data-play disabled><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg><span data-play-label>Play Now</span></button>
+   <div class="patch-info" data-patch-info hidden><strong data-patch-summary></strong><p data-patch-details></p></div>
   </header>
   <form data-page="components">
    <nav class="launcher-sidebar" aria-label="Launcher navigation">
@@ -550,6 +554,22 @@
  let confirmedFolder;
  const playButton=root.querySelector('[data-play]');
  const playStatus=root.querySelector('[data-play-status]');
+ const playLabel=playButton.querySelector('[data-play-label]');
+ const patchPanel=root.querySelector('[data-patch-info]');
+ const patchSummary=patchPanel.querySelector('[data-patch-summary]');
+ const patchDetails=patchPanel.querySelector('[data-patch-details]');
+ let patch=null,patchChecking=false,patchTime=0,patchInstruction='';
+ function checkGamePatch(force=false){
+  if(!confirmedFolder||confirmedFolder!==gameField.value||patchChecking||
+     (!force&&Date.now()-patchTime<300000))return;
+  patchChecking=true;
+  if(!patch)refreshPlayButton();
+  send('check-game-patch',{game:confirmedFolder});
+ }
+ function patchSize(bytes){
+  return bytes>=1073741824?(bytes/1073741824).toFixed(2)+' GB':
+   (bytes/1048576).toFixed(1)+' MB';
+ }
  const launchClient=root.querySelector('[data-launch-client]');
  const savedClient=localStorage.getItem('launcher-client');
  if([...launchClient.options].some(item=>item.value===savedClient))launchClient.value=savedClient;
@@ -560,11 +580,26 @@
  }
  function refreshPlayButton(){
   const ready=Boolean(confirmedFolder&&confirmedFolder===gameField.value);
-  playButton.disabled=!ready||operationBusy;
-  showPlayStatus(ready?'Ready to play · Y’Shaarj · Alliance':'Choose your game folder in Settings',ready);
+  const update=ready&&patch?.State==='available';
+  const checking=ready&&!patch;
+  playButton.disabled=!ready||operationBusy||checking;
+  playLabel.textContent=update?'Update':checking?'Checking…':'Play Now';
+  patchPanel.hidden=!update;
+  if(update){
+   patchSummary.textContent=patch.ArchiveCount
+    ?patch.ArchiveCount+' game archive'+(patch.ArchiveCount===1?'':'s')+' · '+patchSize(patch.ArchiveBytes)+' total'
+    :'OctoWoW client update';
+   patchDetails.textContent=patchInstruction||'Revision '+patch.Revision+' · OctoLauncher calculates the exact download size and shows progress.';
+  }
+  showPlayStatus(!ready?'Choose your game folder in Settings':
+   update?'Game update available':checking?'Checking OctoWoW for updates…':
+   patch.State==='current'?'Ready to play · Y’Shaarj · Alliance':
+   'Patch status unavailable · Y’Shaarj · Alliance',ready&&!update&&!checking&&patch.State==='current');
  }
  playButton.addEventListener('click',()=>{
-  if(!playButton.disabled)send('play',{game:confirmedFolder,client:launchClient.value});
+  if(playButton.disabled)return;
+  if(patch?.State==='available')send('open-game-updater');
+  else send('play',{game:confirmedFolder,client:launchClient.value});
  });
  function showFolderSettings(open,focus=false){
   folderSettings.hidden=!open;
@@ -1009,8 +1044,11 @@
  bridge.addEventListener('message',({data})=>{
   if(data.game!==undefined){
    gameField.value=data.game;
-   confirmedFolder=data.gameValid?data.game:undefined;
+   const nextFolder=data.gameValid?data.game:undefined;
+   if(nextFolder!==confirmedFolder){patch=null;patchChecking=false;patchTime=0;patchInstruction='';}
+   confirmedFolder=nextFolder;
    refreshPlayButton();
+   checkGamePatch();
    showFolderSettings(!data.gameValid,data.gameValid&&folderSettings.contains(document.activeElement));
    installedAddons=[];availableUpdates={};scanPath=null;page=0;
    showInstalled({});
@@ -1039,6 +1077,17 @@
   if(data.toolkitFolder!==undefined)security.querySelector('[data-toolkit-folder]').textContent=data.toolkitFolder;
   if(data.securityResult!==undefined)securityResults.textContent=data.securityResult;
   if(data.status!==undefined)status.textContent=data.status;
+  if(data.patchCheck&&data.patchGame===confirmedFolder){
+   patchChecking=false;
+   patchTime=Date.now();
+   if(data.patchCheck.State!=='unavailable'||patch?.State!=='available')patch=data.patchCheck;
+   if(patch.State!=='available')patchInstruction='';
+   refreshPlayButton();
+  }
+  if(data.patchInstruction!==undefined){
+   patchInstruction=data.patchInstruction;
+   refreshPlayButton();
+  }
   if(data.playStatus!==undefined)showPlayStatus(data.playStatus,data.playStatus==='Game started'||data.playStatus==='Game already running');
   if(data.availableUpdates&&data.updatePath===scanPath){
    availableUpdates=data.availableUpdates;
@@ -1123,6 +1172,8 @@
   } else if(data.status!==undefined)detail.hidden=true;
  });
  setInterval(()=>checkUpdates(true),30*60*1000);
+ setInterval(()=>checkGamePatch(Boolean(patchInstruction)),20000);
+ window.addEventListener('focus',()=>checkGamePatch(Boolean(patchInstruction)));
  send('ready');
  function fitWindow(){
   send('fit',{viewport:innerWidth});
