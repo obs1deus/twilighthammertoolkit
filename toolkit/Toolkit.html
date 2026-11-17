@@ -203,6 +203,10 @@
  #th-toolkit .launcher-hero [data-play-status][data-ready=true]{color:#b6df95}
  #th-toolkit .launcher-hero [data-play]{border-color:#e7ba71;background:linear-gradient(#f5d598,#d49a47);color:#2b1b13;padding:9px 26px;font-weight:750;font-size:16px}
  #th-toolkit .launcher-hero [data-play]:enabled:hover{background:#ffe2a8}
+ #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero{flex:1;justify-content:flex-end;gap:14px;min-height:0;padding:40px 42px clamp(40px,10vh,90px);border-bottom:0;background-image:linear-gradient(0deg,#130e1bd9,transparent 65%),linear-gradient(90deg,#1b1228b8,transparent 72%),url('/launcher-hero.jpg');background-position:right center}
+ #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero h1{font-size:clamp(48px,7vw,84px)}
+ #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero [data-play]{padding:12px 34px;font-size:18px}
+ #th-toolkit .shell>form[data-page=play]{flex:0 0 auto}
  #th-toolkit .shell>form>.body{padding:15px 21px;gap:12px}
  #th-toolkit .section-title{margin:0;font-size:22px;letter-spacing:-.025em}
  #th-toolkit fieldset.must-have{margin:0;border-color:#87653b;background:linear-gradient(120deg,#3a2934,#251c2c);padding:11px;gap:8px}
@@ -230,7 +234,7 @@
  #th-toolkit footer .launcher-link{color:var(--subtle);text-decoration:none;white-space:nowrap}
  #th-toolkit footer .launcher-link:hover{color:var(--gold)}
  #th-toolkit .shell>form>.body:has([data-addon-panel="installed"]:not([hidden])){grid-template-rows:auto auto auto minmax(95px,1fr)}
- #th-toolkit [data-mode=play] :is(.addon-nav,[data-addon-panel],[data-auction-picker]),#th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
+ #th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
  #th-toolkit [data-mode=mods] .panels{grid-template-columns:1fr}
  #th-toolkit .toolbar [data-launch-client]{max-width:200px}
 </style><div id="th-toolkit">
@@ -241,7 +245,7 @@
    <p data-play-status role="status">Choose your game folder</p>
    <button type="button" data-play disabled>Play Now</button>
   </header>
-  <form>
+  <form data-page="components">
    <nav class="launcher-sidebar" aria-label="Launcher navigation">
     <div class="launcher-brand"><span class="crest" aria-hidden="true">⚒</span><strong>Twilight<br>Hammer</strong><span class="version">v{{VERSION}} · Experimental</span></div>
     <button type="button" data-tab="play" aria-pressed="false">Play</button>
@@ -410,11 +414,14 @@
  tabs.forEach(button => button.addEventListener('click', () => {
   const mode=button.dataset.tab;
   tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab===button)));
-  componentsPage.hidden=mode==='tweaks';
+  form.dataset.page=mode;
+  componentsPage.hidden=mode==='play'||mode==='tweaks';
+  form.querySelector('.sync-dock').hidden=mode!=='components';
+  form.querySelector('footer').hidden=mode==='play';
   form.querySelector('[data-tweaks]').hidden=mode!=='tweaks';
   componentsPage.dataset.mode=mode;
   componentsPage.querySelector('[data-section-title]').textContent=
-    {play:'Play',components:'Addons',mods:'Mods & Tools'}[mode]||'Addons';
+    mode==='mods'?'Mods & Tools':'Addons';
   if(mode==='mods')selectAddonView('recommended');
   showFolderSettings(false);
   if(mode==='play')playButton.focus();
