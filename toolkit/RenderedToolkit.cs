@@ -561,6 +561,14 @@ internal sealed class RenderedToolkit : Form {
     }
     [DllImport("user32.dll")]private static extern bool ReleaseCapture();
     [DllImport("user32.dll")]private static extern IntPtr SendMessage(IntPtr window,uint message,IntPtr wparam,IntPtr lparam);
+    protected override CreateParams CreateParams {
+        get {
+            const int DropShadow = 0x00020000;
+            var parameters=base.CreateParams;
+            parameters.ClassStyle|=DropShadow;
+            return parameters;
+        }
+    }
     protected override void OnSizeChanged(EventArgs args) {base.OnSizeChanged(args);SetShape();}
     private void SetShape() {
         if(Width<40||Height<40||WindowState==FormWindowState.Minimized)return;
