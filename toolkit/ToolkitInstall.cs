@@ -199,7 +199,7 @@ internal static class ToolkitInstall {
             .OrderBy(file=>file,StringComparer.OrdinalIgnoreCase)
             .Select(file=>file.Substring(folder.Length+1)+":"+ToolkitPackages.Hash(File.ReadAllBytes(file))))));
     }
-    private static void CheckForLinks(string game,string path) {
+    internal static void CheckForLinks(string game,string path) {
         string root=Path.GetFullPath(game).TrimEnd(Path.DirectorySeparatorChar);
         for(string current=path;!current.Equals(root,StringComparison.OrdinalIgnoreCase);current=Path.GetDirectoryName(current)) {
             try {
@@ -292,7 +292,7 @@ internal static class ToolkitInstall {
     internal static bool RequiresClosedGame(string edition,Package[] packages,ClientTweaks tweaks) {
         return edition!="Skip Sync"||tweaks.Enabled||packages.Any(package=>package.Folder=="game"||package.Folder=="Data");
     }
-    private static void Restore(List<KeyValuePair<string,string>> changes) {
+    internal static void Restore(List<KeyValuePair<string,string>> changes) {
         for(int i=changes.Count-1;i>=0;i--) {
             var change=changes[i];
             try {
@@ -302,7 +302,7 @@ internal static class ToolkitInstall {
               catch(UnauthorizedAccessException) { }
         }
     }
-    private static void Replace(string from,string to,string backup,List<KeyValuePair<string,string>> changes) {
+    internal static void Replace(string from,string to,string backup,List<KeyValuePair<string,string>> changes) {
         Directory.CreateDirectory(Path.GetDirectoryName(to));
         if(File.Exists(to)) {
             Directory.CreateDirectory(Path.GetDirectoryName(backup));
@@ -318,7 +318,7 @@ internal static class ToolkitInstall {
             if(File.Exists(temp))File.Delete(temp);
         }
     }
-    private static void EnsureClosed() {
+    internal static void EnsureClosed() {
         if(new[]{"WoW","WoW_Modernized","WoW_tweaked"}.Any(name=>Process.GetProcessesByName(name).Length>0))
             throw new IOException("Close OctoWoW before changing client mods, data patches, client tweaks, or Sync.");
     }

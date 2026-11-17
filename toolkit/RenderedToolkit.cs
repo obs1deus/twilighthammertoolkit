@@ -161,7 +161,7 @@ internal sealed class RenderedToolkit : Form {
                 case "save-folder": SaveGameFolder(game);break;
                 case "play": if(!busy)LaunchGame(game,TextField(request,"client"));break;
                 case "check-game-patch": await CheckGamePatch(game);break;
-                case "open-game-updater": if(!busy)OpenGameUpdater();break;
+                case "apply-game-patch": if(!busy)await ApplyGamePatch(game);break;
                 case "installed": await ReadInstalled(game);break;
                 case "security-open": Open("windowsdefender:");break;
                 case "security-history": Open("windowsdefender://threat/");break;
@@ -524,15 +524,24 @@ internal sealed class RenderedToolkit : Form {
             Post(new{patchCheck=new OctoPatchInfo{State="unavailable"},patchGame=game});
         }
     }
-    private void OpenGameUpdater() {
-        string launcher=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"OctoLauncher","OctoLauncher.exe");
-        if(!File.Exists(launcher)) {
-            Open("https://octowow.st/git/OctoWoW/OctoLauncher/releases");
-            Post(new{patchInstruction="Install OctoLauncher, select this game folder, then apply the update there."});
-            return;
+    private async Task ApplyGamePatch(string game) {
+        busy=true;
+        Post(new{busy=true,patchApplying=true,patchMessage="Preparing game update…"});
+        try {
+            string folder=GamePath(game);
+            var progress=new Progress<Tuple<string,long,long>>(value=>Post(new {
+                patchMessage=value.Item1,patchDone=value.Item2,patchTotal=value.Item3}));
+            var check=await Task.Run(()=>OctoPatch.Apply(folder,(message,done,total)=>
+                ((IProgress<Tuple<string,long,long>>)progress).Report(Tuple.Create(message,done,total))));
+            ToolkitLog.Write("launcher","Applied OctoWoW revision "+check.Revision+".");
+            Post(new{patchCheck=check,patchGame=game,patchMessage="Game update complete."});
+        } catch(Exception error) {
+            ToolkitLog.Write("launcher","Game patch failed ("+error.GetType().Name+").","warn");
+            Post(new{patchError=error.Message});
+        } finally {
+            busy=false;
+            Post(new{busy=false,patchApplying=false});
         }
-        using(var process=Process.Start(new ProcessStartInfo(launcher){WorkingDirectory=Path.GetDirectoryName(launcher),UseShellExecute=true})) { }
-        Post(new{patchInstruction="In OctoLauncher, confirm the game folder and click Update. Download progress is shown there."});
     }
     private void LaunchGame(string game,string client) {
         try {
