@@ -49,11 +49,15 @@ internal static class ToolkitUpdates {
                 var release=ToolkitPackages.Resolve(package);
                 string installed;
                 string status;
-                if(recorded.TryGetValue(package.Name,out installed))
-                    status=release.Version==installed?"up to date":"update available";
+                bool tracked=recorded.TryGetValue(package.Name,out installed);
+                if(tracked&&release.Version==installed)
+                    status="up to date";
+                else if(!tracked||File.Exists(Path.Combine(game,"Interface","AddOns",package.Folder,package.Folder+".toc")))
+                    status=CompareInstalled(game,package,release,tracked);
                 else
-                    status=CompareUntracked(game,package,release);
-                result.Available[package.Name]=status=="update available";
+                    status="update available";
+                if(status=="update available")result.Available[package.Name]=true;
+                else if(status=="up to date"||status=="matches upstream")result.Available[package.Name]=false;
                 result.Lines.Add(package.Name+": "+status);
             } catch(Exception error) {
                 result.Lines.Add(package.Name+": could not verify ("+error.Message+")");
@@ -85,7 +89,7 @@ internal static class ToolkitUpdates {
         return result;
     }
 
-    private static string CompareUntracked(string game,Package package,Release release) {
+    private static string CompareInstalled(string game,Package package,Release release,bool tracked) {
         string stage=Path.Combine(Path.GetTempPath(),"TwilightToolkit-Check-"+Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(stage);
         try {
@@ -96,9 +100,9 @@ internal static class ToolkitUpdates {
             Version installed,latest;
             if(File.Exists(local)&&File.Exists(upstream)&&
                Version.TryParse((ToolkitInstall.TocVersion(local)??"").TrimStart('v','V'),out installed)&&
-               Version.TryParse((ToolkitInstall.TocVersion(upstream)??"").TrimStart('v','V'),out latest)&&latest>installed)
-                return "update available";
-            return "differs from latest upstream files";
+               Version.TryParse((ToolkitInstall.TocVersion(upstream)??"").TrimStart('v','V'),out latest))
+                return latest>installed?"update available":"up to date";
+            return tracked?"update available":"differs from latest upstream files";
         } finally {
             try {Directory.Delete(stage,true);}
             catch(IOException) {}

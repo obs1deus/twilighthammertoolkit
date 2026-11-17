@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web.Script.Serialization;
 
 internal sealed class RepositoryAddon {
@@ -17,6 +18,7 @@ internal sealed class InstalledAddon {
     public string Version {get;set;}
     public string Source {get;set;}
     public string CatalogName {get;set;}
+    public string Notes {get;set;}
 }
 
 internal static class ToolkitInstall {
@@ -49,7 +51,10 @@ internal static class ToolkitInstall {
         return result;
     }
     internal static string TocVersion(string file) {
-        const string prefix="## Version:";
+        return TocField(file,"Version");
+    }
+    private static string TocField(string file,string field) {
+        string prefix="## "+field+":";
         string line=File.ReadLines(file).FirstOrDefault(value=>value.StartsWith(prefix,StringComparison.OrdinalIgnoreCase));
         return line==null?null:line.Substring(prefix.Length).Trim();
     }
@@ -65,8 +70,14 @@ internal static class ToolkitInstall {
             RepositoryAddon repository;
             repositories.TryGetValue(name,out repository);
             return new InstalledAddon{Name=name,Version=TocVersion(toc),Source=repository==null?null:repository.Source,
-                CatalogName=package==null?null:package.Name};
+                CatalogName=package==null?null:package.Name,Notes=package==null?ReadAddonNotes(toc):null};
         }).Where(addon=>addon!=null).OrderBy(addon=>addon.Name,StringComparer.OrdinalIgnoreCase).ToArray();
+    }
+    private static string ReadAddonNotes(string toc) {
+        string notes=TocField(toc,"Notes");
+        if(String.IsNullOrWhiteSpace(notes))return null;
+        notes=Regex.Replace(notes,@"\|c[0-9a-f]{8}|\|r","",RegexOptions.IgnoreCase).Trim();
+        return notes.Length<=500?notes:notes.Substring(0,500).TrimEnd()+"…";
     }
     internal static void RemoveAddon(string game,string name) {
         if(String.IsNullOrWhiteSpace(name)||Path.GetFileName(name)!=name||
@@ -112,6 +123,21 @@ internal static class ToolkitInstall {
         string config=Path.Combine(uploader,"native-game.txt");
         return File.Exists(Path.Combine(uploader,"TwilightHammerUploader.exe"))&&File.Exists(config)&&
             File.ReadAllText(config).Trim().TrimEnd('\\').Equals(game.TrimEnd('\\'),StringComparison.OrdinalIgnoreCase);
+    }
+    internal static string SyncEdition(string game) {
+        string file=Path.Combine(game,"Interface","AddOns","TwilightHammerSync","Edition.lua");
+        if(!File.Exists(file))return null;
+        try {
+            var match=Regex.Match(File.ReadAllText(file),@"(?m)^\s*TwilightHammerSync_Edition\s*=\s*['""](guild|auctions?|bank)['""]\s*$");
+            switch(match.Groups[1].Value) {
+                case "guild": return "Guild Sync";
+                case "auction":
+                case "auctions": return "Auction Only";
+                case "bank": return "Bank and Guild Sync";
+                default: return null;
+            }
+        } catch(IOException) {return null;}
+          catch(UnauthorizedAccessException) {return null;}
     }
     internal static Dictionary<string,string> ComponentStatuses(string game) {
         var statuses=new Dictionary<string,string>();

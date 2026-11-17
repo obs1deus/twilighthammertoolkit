@@ -359,10 +359,10 @@ internal sealed class ToolkitForm : Form {
             string detail=package.Name=="TWThreat"?"Threat meter":package.Name=="BigWigs"?"prodigeomix":
                 package.Name=="Chronicle Sidekick"?"Windows app":
                 package.Name=="UnitXP_SP3"?"brues-code":null;
-            var row=new RoundedTable{ColumnCount=2,RowCount=featured?2:1,Dock=DockStyle.Fill,
+            var row=new RoundedTable{ColumnCount=1,RowCount=featured?2:1,Dock=DockStyle.Fill,
                 Height=featured?54:30,Margin=featured?new Padding(2,2,2,0):Padding.Empty,Padding=featured?new Padding(4,4,4,3):Padding.Empty,
                 BackColor=Surface,Stroke=featured?Line:Color.Empty,Radius=featured?7:0};
-            row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));row.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,22));
+            row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));
             row.RowStyles.Add(new RowStyle(SizeType.Absolute,featured?24:30));
             if(featured)row.RowStyles.Add(new RowStyle(SizeType.Percent,100));
             if(!featured)row.Paint+=delegate(object sender,PaintEventArgs args) {
@@ -374,9 +374,6 @@ internal sealed class ToolkitForm : Form {
                 row.Controls.Add(caption,0,1);
             }
             row.Controls.Add(check,0,0);
-            var info=new InfoMarker {Anchor=AnchorStyles.None,ForeColor=Muted,AccessibleName=package.Name+" information"};
-            hints.SetToolTip(info,package.Help);
-            row.Controls.Add(info,1,0);
             panel.Controls.Add(row,index%columns,1+index/columns);
             index++;
         }
@@ -572,15 +569,6 @@ internal sealed class ToolkitForm : Form {
     private static LinkLabel Link(string text,Action action) {
         var link=new LinkLabel{Text=text,AutoSize=true,LinkColor=Gold,ActiveLinkColor=Color.White,VisitedLinkColor=Gold,Margin=new Padding(7,10,7,3)};
         link.LinkClicked+=delegate {action();};return link;
-    }
-    private sealed class InfoMarker : Control {
-        internal InfoMarker(){Size=new Size(16,16);SetStyle(ControlStyles.UserPaint|ControlStyles.OptimizedDoubleBuffer,true);}
-        protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.SmoothingMode=SmoothingMode.AntiAlias;
-            using(var pen=new Pen(ForeColor))e.Graphics.DrawEllipse(pen,1,1,13,13);
-            using(var font=new Font("Segoe UI",7,FontStyle.Bold))
-                TextRenderer.DrawText(e.Graphics,"i",font,new Rectangle(0,0,16,15),ForeColor,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPadding);
-        }
     }
     private sealed class ToolkitButton : Button {
         private bool hover,pressed;

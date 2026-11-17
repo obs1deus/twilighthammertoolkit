@@ -446,8 +446,12 @@ internal sealed class RenderedToolkit : Form {
                 return;
             }
             path=Path.GetFullPath(path);
-            var inventory=await Task.Run(()=>new{installPath=game,scanPath=path,
-                componentStatuses=ToolkitInstall.ComponentStatuses(path),addons=ToolkitInstall.Addons(path),syncInstalled=ToolkitInstall.SyncInstalled(path)});
+            var inventory=await Task.Run(()=>{
+                bool syncInstalled=ToolkitInstall.SyncInstalled(path);
+                return new{installPath=game,scanPath=path,componentStatuses=ToolkitInstall.ComponentStatuses(path),
+                    addons=ToolkitInstall.Addons(path),syncInstalled=syncInstalled,
+                    syncEdition=syncInstalled?ToolkitInstall.SyncEdition(path):null};
+            });
             Post(inventory);
         } catch(IOException) {Post(new {installPath=game,componentStatuses=new Dictionary<string,string>()});}
           catch(UnauthorizedAccessException) {Post(new {installPath=game,componentStatuses=new Dictionary<string,string>()});}

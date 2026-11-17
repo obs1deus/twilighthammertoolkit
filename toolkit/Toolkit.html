@@ -31,7 +31,7 @@
 
 
 #th-toolkit .tooltip-description{display:none}
-#th-toolkit .floating-tip{position:absolute;z-index:10;pointer-events:none;max-width:min(310px,calc(100% - 24px));padding:8px 10px;border:1px solid light-dark(#c8b6d5,#776387);border-radius:6px;box-shadow:0 5px 14px #21152c2d;background:light-dark(#fffaff,#30243c);color:light-dark(#33283d,#f8efff);font-size:13px}
+#th-toolkit .floating-tip{position:absolute;z-index:10;pointer-events:none;max-width:min(310px,calc(100% - 24px));padding:8px 10px;border:1px solid light-dark(#c8b6d5,#776387);border-radius:6px;overflow-wrap:anywhere;box-shadow:0 5px 14px #21152c2d;background:light-dark(#fffaff,#30243c);color:light-dark(#33283d,#f8efff);font-size:13px}
 #th-toolkit .floating-tip[hidden]{display:none}
 
 #th-toolkit{--ink:light-dark(#28243a,#ebe7f4);--subtle:light-dark(#57516a,#b8afc8);--line:light-dark(#ddd6e6,#383044);--surface:light-dark(#fcfafe,#17141f);--raised:light-dark(#f2edf7,#211a2b);--gold:light-dark(#795219,#efc783);font-family:'Segoe UI',system-ui,sans-serif}
@@ -55,8 +55,6 @@
 #th-toolkit .panels legend{width:100%;padding-bottom:5px;border-bottom:1px solid var(--line);margin-bottom:1px}
 #th-toolkit .component{cursor:pointer}
 #th-toolkit .component:hover,#th-toolkit .component:focus-within{background:var(--raised)}
-#th-toolkit .component::after{content:'i';display:grid;place-items:center;flex:0 0 14px;width:14px;height:14px;border:1px solid currentColor;border-radius:50%;color:var(--subtle);font:600 9px/1 'Segoe UI',sans-serif;margin-right:4px}
-#th-toolkit .must-have .component::after{margin:1px 0 0}
 #th-toolkit input[type=checkbox]{margin-inline:4px}
 #th-toolkit .auction{padding-top:11px;border-top:1px solid var(--line)}
 #th-toolkit footer{padding:13px 24px;background:var(--raised);border-top:1px solid var(--line)}
@@ -130,8 +128,7 @@
  #th-toolkit .component:has(input:disabled){cursor:default}
  #th-toolkit .installed-badge{display:inline-block;vertical-align:middle;margin-left:6px;padding:1px 5px;border:1px solid #375649;border-radius:5px;color:#a8ddc0;background:#20342d;font-size:10px;font-weight:600;line-height:1.4;white-space:nowrap}
  #th-toolkit .installed-badge[data-files-only=true]{border-color:#675436;color:#edca91;background:#362d24}
- #th-toolkit .must-have .component{display:grid;grid-template-columns:18px minmax(0,1fr) 14px;grid-template-rows:1fr auto}
- #th-toolkit .must-have .component::after{grid-row:1;grid-column:3}
+ #th-toolkit .must-have .component{display:grid;grid-template-columns:18px minmax(0,1fr);grid-template-rows:1fr auto}
  #th-toolkit .must-have .installed-badge{grid-row:2;grid-column:2;justify-self:start;margin:0}
  #th-toolkit .addon-nav{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
  #th-toolkit .addon-nav [data-add-repository]{margin-left:auto}
@@ -141,11 +138,13 @@
  #th-toolkit .inventory-row button{flex:none}
  #th-toolkit .inventory-actions{display:flex;align-items:center;gap:6px}
  #th-toolkit .removable-component{position:relative;min-width:0}
- #th-toolkit .removable-component>.component{height:100%;padding-right:29px}
- #th-toolkit .removable-component>.component::after{visibility:hidden}
- #th-toolkit .removable-component>.remove-addon{position:absolute;right:3px;top:3px}
- #th-toolkit .remove-addon{display:grid;place-items:center;width:24px;height:24px;padding:0;border-color:transparent;background:transparent;color:var(--subtle);font-size:15px}
- #th-toolkit .remove-addon:hover{background:#49303a;color:#f7b8bd}
+ #th-toolkit .removable-component>.component{height:100%}
+ #th-toolkit .removable-component:has(>.remove-addon:not([hidden]))>.component{padding-right:35px}
+ #th-toolkit .removable-component>.remove-addon{position:absolute;right:2px;top:50%;transform:translateY(-50%)}
+ #th-toolkit .must-have .removable-component>.remove-addon{top:4px;transform:none}
+ #th-toolkit .remove-addon{display:grid;place-items:center;width:28px;height:28px;padding:0;border-color:transparent;background:transparent;color:light-dark(#9b3447,#ed9aa7)}
+ #th-toolkit .remove-addon svg{width:18px;height:18px}
+ #th-toolkit .remove-addon:enabled:is(:hover,:focus-visible){border-color:currentColor;background:light-dark(#f9e4e8,#49303a);color:light-dark(#7d2435,#ffd1d7)}
  #th-toolkit .inventory-pages{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
  #th-toolkit .inventory-controls{display:flex;justify-content:flex-end;align-items:center;gap:8px;padding-bottom:6px}
  #th-toolkit button[data-addon-update]:enabled:hover,#th-toolkit button[data-bulk-action=true]:enabled:hover{border-color:var(--gold);background:#edca91;color:#302116}
@@ -174,7 +173,17 @@
  #th-toolkit .sync{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
  #th-toolkit .sync [data-sync-description]{grid-column:1/-1;min-height:2.9em}
  #th-toolkit .sync [data-uninstall]{justify-self:start;text-align:left;padding:0}
- #th-toolkit .sync-summary{display:flex;align-items:center;justify-content:space-between;gap:10px}
+ #th-toolkit .sync-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 12px}
+ #th-toolkit .sync-summary [data-sync-toggle]{display:flex;align-items:center;gap:7px;text-align:left;padding:0;min-width:0;color:var(--ink);border:0;background:transparent;font-weight:700}
+ #th-toolkit .sync-summary [data-sync-toggle]:is(:hover,:focus-visible){color:var(--gold)}
+ #th-toolkit .sync-summary [data-sync-toggle] .installed-badge{margin:0}
+ #th-toolkit .sync-chevron{margin-left:auto;color:var(--subtle)}
+ #th-toolkit [data-sync-toggle][aria-expanded=true] .sync-chevron{transform:rotate(180deg)}
+ #th-toolkit .sync-details{grid-column:1/-1;border-top:1px solid var(--line);margin-top:9px;padding-top:8px}
+ #th-toolkit .sync-details p{margin:3px 0 0}
+ #th-toolkit .must-have.compact{padding-block:5px}
+ #th-toolkit .must-have.compact label.component{padding-block:5px;gap:3px 5px}
+ #th-toolkit .must-have.compact .component small{display:none}
  #th-toolkit .security-content .removal-option{display:flex;align-items:center;gap:8px}
  #th-toolkit .update-results{margin:0;padding:0;list-style:none}
  #th-toolkit .update-results li{padding:6px 0;border-bottom:1px solid var(--line)}
@@ -197,7 +206,11 @@
    </nav>
    <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
    <div class="body" data-components>
-    <div class="sync sync-summary" data-sync-summary hidden><h3>Twilight Hammer Sync <span class="installed-badge">Installed</span></h3><button class="security-link" type="button" data-uninstall>Uninstall</button></div>
+    <section class="sync sync-summary" data-sync-summary hidden>
+     <button type="button" data-sync-toggle aria-controls="installed-sync-details" aria-expanded="false">Twilight Hammer Sync <span class="installed-badge">Installed</span><span class="sync-chevron" aria-hidden="true">⌄</span></button>
+     <button class="security-link" type="button" data-uninstall>Uninstall</button>
+     <div class="sync-details" id="installed-sync-details" hidden><strong data-installed-sync-edition></strong><p class="muted" data-installed-sync-description></p></div>
+    </section>
     <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
     <fieldset class="must-have"><legend>Must Haves</legend>
       <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1">TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
@@ -325,13 +338,23 @@
  const syncDescriptions = {
   'Guild Sync':'Uploads the guild roster, professions, and auction scans. Requires Discord sign-in on the guild portal.',
   'Auction Only':'Uploads auction scans to the public Auction House. Open to everyone without signing in.',
-  'Bank and Guild Sync':'Also uploads Twilightbank inventory and gold. Requires a guild officer or admin to authorize through Discord.',
+  'Bank and Guild Sync':'Uploads the guild roster, professions, auction scans, and Twilightbank inventory and gold. Requires a guild officer or admin to authorize through Discord.',
   'Skip Sync':'Continues setting up your selected addons and tweaks without installing Sync.'
  };
  function describeSync(){
   root.querySelector('[data-sync-description]').textContent=syncDescriptions[edition.value];
  }
  edition.addEventListener('change',describeSync);
+ const syncSummary=root.querySelector('[data-sync-summary]');
+ const syncToggle=syncSummary.querySelector('[data-sync-toggle]');
+ const syncDetails=syncSummary.querySelector('.sync-details');
+ const mustHaves=root.querySelector('.must-have');
+ function expandSync(expanded){
+  syncToggle.setAttribute('aria-expanded',String(expanded));
+  syncDetails.hidden=!expanded;
+  mustHaves.classList.toggle('compact',expanded);
+ }
+ syncToggle.addEventListener('click',()=>expandSync(syncDetails.hidden));
  const status = root.querySelector('output');
  const checks = [...form.querySelectorAll('.component input[type=checkbox]')];
  const tabs = [...form.querySelectorAll('[data-tab]')];
@@ -353,37 +376,50 @@
  let hovered = null;
  let focused = null;
  function drawTooltip() {
-  const row = hovered || focused;
-  tip.hidden = !row;
-  if (!row) return;
-  tip.textContent = row.querySelector('.tooltip-description').textContent;
+  const item = hovered || focused;
+  tip.hidden = !item || !item.anchor.getClientRects().length;
+  if (tip.hidden) return;
+  tip.textContent = item.description;
   const bounds = root.getBoundingClientRect();
-  const anchor = row.getBoundingClientRect();
+  const anchor = item.anchor.getBoundingClientRect();
   const left = Math.max(12, Math.min(anchor.left - bounds.left, bounds.width - tip.offsetWidth - 12));
   const above = anchor.top - bounds.top - tip.offsetHeight - 5;
   tip.style.left = left + 'px';
   tip.style.top = (above >= 3 ? above : anchor.bottom - bounds.top + 5) + 'px';
  }
- checks.forEach(input => {
-  const row = input.closest('.component');
-  row.addEventListener('pointerenter', event => {
+ function bindTooltip(anchor, control, description) {
+  const item = {anchor, description};
+  anchor.addEventListener('pointerover', event => {
    if (event.pointerType === 'touch') return;
-   hovered = row;
+   const next = event.target.closest('.inventory-actions') ? null : item;
+   if (hovered === next) return;
+   hovered = next;
    drawTooltip();
   });
-  row.addEventListener('pointerleave', () => {
-   if (hovered === row) hovered = null;
+  anchor.addEventListener('pointerleave', () => {
+   if (hovered === item) hovered = null;
    drawTooltip();
   });
-  input.addEventListener('focus', () => {
-   if (input.matches(':focus-visible')) focused = row;
+  control.addEventListener('focus', () => {
+   if (control.matches(':focus-visible')) focused = item;
    drawTooltip();
   });
-  input.addEventListener('blur', () => {
-   if (focused === row) focused = null;
+  control.addEventListener('blur', () => {
+   if (focused === item) focused = null;
    drawTooltip();
   });
+ }
+ const catalogDescriptions = new Map();
+ checks.forEach(input => {
+  const description = input.closest('.component').querySelector('.tooltip-description').textContent;
+  const name = document.getElementById(input.getAttribute('aria-labelledby'));
+  catalogDescriptions.set(input.value, description);
+  bindTooltip(name, input, description);
  });
+ root.addEventListener('scroll', () => {
+  hovered = null;
+  drawTooltip();
+ }, true);
  root.addEventListener('keydown', event => {
   if (event.key === 'Escape') {
    hovered = null;
@@ -441,7 +477,7 @@
   const button=document.createElement('button');
   button.type='button';
   button.className='remove-addon';
-  button.textContent='🗑︎';
+  button.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M9 6V3h6v3M6 6l1 14h10l1-14M10 10v6m4-6v6"/></svg>';
   return button;
  }
  function bindRemoval(button,name){
@@ -462,6 +498,9 @@
  });
  const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
  function selectAddonView(view){
+  hovered=null;
+  focused=null;
+  drawTooltip();
   addonView=view;
   addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
   root.querySelectorAll('[data-addon-panel]').forEach(panel=>{panel.hidden=panel.dataset.addonPanel!==view;});
@@ -493,6 +532,9 @@
   pages.querySelector('[data-page-number]').textContent=(page+1)+' / '+totalPages;
   const scrollTop=inventory.scrollTop;
   inventory.replaceChildren();
+  if(hovered&&!hovered.anchor.isConnected)hovered=null;
+  if(focused&&!focused.anchor.isConnected)focused=null;
+  drawTooltip();
   if(!installedAddons.length){inventory.textContent='No installed addons found in this game folder.';return;}
   for(const addon of scrolling?installedAddons:installedAddons.slice(page*pageSize,(page+1)*pageSize)){
    const row=document.createElement('div');
@@ -509,6 +551,16 @@
    const detail=document.createElement('small');
    detail.className='muted';
    detail.textContent=[addon.Version?'Version '+addon.Version:'Version unavailable',addon.Source].filter(Boolean).join(' · ');
+   const description=catalogDescriptions.get(addon.CatalogName)||addon.Notes
+    ||['No description provided.',detail.textContent].join(' ');
+   const accessibleDescription=document.createElement('span');
+   accessibleDescription.className='tooltip-description';
+   accessibleDescription.id='th-installed-tip-'+inventory.childElementCount;
+   accessibleDescription.textContent=description;
+   title.tabIndex=0;
+   title.setAttribute('aria-describedby',accessibleDescription.id);
+   label.append(accessibleDescription);
+   bindTooltip(row,title,description);
    label.prepend(title);
    label.append(detail);
    row.append(label);
@@ -592,33 +644,44 @@
   const keys=addonView==='installed'?registered:[...registered,...[...catalogNames].filter(name=>installedStatuses[name])];
   return [...new Set(keys)].filter(key=>availableUpdates[key]);
  }
- function plan() {
+ function canApply(name){
+  if(installedStatuses[name]!=='Installed')return true;
+  const addon=installedAddons.find(item=>item.CatalogName===name&&item.Source);
+  return availableUpdates[addon?addonKey(addon):name]===true;
+ }
+ function plan(selected) {
   const names = new Set();
   const seen = new Set();
   function add(name) {
    if (seen.has(name)) return;
    seen.add(name);
    (dependencies[name] || []).forEach(add);
-   if(manual.has(name)||installedStatuses[name]!=='Installed')names.add(name);
+   if(selected.includes(name)||installedStatuses[name]!=='Installed')names.add(name);
   }
-  manual.forEach(add);
+  selected.forEach(add);
   return names;
  }
+ let lastSelectionCount=0;
  function count(writeStatus=true) {
-  const names = plan();
+  const selected = [...manual].filter(canApply);
+  const names = plan(selected);
   checks.forEach(input => {
-   input.checked = names.has(input.value);
-   input.disabled = names.has(input.value) && !manual.has(input.value);
+   input.checked = manual.has(input.value)||names.has(input.value);
+   input.disabled = names.has(input.value)&&!manual.has(input.value);
   });
-  const picks=[...names,form.elements.auction.value].filter(Boolean);
+  const auction=form.elements.auction.value;
+  const picks=[...names,...(auction&&canApply(auction)?[auction]:[])];
   const total=picks.length;
   const updates=picks.some(name=>installedStatuses[name]);
   const installs=picks.some(name=>!installedStatuses[name])||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked;
-  const bulk=!componentsPage.hidden&&(addonView==='installed'||(!installs&&bulkKeys().length>0));
+  const pendingUpdates=bulkKeys();
+  const inactiveSelection=(manual.size>0||auction)&&total===0;
+  const bulk=!componentsPage.hidden&&(addonView==='installed'||(!inactiveSelection&&!installs&&pendingUpdates.length>0));
   submitButton.dataset.bulkAction=String(bulk);
   submitButton.textContent=bulk?'Update All':installs?'Install':updates?'Update':'Install';
-  submitButton.disabled=operationBusy||(bulk?!bulkKeys().length:!updates&&!installs);
-  if(writeStatus)status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
+  submitButton.disabled=operationBusy||(bulk?!pendingUpdates.length:!updates&&!installs);
+  if(writeStatus||(manual.size>0&&total!==lastSelectionCount))status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
+  lastSelectionCount=total;
  }
  checks.forEach(input => input.addEventListener('change', () => {
   if (input.checked) manual.add(input.value); else manual.delete(input.value);
@@ -634,7 +697,7 @@
   }
   send(action, {
    game: form.elements.game.value, edition: form.elements.edition.value,
-   components: [...manual, form.elements.auction.value].filter(Boolean),
+   components: [...manual, form.elements.auction.value].filter(name=>name&&canApply(name)),
    tweaks: {
     enabled: form.elements.applyTweaks.checked, autoLoot:form.elements.autoLoot.checked,
     laa: form.elements.laa.checked, audio: form.elements.audio.checked,
@@ -687,7 +750,7 @@
   form.elements.render.value=recommendedDistance;
   pcResult.textContent='Render distance set to '+recommendedDistance+'. Turn on Apply client tweaks to include it in setup.';
  });
- form.addEventListener('submit',event=>{event.preventDefault();request('install');});
+ form.addEventListener('submit',event=>{event.preventDefault();if(!submitButton.disabled)request('install');});
  root.querySelectorAll('[data-window]').forEach(button=>button.addEventListener('click',()=>send(button.dataset.window)));
  window.addEventListener('pointerdown',event=>{
   if(event.button!==0)return;
@@ -746,7 +809,10 @@
    installedAddons=data.addons||[];
    scanPath=data.scanPath;
    const installed=Boolean(data.syncInstalled);
-   root.querySelector('[data-sync-summary]').hidden=!installed;
+   syncSummary.hidden=!installed;
+   if(!installed)expandSync(false);
+   syncSummary.querySelector('[data-installed-sync-edition]').textContent=data.syncEdition||'Installed edition unavailable';
+   syncSummary.querySelector('[data-installed-sync-description]').textContent=syncDescriptions[data.syncEdition]||'The uploader is installed, but the game folder does not identify its edition.';
    root.querySelector('[data-sync-setup]').hidden=installed;
    if(installed&&edition.value!=='Skip Sync'){edition.value='Skip Sync';describeSync();}
    showInstalled(data.componentStatuses);
@@ -765,7 +831,7 @@
    showInstalled(installedStatuses);
   }
   if(data.updated){
-   data.updated.forEach(name=>{delete availableUpdates[name];updating.delete(name);});
+   data.updated.forEach(name=>{availableUpdates[name]=false;updating.delete(name);});
    if(data.repositoryApplied&&addonView!=='installed'){page=0;selectAddonView('installed');}
    if(data.installPlanApplied){
     manual.clear();form.elements.auction.selectedIndex=0;
