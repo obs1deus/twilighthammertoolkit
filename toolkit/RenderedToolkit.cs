@@ -119,11 +119,19 @@ internal sealed class RenderedToolkit : Form {
         }
         view.AddWebResourceRequestedFilter(InterfaceUrl+"*",CoreWebView2WebResourceContext.All);
         view.WebResourceRequested+=delegate(object sender,CoreWebView2WebResourceRequestedEventArgs e){
-            e.Response=e.Request.Uri==InterfaceUrl?
-                environment.CreateWebResourceResponse(new MemoryStream(document,false),200,"OK","Content-Type: text/html; charset=utf-8"):
-                e.Request.Uri==InterfaceUrl+"launcher-hero.jpg"?
-                environment.CreateWebResourceResponse(GetType().Assembly.GetManifestResourceStream("LauncherHero.jpg"),200,"OK","Content-Type: image/jpeg"):
-                environment.CreateWebResourceResponse(null,404,"Not Found","");
+            string resource;
+            string mime;
+            switch(e.Request.Uri) {
+                case InterfaceUrl:
+                    e.Response=environment.CreateWebResourceResponse(new MemoryStream(document,false),200,"OK","Content-Type: text/html; charset=utf-8");
+                    return;
+                case InterfaceUrl+"launcher-hero.jpg": resource="LauncherHero.jpg";mime="image/jpeg";break;
+                case InterfaceUrl+"launcher-hammers.png": resource="LauncherHammers.png";mime="image/png";break;
+                default:
+                    e.Response=environment.CreateWebResourceResponse(null,404,"Not Found","");
+                    return;
+            }
+            e.Response=environment.CreateWebResourceResponse(GetType().Assembly.GetManifestResourceStream(resource),200,"OK","Content-Type: "+mime);
         };
         view.Navigate(InterfaceUrl);
     }

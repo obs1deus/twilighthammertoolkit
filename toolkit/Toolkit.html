@@ -197,13 +197,13 @@
  #th-toolkit .launcher-sidebar button[aria-pressed=true],#th-toolkit .launcher-sidebar button[aria-expanded=true]{background:#392747;border-color:#61466f;color:#ffe1aa}
  #th-toolkit .launcher-sidebar [data-settings]{margin-top:auto}
  #th-toolkit .launcher-sidebar [data-toolkit-release]{color:var(--gold);border-color:#684d37}
- #th-toolkit .launcher-hero{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-height:206px;padding:25px 28px;background:linear-gradient(90deg,#1c1327 1%,#21152ce6 23%,#23172b38 65%),url('/launcher-hero.jpg') 63% 45%/cover;border-bottom:1px solid #59415e}
+ #th-toolkit .launcher-hero{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:10px;min-height:206px;padding:25px 28px;background:linear-gradient(90deg,#1c1327 1%,#21152ce6 23%,#23172b38 65%),url('/launcher-hero.jpg') center 35%/cover no-repeat;border-bottom:1px solid #59415e}
  #th-toolkit .launcher-hero h1{font:700 47px/1 Georgia,serif;letter-spacing:-.045em;margin:0;color:#f6eee5}
  #th-toolkit .launcher-hero [data-play-status]{margin:0;color:#d5cadf}
  #th-toolkit .launcher-hero [data-play-status][data-ready=true]{color:#b6df95}
  #th-toolkit .launcher-hero [data-play]{border-color:#e7ba71;background:linear-gradient(#f5d598,#d49a47);color:#2b1b13;padding:9px 26px;font-weight:750;font-size:16px}
  #th-toolkit .launcher-hero [data-play]:enabled:hover{background:#ffe2a8}
- #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero{flex:1;justify-content:flex-end;gap:14px;min-height:0;padding:40px 42px clamp(40px,10vh,90px);border-bottom:0;background-image:linear-gradient(0deg,#130e1bd9,transparent 65%),linear-gradient(90deg,#1b1228b8,transparent 72%),url('/launcher-hero.jpg');background-position:right center}
+ #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero{flex:1;justify-content:flex-end;gap:14px;min-height:0;padding:40px 42px clamp(40px,10vh,90px);border-bottom:0;background:linear-gradient(0deg,#15101ee8 0%,transparent 54%),linear-gradient(90deg,#160f2599,transparent 68%),url('/launcher-hero.jpg') 68% center/cover no-repeat #181121}
  #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero h1{font-size:clamp(48px,7vw,84px)}
  #th-toolkit .shell:has(>form[data-page=play])>.launcher-hero [data-play]{padding:12px 34px;font-size:18px}
  #th-toolkit .shell>form[data-page=play]{flex:0 0 auto}
@@ -237,34 +237,80 @@
  #th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
  #th-toolkit [data-mode=mods] .panels{grid-template-columns:1fr}
  #th-toolkit .toolbar [data-launch-client]{max-width:200px}
+ #th-toolkit .launcher-icon{width:17px;height:17px;flex:none;vertical-align:middle}
+ #th-toolkit .launcher-brand{gap:10px;margin:0 3px 12px;padding:1px 0 21px;border-bottom:1px solid #503747;font-size:22px}
+ #th-toolkit .launcher-brand strong{letter-spacing:.015em;text-shadow:0 2px 10px #0009}
+ #th-toolkit .launcher-emblem{width:102px;height:102px;object-fit:contain;filter:drop-shadow(0 6px 10px #0b070da8)}
+ #th-toolkit .splash-mark .launcher-emblem{width:85px;height:85px}
+ #th-toolkit .launcher-sidebar button{gap:10px}
+ #th-toolkit .launcher-sidebar button .launcher-icon{color:#bfb0ca}
+ #th-toolkit .launcher-sidebar button:is([aria-pressed=true],[aria-expanded=true]) .launcher-icon{color:#f2cb8a}
+ #th-toolkit .launcher-hero [data-play]{display:inline-flex;align-items:center;gap:9px;box-shadow:0 4px 20px #140b1480}
+ #th-toolkit .launcher-hero [data-play] .launcher-icon{fill:currentColor;stroke-width:1.2}
+ #th-toolkit .must-have .component>[id^=th-toolkit-label]{position:relative;padding-left:30px}
+ #th-toolkit .must-have .featured-icon{position:absolute;left:0;top:0;width:23px;height:23px;padding:3px;border:1px solid #685037;border-radius:6px;color:#efca8d;background:#31252f}
+ #th-toolkit .must-have .installed-badge{margin-left:30px}
+ #th-toolkit .inventory-controls{justify-content:space-between;gap:10px;padding-bottom:10px}
+ #th-toolkit .inventory-search{display:flex;align-items:center;gap:7px;flex:1;max-width:415px;background:#211a2b;border:1px solid #54435f;border-radius:8px;padding:0 9px;color:#b9aac6}
+ #th-toolkit .inventory-search:focus-within{border-color:#e2b875;box-shadow:0 0 0 2px #d5a86626}
+ #th-toolkit .inventory-search input{flex:1;min-width:0;outline:none;border:0;background:transparent;padding:7px 3px;color:var(--ink)}
+ #th-toolkit .inventory-count{margin-right:auto;white-space:nowrap;font-size:12px}
+ #th-toolkit .inventory-controls>label:last-child{white-space:nowrap}
+ #th-toolkit .inventory-empty{padding:18px 12px}
+ #th-toolkit .inventory-row{padding:9px 10px}
+ #th-toolkit .inventory-row:hover{background:#211a2a}
+ #th-toolkit .inventory-identity{min-width:0;display:flex;align-items:center;gap:10px}
+ #th-toolkit .inventory-glyph{display:grid;place-items:center;flex:none;width:33px;height:33px;border-radius:7px;border:1px solid #51405d;background:#2a2034;color:#c7a9d7}
+ #th-toolkit .shell{border:0;border-radius:14px}
+ #th-toolkit .shell::after{content:'';position:absolute;inset:0;border:1px solid #79617b;border-radius:inherit;box-shadow:inset 0 0 0 1px #1a102799;pointer-events:none;z-index:4}
+ #th-toolkit .window-actions{top:10px;right:12px;gap:2px;padding:2px;background:#1b1426de;border:1px solid #75617d;border-radius:8px}
+ #th-toolkit .window-actions button{color:#eee1ee}
+ #th-toolkit .launcher-sidebar{border-right-color:#554057}
+ #th-toolkit .launcher-hero{border-bottom-color:#644b68}
+ #th-toolkit [data-mode=components] [data-mod-tools]{display:none}
+ #th-toolkit [data-mode=components] .panels{grid-template-columns:1fr}
+ #th-toolkit .panels fieldset{display:grid;gap:7px}
+ #th-toolkit .panels legend{padding:0 0 5px;color:var(--subtle)}
+ #th-toolkit .panels .catalog-row>.component{display:grid;grid-template-columns:16px minmax(126px,.9fr) minmax(100px,1.35fr);align-items:center;gap:9px;min-height:55px;padding:8px 12px;border:1px solid #4d3a55;border-radius:8px;background:linear-gradient(105deg,#251c30,#211727)}
+ #th-toolkit .panels .catalog-row>.component:hover,#th-toolkit .panels .catalog-row>.component:focus-within{border-color:#82678a;background:#302238}
+ #th-toolkit .panels .catalog-row:has(.launcher-action:not([hidden]))>.component{padding-right:80px}
+ #th-toolkit .panels .catalog-row:has(.remove-addon:not([hidden]))>.component{padding-right:42px}
+ #th-toolkit .panels .catalog-row:has(.launcher-action:not([hidden])):has(.remove-addon:not([hidden]))>.component{padding-right:112px}
+ #th-toolkit .panels .catalog-row>.remove-addon{right:8px}
+ #th-toolkit .panels .catalog-row>.launcher-action{right:9px}
+ #th-toolkit .panels .catalog-row:has(.remove-addon:not([hidden]))>.launcher-action{right:43px}
+ #th-toolkit .catalog-description{color:var(--subtle);font-size:12px;line-height:1.35}
+ #th-toolkit .panels .catalog-name{min-width:0;overflow-wrap:anywhere;font-weight:650}
+ #th-toolkit .panels .catalog-name .installed-badge{margin:2px 4px 0 0}
+ #th-toolkit .panels .catalog-name small:not([hidden]){display:block;font-weight:400}
 </style><div id="th-toolkit">
- <div class="splash" aria-hidden="true"><span class="splash-mark">⚒</span><span class="splash-title">Twilight Hammer Toolkit</span></div>
+ <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
   <header class="launcher-hero"><div class="window-actions" aria-label="Window controls"><button type="button" data-window="minimize" aria-label="Minimize" title="Minimize">−</button><button type="button" data-window="close" aria-label="Close" title="Close">×</button></div>
    <h1>OctoWoW</h1>
    <p data-play-status role="status">Choose your game folder</p>
-   <button type="button" data-play disabled>Play Now</button>
+   <button type="button" data-play disabled><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg>Play Now</button>
   </header>
   <form data-page="components">
    <nav class="launcher-sidebar" aria-label="Launcher navigation">
-    <div class="launcher-brand"><span class="crest" aria-hidden="true">⚒</span><strong>Twilight<br>Hammer</strong><span class="version">v{{VERSION}} · Experimental</span></div>
-    <button type="button" data-tab="play" aria-pressed="false">Play</button>
-    <button type="button" data-tab="components" aria-pressed="true">Addons</button>
-    <button type="button" data-tab="tweaks" aria-pressed="false">Client Tweaks</button>
-    <button type="button" data-tab="mods" aria-pressed="false">Mods &amp; Tools</button>
-    <button type="button" data-settings aria-controls="game-folder-settings" aria-expanded="false">Settings</button>
+    <div class="launcher-brand"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"><strong>Twilight<br>Hammer</strong><span class="version">v{{VERSION}} · Experimental</span></div>
+    <button type="button" data-tab="play" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5 12 7-12 7z"/></svg>Play</button>
+    <button type="button" data-tab="components" aria-pressed="true"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Addons</button>
+    <button type="button" data-tab="tweaks" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4v16m7-16v16m7-16v16M2 9h6m1 6h6m1-8h6"/></svg>Client Tweaks</button>
+    <button type="button" data-tab="mods" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5m-8 4.5L4 7.5M12 12v9"/></svg>Mods &amp; Tools</button>
+    <button type="button" data-settings aria-controls="game-folder-settings" aria-expanded="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m10 3-1 3-2 1-3-.5-1 3 2.3 2v2L3 16l2 2.5 3-.6 2 1 1 2.1h3l1-2.5 2-1 3 .5 1-3-2.3-2v-2L21 8l-2-2.5-3 .6-2-1L13 3z"/></svg>Settings</button>
     <button type="button" data-toolkit-release hidden>Update Available</button>
    </nav>
    <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><label>Launch client <select data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option></select></label><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
    <div class="body" data-components data-mode="components"><h2 class="section-title" data-section-title>Addons</h2>
     <fieldset class="must-have"><legend>Must Haves</legend>
-      <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1">TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
-      <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2">Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
-      <label class="component"><input type="checkbox" value="BigWigs" aria-describedby="th-toolkit-tip-3" aria-labelledby="th-toolkit-label-3"><span id="th-toolkit-label-3">BigWigs <small class="muted">prodigeomix</small></span><span class="tooltip-description" id="th-toolkit-tip-3">Shows boss ability timers and raid warnings. This is the prodigeomix fork.</span></label>
+      <label class="component"><input type="checkbox" value="TWThreat" aria-describedby="th-toolkit-tip-1" aria-labelledby="th-toolkit-label-1"><span id="th-toolkit-label-1"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.8 3 8 7 10 4-2 7-5.2 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>TWThreat <small class="muted">Threat meter</small></span><span class="tooltip-description" id="th-toolkit-tip-1">Shows your threat relative to the tank so you can tell when you are close to pulling aggro.</span></label>
+      <label class="component"><input type="checkbox" value="Rook's RaidVisuals" aria-describedby="th-toolkit-tip-2" aria-labelledby="th-toolkit-label-2"><span id="th-toolkit-label-2"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/></svg>Rook's RaidVisuals</span><span class="tooltip-description" id="th-toolkit-tip-2">OctoWoW client patch that changes spell visuals and sounds to make raid mechanics easier to see.</span></label>
+      <label class="component"><input type="checkbox" value="BigWigs" aria-describedby="th-toolkit-tip-3" aria-labelledby="th-toolkit-label-3"><span id="th-toolkit-label-3"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16h12l-2-3V9a4 4 0 0 0-8 0v4zm4 3a2 2 0 0 0 4 0"/></svg>BigWigs <small class="muted">prodigeomix</small></span><span class="tooltip-description" id="th-toolkit-tip-3">Shows boss ability timers and raid warnings. This is the prodigeomix fork.</span></label>
     </fieldset>
     <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
     <div class="panels" data-addon-panel="recommended">
-     <fieldset data-raid-addons><legend>Raid &amp; Character Addons</legend>
+     <fieldset data-raid-addons><legend>Recommended Addons</legend>
       <label class="component"><input type="checkbox" value="_LazyPig" aria-describedby="th-toolkit-tip-4" aria-labelledby="th-toolkit-label-4"><span id="th-toolkit-label-4">_LazyPig</span><span class="tooltip-description" id="th-toolkit-tip-4">Adds configurable shortcuts and automation for common tasks such as dismounting and accepting invites.</span></label>
       <label class="component"><input type="checkbox" value="DopingControl" aria-describedby="th-toolkit-tip-5" aria-labelledby="th-toolkit-label-5"><span id="th-toolkit-label-5">DopingControl</span><span class="tooltip-description" id="th-toolkit-tip-5">Checks raid consumables, buffs, debuffs, resistances, hit, and enchants before a pull.</span></label>
       <label class="component"><input type="checkbox" value="AutoMarker" aria-describedby="th-toolkit-tip-6" aria-labelledby="th-toolkit-label-6"><span id="th-toolkit-label-6">AutoMarker</span><span class="tooltip-description" id="th-toolkit-tip-6">Automatically assigns raid target icons to configured enemies.</span></label>
@@ -274,7 +320,7 @@
       <label class="component"><input type="checkbox" value="Rinse" aria-describedby="th-toolkit-tip-10" aria-labelledby="th-toolkit-label-10"><span id="th-toolkit-label-10">Rinse</span><span class="tooltip-description" id="th-toolkit-tip-10">Helps identify and dispel removable debuffs on party and raid members.</span></label>
       <label class="component"><input type="checkbox" value="ChronicleCompanion" aria-describedby="th-toolkit-tip-20" aria-labelledby="th-toolkit-label-20"><span id="th-toolkit-label-20">ChronicleCompanion</span><span class="tooltip-description" id="th-toolkit-tip-20">Adds extended unit data to combat logs for ChronicleClassic. Requires the WoW 1.12 client and Nampower.</span></label>
      </fieldset>
-     <fieldset><legend>Client Tools &amp; Compatibility</legend>
+     <fieldset data-mod-tools><legend>Client Mods &amp; Tools</legend>
       <label class="component"><input type="checkbox" value="Nampower" aria-describedby="th-toolkit-tip-11" aria-labelledby="th-toolkit-label-11"><span id="th-toolkit-label-11">Nampower</span><span class="tooltip-description" id="th-toolkit-tip-11">Client mod that improves spell handling and provides extra functions for compatible addons.</span></label>
       <label class="component"><input type="checkbox" value="NampowerSettings" aria-describedby="th-toolkit-tip-12" aria-labelledby="th-toolkit-label-12"><span id="th-toolkit-label-12">NampowerSettings</span><span class="tooltip-description" id="th-toolkit-tip-12">Adds an in-game settings panel for the Nampower client mod.</span></label>
       <label class="component"><input type="checkbox" value="ClassicAPI" aria-describedby="th-toolkit-tip-13" aria-labelledby="th-toolkit-label-13"><span id="th-toolkit-label-13">ClassicAPI</span><span class="tooltip-description" id="th-toolkit-tip-13">Adds newer WoW API functions so compatible addons can use them on the vanilla client.</span></label>
@@ -288,7 +334,7 @@
      </fieldset>
     </div>
     <label class="auction" data-auction-picker>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
-    <section data-addon-panel="installed" aria-label="Installed Addons" hidden><div class="inventory-controls"><label>View <select data-inventory-mode><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label></div><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
+    <section data-addon-panel="installed" aria-label="Installed Addons" hidden><div class="inventory-controls"><label class="inventory-search"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg><input type="search" data-inventory-search aria-label="Search installed addons" placeholder="Search installed addons" autocomplete="off" spellcheck="false"></label><span class="muted inventory-count" data-inventory-count role="status"></span><label>View <select data-inventory-mode><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label></div><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
    </div>
    <div class="body" data-tweaks hidden>
     <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
@@ -570,6 +616,17 @@
   const wrapper=document.createElement('div');
   wrapper.className='catalog-row removable-component';
   row.before(wrapper);
+  if(row.closest('.panels')){
+   const name=document.getElementById(input.getAttribute('aria-labelledby'));
+   name.classList.add('catalog-name');
+   const description=document.createElement('span');
+   description.className='catalog-description';
+   description.setAttribute('aria-hidden','true');
+   description.textContent=catalogDescriptions.get(input.value);
+   row.append(description);
+   if(removableComponents.has(input.value)&&row.closest('[data-mod-tools]'))
+    root.querySelector('[data-raid-addons]').append(wrapper);
+  }
   wrapper.append(row);
 
   const action=document.createElement('button');
@@ -599,6 +656,13 @@
  }
  addonTabs.forEach(tab=>tab.addEventListener('click',()=>selectAddonView(tab.dataset.addonTab)));
  const inventory=root.querySelector('[data-addon-inventory]');
+ const search=root.querySelector('[data-inventory-search]');
+ const inventoryCount=root.querySelector('[data-inventory-count]');
+ search.addEventListener('input',()=>{
+  page=0;
+  inventory.scrollTop=0;
+  renderInventory();
+ });
  const pages=root.querySelector('.inventory-pages');
  const previousPage=pages.querySelector('[data-page-back]');
  const nextPage=pages.querySelector('[data-page-next]');
@@ -613,7 +677,10 @@
  const addonKey=addon=>addon.Source?'git:'+addon.Name:addon.CatalogName;
  function renderInventory(){
   const pageSize=6;
-  const totalPages=Math.max(1,Math.ceil(installedAddons.length/pageSize));
+  const query=search.value.trim().toLowerCase();
+  const matches=query?installedAddons.filter(addon=>[addon.Name,addon.CatalogName].some(name=>name?.toLowerCase().includes(query))):installedAddons;
+  inventoryCount.textContent=query?matches.length+' of '+installedAddons.length:matches.length+' installed';
+  const totalPages=Math.max(1,Math.ceil(matches.length/pageSize));
   page=Math.min(Math.max(page,0),totalPages-1);
   const scrolling=mode.value==='scroll';
   pages.hidden=scrolling||totalPages===1;
@@ -625,8 +692,14 @@
   if(hovered&&!hovered.anchor.isConnected)hovered=null;
   if(focused&&!focused.anchor.isConnected)focused=null;
   drawTooltip();
-  if(!installedAddons.length){inventory.textContent='No installed addons found in this game folder.';return;}
-  for(const addon of scrolling?installedAddons:installedAddons.slice(page*pageSize,(page+1)*pageSize)){
+  if(!matches.length){
+   const empty=document.createElement('p');
+   empty.className='inventory-empty muted';
+   empty.textContent=installedAddons.length?'No installed addons match your search.':'No installed addons found in this game folder.';
+   inventory.append(empty);
+   return;
+  }
+  for(const addon of scrolling?matches:matches.slice(page*pageSize,(page+1)*pageSize)){
    const row=document.createElement('div');
    row.className='inventory-row';
    const label=document.createElement('div');
@@ -653,7 +726,13 @@
    bindTooltip(row,title,description);
    label.prepend(title);
    label.append(detail);
-   row.append(label);
+   const identity=document.createElement('div');
+   identity.className='inventory-identity';
+   const glyph=document.createElement('span');
+   glyph.className='inventory-glyph';
+   glyph.innerHTML='<svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>';
+   identity.append(glyph,label);
+   row.append(identity);
    const actions=document.createElement('div');
    actions.className='inventory-actions';
    if(active||availableUpdates[updateKey]){
@@ -749,7 +828,8 @@
  const catalogNames=new Set([...checks.map(input=>input.value),...auctionChoices.map(option=>option.value)]);
  function bulkKeys(){
   const registered=installedAddons.filter(addon=>addonView==='installed'||addon.CatalogName).map(addonKey);
-  const keys=addonView==='installed'?registered:[...registered,...[...catalogNames].filter(name=>installedStatuses[name])];
+  const keys=addonView==='installed'?registered:[...registered,...[...catalogNames].filter(name=>
+   installedStatuses[name]&&(removableComponents.has(name)||name==="Rook's RaidVisuals"))];
   return [...new Set(keys)].filter(key=>availableUpdates[key]);
  }
  function canApply(name){
