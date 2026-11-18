@@ -34,6 +34,7 @@ internal static class ExperimentalClient {
         if(!Directory.Exists(Path.Combine(game,"Data")))throw new IOException("Choose an OctoWoW folder containing its Data folder.");
         if(!ToolkitPackages.Hash(bytes).Equals(PackageHash,StringComparison.OrdinalIgnoreCase))
             throw new IOException("The Benilla download did not match its published checksum. Download it again.");
+        EnsureStopped(game);
         string root=Root(game),target=BuildFolder(game);
         ToolkitInstall.CheckForLinks(game,target);
         Directory.CreateDirectory(root);
@@ -63,6 +64,28 @@ internal static class ExperimentalClient {
         } finally {
             if(Directory.Exists(stage))Directory.Delete(stage,true);
         }
+    }
+    internal static void EnsureStopped(string game) {
+        string executable=Path.GetFullPath(Executable(game));
+        foreach(var process in Process.GetProcessesByName("Benilla-Octo"))using(process) {
+            try {
+                if(Path.GetFullPath(process.MainModule.FileName).Equals(executable,StringComparison.OrdinalIgnoreCase))
+                    throw new IOException("Close the installed Benilla client before changing its files.");
+            } catch(System.ComponentModel.Win32Exception) {
+                throw new IOException("Close Benilla before changing its files.");
+            } catch(InvalidOperationException) { }
+        }
+    }
+    internal static string Uninstall(string game) {
+        string target=BuildFolder(game);
+        ToolkitInstall.CheckForLinks(game,target);
+        if(!Directory.Exists(target))throw new IOException("The installed Benilla client was not found.");
+        EnsureStopped(game);
+        string backup=ToolkitPackages.SafePath(game,Path.Combine(".twilight-toolkit","backups","Benilla-removed-"+Guid.NewGuid().ToString("N")));
+        ToolkitInstall.CheckForLinks(game,backup);
+        Directory.CreateDirectory(Path.GetDirectoryName(backup));
+        Directory.Move(target,backup);
+        return backup;
     }
     internal static ProcessStartInfo StartInfo(string game) {
         if(!Installed(game))throw new IOException("Install Benilla-Octo from Experimental first.");

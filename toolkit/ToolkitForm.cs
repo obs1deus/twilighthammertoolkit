@@ -35,6 +35,7 @@ internal sealed class ToolkitForm : Form {
         ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+        if(args.Length>0&&args[0]=="--finish-toolkit-uninstall"){ToolkitUninstall.Finish(args);return;}
         if(args.Length>0&&args[0]=="--apply-toolkit-update"){ToolkitSelfUpdate.Apply(args);return;}
         if(args.Length==2&&args[0]=="--clean-toolkit-update")
             Task.Run(()=>ToolkitSelfUpdate.Clean(args[1]));

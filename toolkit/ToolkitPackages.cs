@@ -27,7 +27,7 @@ internal sealed class Release {
 }
 internal static class ToolkitPackages {
     internal const string GitHub = "https://github.com/obs1deus/twilighthammertoolkit";
-    internal const string Version = "0.1.33";
+    internal const string Version = "0.1.35";
     internal static readonly Package[] Recommended = {
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),

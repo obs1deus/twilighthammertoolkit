@@ -393,6 +393,23 @@
  #th-toolkit .settings-folder-row input{flex:1;min-width:0}
  #th-toolkit .settings-card .settings-feedback{margin:9px 0 0;min-height:18px;font-size:12px;color:var(--gold)}
  #th-toolkit .settings-version{margin:18px 0 0;color:var(--subtle);font-size:12px}
+ #th-toolkit .remove-client{color:#f2a6b0;border-color:#81505c;background:#3c202b;transition:background .15s,border-color .15s}
+ #th-toolkit .remove-client:enabled:hover{color:#fff;background:#753444;border-color:#d27b8a}
+ #th-toolkit .settings-uninstall{display:flex;gap:20px;align-items:center;justify-content:space-between}
+ #th-toolkit .settings-uninstall p{margin:0;max-width:570px}
+ #th-toolkit .settings-uninstall button{flex:none}
+ /* Use the same rounded scrollbar in every launcher page and dialog. Reset the
+    standard scrollbar properties so Chromium uses the custom thumb below. */
+ #th-toolkit{--scroll-thumb:#6e567d;--scroll-hover:#b39874;--scroll-active:#efc783}
+ #th-toolkit[data-theme=horde]{--scroll-thumb:#825044;--scroll-hover:#bc785b;--scroll-active:#f0b07b}
+ #th-toolkit .shell,#th-toolkit .shell *{scrollbar-width:auto!important;scrollbar-color:auto!important}
+ #th-toolkit .shell::-webkit-scrollbar,#th-toolkit .shell *::-webkit-scrollbar{width:12px;height:12px;background:transparent}
+ #th-toolkit .shell::-webkit-scrollbar-track,#th-toolkit .shell *::-webkit-scrollbar-track{background:transparent;margin-block:7px;border-radius:12px}
+ #th-toolkit .shell::-webkit-scrollbar-thumb,#th-toolkit .shell *::-webkit-scrollbar-thumb{min-height:36px;border:3px solid transparent;border-radius:12px;background:var(--scroll-thumb);background-clip:padding-box}
+ #th-toolkit .shell::-webkit-scrollbar-thumb:hover,#th-toolkit .shell *::-webkit-scrollbar-thumb:hover{background-color:var(--scroll-hover)}
+ #th-toolkit .shell::-webkit-scrollbar-thumb:active,#th-toolkit .shell *::-webkit-scrollbar-thumb:active{background-color:var(--scroll-active)}
+ #th-toolkit .shell::-webkit-scrollbar-button,#th-toolkit .shell *::-webkit-scrollbar-button{display:none;width:0;height:0}
+ #th-toolkit .shell::-webkit-scrollbar-corner,#th-toolkit .shell *::-webkit-scrollbar-corner{background:transparent}
 </style><div id="th-toolkit" data-frame="{{FRAME}}" data-theme="alliance">
  <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
@@ -423,6 +440,7 @@
      <section class="settings-card"><h3>Appearance</h3><p>Choose your launcher theme.</p><label for="settings-launcher-theme">Theme</label><select id="settings-launcher-theme" data-launcher-theme><option value="alliance">Alliance</option><option value="horde">Horde</option></select><small>Theme changes apply immediately and save automatically.</small></section>
      <section class="settings-card"><h3>Updates</h3><p>Check for Toolkit, addon, and client mod updates.</p><button type="button" data-check>Check for updates</button><small>Checks also run automatically in the background.</small></section>
      <section class="settings-card"><h3>Logs &amp; troubleshooting</h3><p>Review recent activity, downloads, and update errors.</p><button type="button" data-view-log>View log</button><small>Opens the launcher log in your default text editor.</small></section>
+     <section class="settings-card settings-game settings-uninstall"><div><h3>Uninstall Launcher</h3><p>Remove this copy of Twilight Hammer Toolkit. Your game, addons, Benilla, Sync uploader, preferences, and logs are kept.</p></div><button type="button" class="remove-client" data-uninstall-toolkit>Uninstall Launcher</button></section>
     </div><p class="settings-version">Twilight Hammer Toolkit · v{{VERSION}}</p>
    </section>
    <div class="body" data-components data-mode="components"><div class="catalog-heading"><h2 class="section-title" data-section-title>Addons</h2>
@@ -473,7 +491,7 @@
      <p>A modern 1.12 client with enhanced lighting, shadows, water, and built-in support for SuperWoW, Nampower, UnitXP_SP3, and ClassicAPI.</p>
      <dl><div><dt>Download</dt><dd>41.8 MB · Hosted on GitHub</dd></div><div><dt>Existing game data</dt><dd>Reads the existing Data folder in your selected OctoWoW installation. A second copy of the game data is not required.</dd></div><div><dt>Your OctoWoW installation</dt><dd>Installing Benilla does not replace or modify your existing OctoWoW executable, Data folder, addons, or settings.</dd></div><div><dt>Benilla files</dt><dd>Stored in a dedicated client folder with its own settings and addons. Open Client Folder to manage them.</dd></div></dl>
      <p class="experimental-note">This build is experimental. A loot roster Lua error and excessive lighting have been observed.</p>
-     <div class="experimental-actions"><button type="button" class="primary" data-benilla-install>Download &amp; Install</button><button type="button" class="primary" data-benilla-play disabled>Play Benilla</button><button type="button" data-benilla-folder disabled>Open Client Folder</button><button type="button" class="security-link" data-benilla-source>Project &amp; Credits ↗</button></div>
+     <div class="experimental-actions"><button type="button" class="primary" data-benilla-install>Download &amp; Install</button><button type="button" class="primary" data-benilla-play disabled>Play Benilla</button><button type="button" data-benilla-folder disabled>Open Client Folder</button><button type="button" class="remove-client" data-benilla-uninstall hidden>Uninstall Benilla</button><button type="button" class="security-link" data-benilla-source>Project &amp; Credits ↗</button></div>
      <progress data-benilla-progress max="100" value="0" hidden aria-label="Benilla download progress"></progress>
      <p class="muted" data-benilla-status role="status">Choose Download &amp; Install to set up this client.</p>
      <details><summary>Lighting troubleshooting</summary><p class="muted">If the scene is too bright, try these commands one at a time in Benilla chat.</p><pre>/console sunShafts 0
@@ -731,21 +749,26 @@
  });
  const benillaInstall=root.querySelector('[data-benilla-install]');
  const benillaPlay=root.querySelector('[data-benilla-play]');
+ const benillaUninstall=root.querySelector('[data-benilla-uninstall]');
  const benillaFolder=root.querySelector('[data-benilla-folder]');
  const benillaStatus=root.querySelector('[data-benilla-status]');
  const benillaProgress=root.querySelector('[data-benilla-progress]');
- let benillaInstalled=false,experimentalDownloading=false;
+ let benillaInstalled=false,experimentalDownloading=false,benillaLastStatus='';
  function refreshExperimental(){
   const ready=Boolean(confirmedFolder&&confirmedFolder===gameField.value);
   benillaInstall.disabled=!ready||operationBusy;
   benillaInstall.textContent=experimentalDownloading?'Downloading…':benillaInstalled?'Reinstall':'Download & Install';
   benillaPlay.disabled=!ready||!benillaInstalled||operationBusy;
   benillaFolder.disabled=!ready||!benillaInstalled||operationBusy;
+  benillaUninstall.hidden=!benillaInstalled;
+  benillaUninstall.disabled=!ready||operationBusy;
   root.querySelector('[data-benilla-badge]').hidden=!benillaInstalled;
   benillaProgress.hidden=!experimentalDownloading;
  }
+ benillaUninstall.addEventListener('click',()=>send('uninstall-experimental',{game:confirmedFolder}));
+ root.querySelector('[data-uninstall-toolkit]').addEventListener('click',()=>send('uninstall-toolkit'));
  benillaInstall.addEventListener('click',()=>send('install-experimental',{game:confirmedFolder}));
- benillaPlay.addEventListener('click',()=>send('play-experimental',{game:confirmedFolder}));
+ benillaPlay.addEventListener('click',()=>{benillaStatus.textContent='Starting Benilla…';send('play-experimental',{game:confirmedFolder});});
  benillaFolder.addEventListener('click',()=>send('experimental-folder',{game:confirmedFolder}));
  root.querySelector('[data-benilla-source]').addEventListener('click',()=>send('experimental-source'));
  const launchClient=root.querySelector('[data-launch-client]');
@@ -1494,6 +1517,7 @@
   if(data.game!==undefined){
    gameField.value=data.game;
    benillaInstalled=false;
+   benillaLastStatus='';
    const nextFolder=data.gameValid?data.game:undefined;
    if(nextFolder!==confirmedFolder){patch=null;patchChecking=false;patchTime=0;patchError='';}
    confirmedFolder=nextFolder;
@@ -1524,10 +1548,15 @@
   }
   if(data.benillaInstalled!==undefined){
    benillaInstalled=Boolean(data.benillaInstalled);
-   if(benillaInstalled&&!experimentalDownloading)benillaStatus.textContent='Benilla-Octo is installed. Ready to play.';
+   if(benillaInstalled&&!experimentalDownloading&&!benillaLastStatus)benillaStatus.textContent='Benilla-Octo is installed. Ready to play.';
    refreshExperimental();
   }
-  if(data.experimentalStatus!==undefined)benillaStatus.textContent=data.experimentalStatus;
+  if(data.benillaRemoved&&launchClient.value==='benilla'){
+   launchClient.value='auto';defaultLaunchClient=true;localStorage.setItem('launcher-client','auto');
+   send('installed',{game:confirmedFolder});
+  }
+  if(data.experimentalStatus!==undefined){benillaLastStatus=data.experimentalStatus;benillaStatus.textContent=benillaLastStatus;}
+  if(data.settingsStatus!==undefined)folderSettings.querySelector('[data-settings-feedback]').textContent=data.settingsStatus;
   if(data.experimentalDownloading!==undefined){
    experimentalDownloading=data.experimentalDownloading;
    refreshExperimental();

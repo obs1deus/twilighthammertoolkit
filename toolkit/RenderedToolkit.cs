@@ -169,9 +169,11 @@ internal sealed class RenderedToolkit : Form {
                     break;
                 case "browse": if(!busy)Browse(game);break;
                 case "save-folder": SaveGameFolder(game);break;
-                case "play": if(!busy)LaunchGame(game,TextField(request,"client"));break;
+                case "play": if(!busy)await LaunchGame(game,TextField(request,"client"));break;
                 case "install-experimental": if(!busy)await InstallExperimental(GamePath(game));break;
-                case "play-experimental": if(!busy)LaunchGame(game,"benilla");break;
+                case "play-experimental": if(!busy)await LaunchGame(game,"benilla");break;
+                case "uninstall-experimental": if(!busy)await UninstallExperimental(GamePath(game));break;
+                case "uninstall-toolkit": if(!busy)await UninstallToolkit();break;
                 case "experimental-source": Open(ExperimentalClient.SourceUrl);break;
                 case "experimental-folder":
                     string clientFolder=ExperimentalClient.Root(GamePath(game));
@@ -610,24 +612,68 @@ internal sealed class RenderedToolkit : Form {
             Post(new{busy=false,experimentalDownloading=false});
         }
     }
-    private void LaunchGame(string game,string client) {
+    private async Task UninstallExperimental(string folder) {
+        busy=true;
+        try {
+            ExperimentalClient.EnsureStopped(folder);
+            if(!await ConfirmInstall("Uninstall Benilla-Octo?",null,new[]{"Benilla-Octo client"},
+                "Moves the installed client to a backup. Benilla settings and addons, and the shared OctoWoW Data folder, are kept.","Uninstall","UNINSTALL"))return;
+            string backup=await Task.Run(()=>ExperimentalClient.Uninstall(folder));
+            ToolkitLog.Write("experimental","Uninstalled Benilla to backup: "+backup);
+            Post(new{benillaInstalled=false,benillaRemoved=true,experimentalStatus="Benilla uninstalled. Its settings and addons were kept; client files are backed up."});
+        } catch(Exception error) {
+            ToolkitLog.Write("experimental","Uninstall failed: "+error.Message,"error");
+            Post(new{experimentalStatus=error.Message});
+        } finally {busy=false;Post(new{busy=false});}
+    }
+    private async Task UninstallToolkit() {
+        busy=true;
+        try {
+            if(!await ConfirmInstall("Uninstall Twilight Hammer Toolkit?",null,new[]{Application.ExecutablePath},
+                "Removes this launcher executable and closes this window. Game files, addons, Benilla, the Sync uploader, and launcher preferences and logs are kept. Other downloaded copies of the launcher are not removed.","Uninstall Launcher","UNINSTALL"))return;
+            ToolkitUninstall.Start();
+            busy=false;
+            Close();
+        } catch(Exception error) {
+            ToolkitLog.Write("toolkit","Could not start uninstall: "+error.Message,"error");
+            Post(new{settingsStatus=error.Message});
+        } finally {busy=false;Post(new{busy=false});}
+    }
+    private void ReportLaunch(string client,string message) {
+        Post(new{playStatus=message});
+        if(client=="benilla")Post(new{experimentalStatus=message});
+    }
+    private async Task LaunchGame(string game,string client) {
+        busy=true;
+        Post(new{busy=true});
         try {
             string folder=GamePath(game);
             string executable=ResolveGameClient(folder,client);
-            if(new[]{"WoW","WoW_Modernized","WoW_tweaked","VanillaFixes","Benilla-Octo"}.Any(name=>Process.GetProcessesByName(name).Length>0)) {
-                Post(new{playStatus="Game already running"});
-                return;
+            foreach(string name in new[]{"WoW","WoW_Modernized","WoW_tweaked","VanillaFixes","Benilla-Octo"}) {
+                foreach(var running in Process.GetProcessesByName(name))using(running) {
+                    string message=name=="Benilla-Octo"?"Benilla is already running.":"The game is already running. Close it before starting another client.";
+                    if(running.MainWindowHandle!=IntPtr.Zero) {
+                        if(IsIconic(running.MainWindowHandle))ShowWindowAsync(running.MainWindowHandle,9);
+                        SetForegroundWindow(running.MainWindowHandle);
+                    }
+                    ToolkitLog.Write("launcher",message);
+                    ReportLaunch(client,message);
+                    return;
+                }
             }
             var start=client=="benilla"?ExperimentalClient.StartInfo(folder):new ProcessStartInfo(executable){WorkingDirectory=folder,UseShellExecute=false};
+            ReportLaunch(client,client=="benilla"?"Starting Benilla…":"Starting game…");
             using(var process=Process.Start(start)) {
                 if(process==null)throw new IOException("Windows could not start the game.");
+                if(client=="benilla"&&await Task.Run(()=>process.WaitForExit(3000)))
+                    throw new IOException("Benilla closed during startup (exit code "+process.ExitCode+"). See the Benilla client logs in Open Client Folder.");
             }
             ToolkitLog.Write("launcher","Started "+Path.GetFileName(executable)+".");
-            Post(new{playStatus="Game started"});
+            ReportLaunch(client,client=="benilla"?"Benilla started.":"Game started");
         } catch(Exception error) {
-            ToolkitLog.Write("launcher","Launch failed ("+error.GetType().Name+").","warn");
-            Post(new{playStatus=error.Message});
-        }
+            ToolkitLog.Write("launcher","Launch failed: "+error.Message,"warn");
+            ReportLaunch(client,error.Message);
+        } finally {busy=false;Post(new{busy=false});}
     }
     private void CopyFolder(string folder,string label) {
         if(String.IsNullOrWhiteSpace(folder)) {
@@ -660,6 +706,9 @@ internal sealed class RenderedToolkit : Form {
         base.OnFormClosing(args);
     }
     [DllImport("user32.dll")]private static extern bool ReleaseCapture();
+    [DllImport("user32.dll")]private static extern bool IsIconic(IntPtr window);
+    [DllImport("user32.dll")]private static extern bool ShowWindowAsync(IntPtr window,int command);
+    [DllImport("user32.dll")]private static extern bool SetForegroundWindow(IntPtr window);
     [DllImport("user32.dll")]private static extern IntPtr SendMessage(IntPtr window,uint message,IntPtr wparam,IntPtr lparam);
     protected override CreateParams CreateParams {
         get {
