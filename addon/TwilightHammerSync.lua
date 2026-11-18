@@ -15,7 +15,6 @@ local function queue(kind,delay)
  pending[kind]=GetTime()+(delay or 2)
 end
 local bankNames={twilightbank=true,twilightbags=true}
-if edition=='bank' then bankNames.twilightbags=nil end
 local function say(s) if not automatic then DEFAULT_CHAT_FRAME:AddMessage('|cffbdabe8Twilight Hammer:|r '..s) end end
 local function quote(s)
  return '"'..string.gsub(tostring(s),'[%z\1-\31\\"]',function(c)

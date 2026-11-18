@@ -15,6 +15,7 @@ using System.Web.Script.Serialization;
 internal sealed class Package {
     internal readonly string Name, Group, Repo, Match, Folder, Help;
     internal readonly bool Octo;
+    internal string Revision = "";
     internal readonly string[] Requires;
     internal Package(string name, string group, string repo, string match, string folder, string help, params string[] requires) {
         Name=name; Group=group; Octo=repo.StartsWith("octo:");
@@ -26,8 +27,8 @@ internal sealed class Release {
 }
 internal static class ToolkitPackages {
     internal const string GitHub = "https://github.com/obs1deus/twilighthammertoolkit";
-    internal const string Version = "0.1.23";
-    internal static readonly Package[] Catalog = {
+    internal const string Version = "0.1.33";
+    internal static readonly Package[] Recommended = {
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),
         new Package("BigWigs","Must-have raid addons","prodigeomix/BigWigs",@"^BigWigs-.*\.zip$", "BigWigs","Boss timers and raid warnings from the prodigeomix fork."),
@@ -40,11 +41,11 @@ internal static class ToolkitPackages {
         new Package("Rinse","Raid & character addons","Otari98/Rinse",null,"Rinse","Helps dispel debuffs on party and raid members."),
         new Package("ChronicleCompanion","Raid & character addons","Emyrk/ChronicleCompanion",null,"ChronicleCompanion","Adds extended unit details to Chronicle combat logs. Requires Nampower.","Nampower"),
         new Package("VanillaFixes","Client tools & compatibility","hannesmann/vanillafixes",@"^vanillafixes-[\d.]+\.zip$","game","Launcher that fixes stutter and loads configured client mods."),
-        new Package("Nampower","Client tools & compatibility","Emyrk/nampower",@"^nampower\.dll$","game","Improves spell handling and adds APIs required by ChronicleCompanion.","VanillaFixes"),
-        new Package("NampowerSettings","Client tools & compatibility","octo:shaga/NampowerSettings",null,"NampowerSettings","In-game settings panel for Nampower.","Nampower"),
+        new Package("Nampower","Client tools & compatibility","Emyrk/nampower",@"^nampower\.dll$","game","Improves spell handling and adds APIs required by ChronicleCompanion. Installs together with NampowerSettings.","VanillaFixes","NampowerSettings"),
+        new Package("NampowerSettings","Raid & character addons","octo:shaga/NampowerSettings",null,"NampowerSettings","In-game settings panel for Nampower. Installs together with the Nampower client mod.","Nampower"),
         new Package("ClassicAPI","Client tools & compatibility","brues-code/ClassicAPI",@"^ClassicAPI\.dll$","game","Adds newer WoW API functions to the vanilla client.","VanillaFixes"),
-        new Package("UnitXP_SP3","Client tools & compatibility","brues-code/UnitXP_SP3",@"^UnitXP_SP3\.dll$","game","Client mod that exposes unit information and distance queries.","VanillaFixes"),
-        new Package("UnitXP_SP3_Addon","Client tools & compatibility","octo:shaga/UnitXP_SP3_Addon",null,"UnitXP_SP3_Addon","Companion addon for UnitXP_SP3.","UnitXP_SP3"),
+        new Package("UnitXP_SP3","Client tools & compatibility","brues-code/UnitXP_SP3",@"^UnitXP_SP3\.dll$","game","Client mod that exposes unit information and distance queries. Installs together with UnitXP_SP3_Addon.","VanillaFixes","UnitXP_SP3_Addon"),
+        new Package("UnitXP_SP3_Addon","Raid & character addons","octo:shaga/UnitXP_SP3_Addon",null,"UnitXP_SP3_Addon","Companion addon for UnitXP_SP3. Installs together with the UnitXP_SP3 client mod.","UnitXP_SP3"),
         new Package("VanillaHelpers","Client tools & compatibility","isfir/VanillaHelpers",@"^VanillaHelpers\.dll$","game","Adds file access, minimap functions, and graphics features.","VanillaFixes"),
         new Package("SuperWoW","Client tools & compatibility","balakethelock/SuperWoW",@"^SuperWoW\.release\..*\.zip$","game","Extends vanilla APIs, including live file export for Guild Sync.","VanillaFixes"),
         new Package("SuperAPI","Client tools & compatibility","balakethelock/SuperAPI",null,"SuperAPI","Compatibility addon for SuperWoW.","SuperWoW"),
@@ -53,6 +54,7 @@ internal static class ToolkitPackages {
         new Package("Aux","Auction House","OldManAlpha/aux-addon",null,"aux-addon","Auction search, pricing and auction posting tools."),
         new Package("OctoAuctionator","Auction House","octo:John-The-Baptist/OctoAuctionator",null,"OctoAuctionator","Auctionator’s Buy, Sell, and More tabs for OctoWoW.")
     };
+    internal static readonly Package[] Catalog = Recommended.Concat(ImportedCatalog.Packages).ToArray();
     internal static readonly Package Self = new Package("Toolkit","","obs1deus/twilighthammertoolkit",@"^TwilightHammerToolkit\.exe$","","");
     private static readonly JavaScriptSerializer Json = new JavaScriptSerializer();
     private static readonly HashSet<string> AddonExtensions = new HashSet<string>(".toc .lua .xml .blp .tga .jpg .jpeg .png .wav .ogg .mp3 .ttf .otf .txt .md .gif .dds".Split(' '),StringComparer.OrdinalIgnoreCase);
@@ -68,7 +70,7 @@ internal static class ToolkitPackages {
     private static bool Allowed(Uri uri) {
         return uri.Scheme=="https" && new[] {"api.github.com","github.com","codeload.github.com","release-assets.githubusercontent.com","objects.githubusercontent.com","octowow.st"}.Contains(uri.Host);
     }
-    internal static byte[] Download(string url,int limit,string expectedTag="",Uri repositoryServer=null) {
+    internal static byte[] Download(string url,int limit,string expectedTag="",Uri repositoryServer=null,Action<long,long> progress=null) {
         for(int redirects=0;redirects<6;redirects++) {
             Uri uri;
             if(!Uri.TryCreate(url,UriKind.Absolute,out uri)||uri.Scheme!="https"||uri.UserInfo.Length!=0||
@@ -92,6 +94,7 @@ internal static class ToolkitPackages {
                     while((count=stream.Read(chunk,0,chunk.Length))>0) {
                         if(data.Length+count>limit)throw new IOException("Download exceeds the size limit.");
                         data.Write(chunk,0,count);
+                        if(progress!=null)progress(data.Length,response.ContentLength);
                     }
                     return data.ToArray();
                 }
@@ -147,7 +150,7 @@ internal static class ToolkitPackages {
             throw new IOException("No matching release asset.");
         }
         if(!package.Octo) {
-            string archive="https://codeload.github.com/"+package.Repo+"/zip/HEAD";
+            string archive="https://codeload.github.com/"+package.Repo+"/zip/"+(package.Revision.Length>0?Uri.EscapeDataString(package.Revision):"HEAD");
             var request=(HttpWebRequest)WebRequest.Create(archive);
             request.UserAgent="Twilight-Hammer-Toolkit/"+Version;
             request.Method="HEAD"; request.AllowAutoRedirect=false; request.Timeout=20000;
@@ -157,7 +160,7 @@ internal static class ToolkitPackages {
                 return new Release {Version=tag,Url=archive,File="source.zip",ArchiveTag=tag};
             }
         }
-        string branch=StringField(Metadata(api),"default_branch");
+        string branch=package.Revision.Length>0?package.Revision:StringField(Metadata(api),"default_branch");
         if(String.IsNullOrEmpty(branch))throw new IOException("Default branch unavailable.");
         var commit=Metadata(api+"/git/commits/"+Uri.EscapeDataString(branch));
         string sha=StringField(commit,"sha");

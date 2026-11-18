@@ -60,6 +60,26 @@
 #th-toolkit footer{padding:13px 24px;background:var(--raised);border-top:1px solid var(--line)}
 #th-toolkit button.primary{background:light-dark(#65418c,#eac181);color:light-dark(#fff,#302116);padding-inline:17px}
 @media(max-width:520px){#th-toolkit header,#th-toolkit .toolbar,#th-toolkit .body,#th-toolkit footer{padding-inline:13px}#th-toolkit fieldset.must-have{grid-template-columns:1fr}#th-toolkit .must-have .component small{display:inline;margin-left:4px}}
+
+ #th-toolkit .recommendation-controls{display:grid;gap:10px}
+ #th-toolkit .recommendation-search{display:flex;align-items:center;gap:9px;padding:8px 11px;border:1px solid #66516f;border-radius:8px;background:var(--raised)}
+ #th-toolkit .recommendation-search input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--ink);font:inherit}
+ #th-toolkit .recommendation-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+ #th-toolkit .category-filters{display:flex;flex-wrap:wrap;gap:6px}
+ #th-toolkit .category-filters button{padding:5px 11px;border-radius:18px;font-size:12px;transition:background .15s,border-color .15s}
+ #th-toolkit .category-filters button[aria-pressed=true]{background:var(--gold);color:#251a1e;border-color:var(--gold);font-weight:650}
+ #th-toolkit .category-filters button:hover{border-color:var(--gold)}
+ #th-toolkit [data-raid-addons]{display:grid;gap:18px;min-width:0}
+ #th-toolkit .recommendation-group legend{font-size:14px;color:var(--ink);margin-bottom:6px}
+ #th-toolkit .recommendation-empty{padding:24px 0}
+ #th-toolkit .catalog-glyph{display:flex;align-items:center;justify-content:center;width:30px;height:32px;flex:none;border:1px solid #67503e;border-radius:7px;background:#372739;color:var(--gold)}
+ #th-toolkit .catalog-glyph svg{width:20px;height:20px}
+ #th-toolkit .panels .catalog-row>.component:has(.catalog-glyph){grid-template-columns:16px 30px minmax(155px,2fr) minmax(0,3fr)}
+ #th-toolkit .must-have .catalog-glyph{display:none}
+ #th-toolkit .panels .catalog-name>.featured-icon{display:none}
+ #th-toolkit [data-mode=mods] [data-recommendation-controls]{display:none!important}
+ #th-toolkit[data-theme=horde] .catalog-glyph{background:#3b251d;border-color:#86523d}
+
 </style>
 <style>
 #th-toolkit [hidden]{display:none!important}
@@ -172,17 +192,6 @@
  #th-toolkit .sync{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px}
  #th-toolkit .sync [data-sync-description]{grid-column:1/-1;min-height:2.9em}
  #th-toolkit .sync [data-uninstall]{justify-self:start;text-align:left;padding:0}
- #th-toolkit .sync-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 12px}
- #th-toolkit .sync-summary [data-sync-toggle]{display:flex;align-items:center;gap:7px;text-align:left;padding:0;min-width:0;color:var(--ink);border:0;background:transparent;font-weight:700}
- #th-toolkit .sync-summary [data-sync-toggle]:is(:hover,:focus-visible){color:var(--gold)}
- #th-toolkit .sync-summary [data-sync-toggle] .installed-badge{margin:0}
- #th-toolkit .sync-chevron{margin-left:auto;color:var(--subtle)}
- #th-toolkit [data-sync-toggle][aria-expanded=true] .sync-chevron{transform:rotate(180deg)}
- #th-toolkit .sync-details{grid-column:1/-1;border-top:1px solid var(--line);margin-top:9px;padding-top:8px}
- #th-toolkit .sync-details p{margin:3px 0 0}
- #th-toolkit .must-have.compact{padding-block:5px}
- #th-toolkit .must-have.compact label.component{padding-block:5px;gap:3px 5px}
- #th-toolkit .must-have.compact .component small{display:none}
  #th-toolkit .security-content .removal-option{display:flex;align-items:center;gap:8px}
  #th-toolkit .update-results{margin:0;padding:0;list-style:none}
  #th-toolkit .update-results li{padding:6px 0;border-bottom:1px solid var(--line)}
@@ -211,9 +220,7 @@
  #th-toolkit .section-title{margin:0;font-size:22px;letter-spacing:-.025em}
  #th-toolkit fieldset.must-have{margin:0;border-color:#87653b;background:linear-gradient(120deg,#3a2934,#251c2c);padding:11px;gap:8px}
  #th-toolkit .must-have legend{font-size:17px;font-weight:750}
- #th-toolkit .must-have.compact{padding-block:7px}
  #th-toolkit .must-have label.component{min-height:73px;align-content:center}
- #th-toolkit .must-have.compact label.component{min-height:56px}
  #th-toolkit .must-have .launcher-action{bottom:6px;top:auto;transform:none}
  #th-toolkit .must-have .component:has(input){padding-bottom:31px}
  #th-toolkit .must-have .catalog-row:has(.launcher-action[hidden]) .component{padding-bottom:8px}
@@ -230,7 +237,6 @@
  #th-toolkit .catalog-row>.launcher-action:enabled:hover{color:#251a1e;background:#edca91;border-color:#edca91}
  #th-toolkit .must-have .catalog-row>.launcher-action{right:5px;top:auto;transform:none}
  #th-toolkit .sync-dock{padding:0 21px 8px}
- #th-toolkit .sync-dock .sync-summary{min-height:36px}
  #th-toolkit footer .launcher-link{color:var(--subtle);text-decoration:none;white-space:nowrap}
  #th-toolkit footer .launcher-link:hover{color:var(--gold)}
  #th-toolkit [data-mode=mods] :is(.addon-nav,[data-raid-addons],[data-auction-picker],.must-have,[data-addon-panel=installed]){display:none!important}
@@ -325,6 +331,68 @@
  #th-toolkit[data-theme=horde] .inventory-search:focus-within{border-color:#df9470;box-shadow:0 0 0 2px #df947033}
  #th-toolkit[data-theme=horde] .splash{background:radial-gradient(ellipse at center,#552b20,#271916 48%,#191414 76%)}
  #th-toolkit[data-theme=horde] .splash-mark{background:#41261f;border-color:#aa6448}
+
+
+ #th-toolkit button[data-delete-action=true]{color:#ffd9db;background:#71373f;border-color:#c2757e}
+ #th-toolkit button[data-delete-action=true]:enabled:hover{background:#91414c;border-color:#efa4ad}
+ #th-toolkit .review-confirmation{display:grid;gap:8px;font-size:13px}
+ #th-toolkit .review-confirmation input{width:100%;font:inherit}
+
+ #th-toolkit .inventory-row.selected{background:#37283a;box-shadow:inset 3px 0 #d8ac70}
+ #th-toolkit .inventory-row:has(input[type=checkbox]){cursor:pointer}
+ #th-toolkit .inventory-row .inventory-identity>input{flex:none;margin:0}
+ #th-toolkit[data-theme=horde] .inventory-row.selected{background:#4c2a23;box-shadow:inset 3px 0 #dd8b62}
+
+ #th-toolkit .addon-nav .git-add-button{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--gold);border-radius:7px;background:transparent;color:var(--gold);font-size:12px;font-weight:600;white-space:nowrap;transition:background .15s,box-shadow .15s}
+ #th-toolkit .addon-nav .git-add-button svg{width:17px;height:17px;flex:none}
+ #th-toolkit .addon-nav .git-add-button:enabled:hover{background:#efc78318;box-shadow:0 0 0 1px #efc78344}
+ #th-toolkit .addon-nav .git-add-button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+ #th-toolkit .recommendation-group legend svg{width:18px;height:18px;margin-right:7px;color:var(--gold);vertical-align:-4px}
+ #th-toolkit .catalog-glyph{width:36px;height:36px;padding:0;overflow:hidden;border-radius:7px;box-shadow:inset 0 0 0 1px #f3ce7b55,0 2px 5px #0004}
+ #th-toolkit .addon-art{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+ #th-toolkit .panels .catalog-row>.component:has(.catalog-glyph){grid-template-columns:16px 36px minmax(155px,2fr) minmax(0,3fr)}
+ #th-toolkit .panels .catalog-name>.featured-icon{display:none}
+ #th-toolkit .must-have .catalog-glyph{display:block;grid-row:1/3;grid-column:2;width:42px;height:42px}
+ #th-toolkit .must-have .component:has(.catalog-glyph){grid-template-columns:14px 42px minmax(0,1fr)}
+ #th-toolkit .must-have .component:has(.catalog-glyph) .catalog-name{grid-column:3}
+ #th-toolkit .must-have .component:has(.catalog-glyph)>.installed-badge{grid-column:3}
+ #th-toolkit .must-have .component:has(.catalog-glyph) .featured-icon{display:none}
+
+ #th-toolkit .experimental-page{align-content:start;overflow:auto;padding:21px;gap:20px}
+ #th-toolkit .experimental-page>div>p{margin-top:6px}
+ #th-toolkit .experimental-client{max-width:850px;padding:22px;border:1px solid #72543e;border-radius:12px;background:linear-gradient(115deg,var(--raised),var(--surface));display:grid;gap:18px}
+ #th-toolkit .experimental-client-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+ #th-toolkit .experimental-client-heading h3{font-size:23px;color:var(--gold)}
+ #th-toolkit .experimental-client dl{display:grid;gap:12px;margin:0;font-size:13px}
+ #th-toolkit .experimental-client dl>div{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px}
+ #th-toolkit .experimental-client dt{color:var(--subtle)}
+ #th-toolkit .experimental-client dd{margin:0}
+ #th-toolkit .experimental-note{padding:11px 13px;border-left:2px solid var(--gold);background:#efc7830d;color:var(--subtle);font-size:13px}
+ #th-toolkit .experimental-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+ #th-toolkit .experimental-client progress{width:100%;accent-color:var(--gold)}
+ #th-toolkit .experimental-client details{font-size:13px;color:var(--subtle)}
+ #th-toolkit .experimental-client summary{cursor:pointer}
+ #th-toolkit .experimental-client details p{margin-top:9px}
+ #th-toolkit .experimental-client pre{user-select:text;padding:12px;background:var(--surface);border-radius:6px}
+ #th-toolkit .shell:has(>form[data-page=settings])>.launcher-hero{min-height:48px;height:48px;flex:none;padding:0;background:var(--raised);border-bottom:1px solid var(--line)}
+ #th-toolkit .shell:has(>form[data-page=settings])>.launcher-hero .hero-content{display:none}
+ #th-toolkit .toolbar.settings-page{display:block;flex:1;min-height:0;overflow-y:auto;padding:24px 28px;border:0;background:var(--surface)}
+ #th-toolkit .settings-page[hidden]{display:none}
+ #th-toolkit .settings-eyebrow{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--gold)}
+ #th-toolkit .settings-heading h2{font-size:30px;line-height:1.2;margin:5px 0 7px}
+ #th-toolkit .settings-heading p{margin:0 0 22px;color:var(--subtle)}
+ #th-toolkit .settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+ #th-toolkit .settings-card{padding:18px 20px;border:1px solid var(--line);border-radius:11px;background:var(--raised);min-width:0}
+ #th-toolkit .settings-card h3{margin:0 0 6px;font-size:16px}
+ #th-toolkit .settings-card p{margin:0 0 15px;color:var(--subtle);font-size:13px;line-height:1.5}
+ #th-toolkit .settings-card label{display:block;margin-bottom:7px;font-size:12px;font-weight:600}
+ #th-toolkit .settings-card select{width:100%;max-width:none;min-height:36px}
+ #th-toolkit .settings-card small{display:block;color:var(--subtle);font-size:12px;line-height:1.45;margin-top:12px}
+ #th-toolkit .settings-game{grid-column:1/-1}
+ #th-toolkit .settings-folder-row{display:flex;gap:8px}
+ #th-toolkit .settings-folder-row input{flex:1;min-width:0}
+ #th-toolkit .settings-card .settings-feedback{margin:9px 0 0;min-height:18px;font-size:12px;color:var(--gold)}
+ #th-toolkit .settings-version{margin:18px 0 0;color:var(--subtle);font-size:12px}
 </style><div id="th-toolkit" data-frame="{{FRAME}}" data-theme="alliance">
  <div class="splash" aria-hidden="true"><span class="splash-mark"><img class="launcher-emblem" src="/launcher-hammers.png" alt="" width="102" height="102"></span><span class="splash-title">Twilight Hammer Toolkit</span></div>
  <section class="shell" aria-label="Twilight Hammer Toolkit installer preview">
@@ -343,12 +411,23 @@
     <button type="button" data-tab="components" aria-pressed="true"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>Addons</button>
     <button type="button" data-tab="tweaks" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4v16m7-16v16m7-16v16M2 9h6m1 6h6m1-8h6"/></svg>Client Tweaks</button>
     <button type="button" data-tab="mods" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5m-8 4.5L4 7.5M12 12v9"/></svg>Mods &amp; Tools</button>
+    <button type="button" data-tab="experimental" aria-pressed="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6m-5 0v7L4 19a1.3 1.3 0 0 0 1 2h14a1.3 1.3 0 0 0 1-2l-6-9V3M7 15h10"/></svg>Experimental</button>
     <button type="button" data-settings aria-controls="game-folder-settings" aria-expanded="false"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m10 3-1 3-2 1-3-.5-1 3 2.3 2v2L3 16l2 2.5 3-.6 2 1 1 2.1h3l1-2.5 2-1 3 .5 1-3-2.3-2v-2L21 8l-2-2.5-3 .6-2-1L13 3z"/></svg>Settings</button>
     <button type="button" data-toolkit-release hidden>Update Available</button>
    </nav>
-   <div class="toolbar" id="game-folder-settings"><label>OctoWoW folder <input type="text" name="game" required></label><button type="button" data-browse>Browse…</button><button type="button" data-save-folder>Done</button><label>Launch client <select data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option></select></label><label class="theme-setting">Theme <select data-launcher-theme title="Changes launcher appearance only"><option value="alliance">Alliance</option><option value="horde">Horde</option></select></label><button type="button" data-check>Check for updates</button><button type="button" data-view-log>View log</button></div>
+   <section class="toolbar settings-page" id="game-folder-settings" aria-labelledby="settings-title" hidden>
+    <div class="settings-heading"><span class="settings-eyebrow">MAKE IT YOURS</span><h2 id="settings-title">Settings</h2><p>Manage your game, launcher preferences, and updates.</p></div>
+    <div class="settings-grid">
+     <section class="settings-card settings-game"><h3>Game installation</h3><p>Choose your existing OctoWoW folder.</p><label for="settings-game-path">OctoWoW folder</label><div class="settings-folder-row"><input id="settings-game-path" type="text" name="game" required spellcheck="false"><button type="button" data-browse>Browse…</button><button type="button" class="primary" data-save-folder>Save folder</button></div><p class="settings-feedback" data-settings-feedback role="status"></p></section>
+     <section class="settings-card"><h3>Launch options</h3><p>Choose which client opens when you press Play Now.</p><label for="settings-launch-client">Launch client</label><select id="settings-launch-client" data-launch-client><option value="auto">Automatic</option><option value="modernized">Modernized</option><option value="standard">Standard</option><option value="vanillafixes">VanillaFixes</option><option value="benilla">Benilla-Octo (Experimental)</option></select><small>Benilla must be installed from Experimental first.</small></section>
+     <section class="settings-card"><h3>Appearance</h3><p>Choose your launcher theme.</p><label for="settings-launcher-theme">Theme</label><select id="settings-launcher-theme" data-launcher-theme><option value="alliance">Alliance</option><option value="horde">Horde</option></select><small>Theme changes apply immediately and save automatically.</small></section>
+     <section class="settings-card"><h3>Updates</h3><p>Check for Toolkit, addon, and client mod updates.</p><button type="button" data-check>Check for updates</button><small>Checks also run automatically in the background.</small></section>
+     <section class="settings-card"><h3>Logs &amp; troubleshooting</h3><p>Review recent activity, downloads, and update errors.</p><button type="button" data-view-log>View log</button><small>Opens the launcher log in your default text editor.</small></section>
+    </div><p class="settings-version">Twilight Hammer Toolkit · v{{VERSION}}</p>
+   </section>
    <div class="body" data-components data-mode="components"><div class="catalog-heading"><h2 class="section-title" data-section-title>Addons</h2>
-    <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" class="security-link" data-add-repository>+ Add from Git link</button></nav>
+    <nav class="addon-nav" aria-label="Addon views"><button type="button" data-addon-tab="recommended" aria-pressed="true">Recommended Addons</button><button type="button" data-addon-tab="installed" aria-pressed="false">Installed Addons</button><button type="button" data-addon-tab="all" aria-pressed="false">Discover</button><button type="button" class="git-add-button" data-add-repository><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.76-.24.76-.54v-2.09c-3.12.68-3.78-1.33-3.78-1.33-.51-1.29-1.25-1.64-1.25-1.64-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.63 1.22 3.27.94.1-.73.39-1.22.71-1.5-2.49-.28-5.11-1.25-5.11-5.54 0-1.23.44-2.24 1.16-3.03-.12-.28-.5-1.43.11-2.98 0 0 .95-.31 3.08 1.15a10.72 10.72 0 0 1 5.6 0c2.13-1.46 3.08-1.15 3.08-1.15.61 1.55.23 2.7.11 2.98.72.79 1.15 1.8 1.15 3.03 0 4.3-2.62 5.25-5.12 5.53.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"/></svg><span>+ Add from Git</span></button></nav>
+    <div class="recommendation-controls" data-recommendation-controls><label class="recommendation-search"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg><input type="search" data-recommendation-search aria-label="Search recommended addons" placeholder="Search addons…" autocomplete="off" spellcheck="false"></label><div class="category-filters" data-category-filters role="group" aria-label="Addon categories"></div></div>
     </div>
     <div class="catalog-content">
     <fieldset class="must-have"><legend>Must Haves</legend>
@@ -357,7 +436,7 @@
       <label class="component"><input type="checkbox" value="BigWigs" aria-describedby="th-toolkit-tip-3" aria-labelledby="th-toolkit-label-3"><span id="th-toolkit-label-3"><svg class="featured-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16h12l-2-3V9a4 4 0 0 0-8 0v4zm4 3a2 2 0 0 0 4 0"/></svg>BigWigs <small class="muted">prodigeomix</small></span><span class="tooltip-description" id="th-toolkit-tip-3">Shows boss ability timers and raid warnings. This is the prodigeomix fork.</span></label>
     </fieldset>
     <div class="panels" data-addon-panel="recommended">
-     <fieldset data-raid-addons><legend>Recommended Addons</legend>
+     <div data-raid-addons>
       <label class="component"><input type="checkbox" value="_LazyPig" aria-describedby="th-toolkit-tip-4" aria-labelledby="th-toolkit-label-4"><span id="th-toolkit-label-4">_LazyPig</span><span class="tooltip-description" id="th-toolkit-tip-4">Adds configurable shortcuts and automation for common tasks such as dismounting and accepting invites.</span></label>
       <label class="component"><input type="checkbox" value="DopingControl" aria-describedby="th-toolkit-tip-5" aria-labelledby="th-toolkit-label-5"><span id="th-toolkit-label-5">DopingControl</span><span class="tooltip-description" id="th-toolkit-tip-5">Checks raid consumables, buffs, debuffs, resistances, hit, and enchants before a pull.</span></label>
       <label class="component"><input type="checkbox" value="AutoMarker" aria-describedby="th-toolkit-tip-6" aria-labelledby="th-toolkit-label-6"><span id="th-toolkit-label-6">AutoMarker</span><span class="tooltip-description" id="th-toolkit-tip-6">Automatically assigns raid target icons to configured enemies.</span></label>
@@ -366,23 +445,42 @@
       <label class="component"><input type="checkbox" value="BetterCharacterStats" aria-describedby="th-toolkit-tip-9" aria-labelledby="th-toolkit-label-9"><span id="th-toolkit-label-9">BetterCharacterStats</span><span class="tooltip-description" id="th-toolkit-tip-9">Expands the character panel with more detailed combat stats.</span></label>
       <label class="component"><input type="checkbox" value="Rinse" aria-describedby="th-toolkit-tip-10" aria-labelledby="th-toolkit-label-10"><span id="th-toolkit-label-10">Rinse</span><span class="tooltip-description" id="th-toolkit-tip-10">Helps identify and dispel removable debuffs on party and raid members.</span></label>
       <label class="component"><input type="checkbox" value="ChronicleCompanion" aria-describedby="th-toolkit-tip-20" aria-labelledby="th-toolkit-label-20"><span id="th-toolkit-label-20">ChronicleCompanion</span><span class="tooltip-description" id="th-toolkit-tip-20">Adds extended unit data to combat logs for ChronicleClassic. Requires the WoW 1.12 client and Nampower.</span></label>
-     </fieldset>
-     <fieldset data-mod-tools><legend>Client Mods &amp; Tools</legend>
-      <label class="component"><input type="checkbox" value="Nampower" aria-describedby="th-toolkit-tip-11" aria-labelledby="th-toolkit-label-11"><span id="th-toolkit-label-11">Nampower</span><span class="tooltip-description" id="th-toolkit-tip-11">Client mod that improves spell handling and provides extra functions for compatible addons.</span></label>
-      <label class="component"><input type="checkbox" value="NampowerSettings" aria-describedby="th-toolkit-tip-12" aria-labelledby="th-toolkit-label-12"><span id="th-toolkit-label-12">NampowerSettings</span><span class="tooltip-description" id="th-toolkit-tip-12">Adds an in-game settings panel for the Nampower client mod.</span></label>
+      <label class="component"><input type="checkbox" value="NampowerSettings" aria-describedby="th-toolkit-tip-12" aria-labelledby="th-toolkit-label-12"><span id="th-toolkit-label-12">NampowerSettings</span><span class="tooltip-description" id="th-toolkit-tip-12">Adds an in-game settings panel for Nampower. Installs together with the Nampower client mod.</span></label>
+      <label class="component"><input type="checkbox" value="UnitXP_SP3_Addon" aria-describedby="th-toolkit-tip-18" aria-labelledby="th-toolkit-label-18"><span id="th-toolkit-label-18">UnitXP_SP3_Addon</span><span class="tooltip-description" id="th-toolkit-tip-18">Companion addon for UnitXP_SP3. Installs together with the UnitXP_SP3 client mod.</span></label>
+      <label class="component"><input type="checkbox" value="SuperAPI" aria-describedby="th-toolkit-tip-19" aria-labelledby="th-toolkit-label-19"><span id="th-toolkit-label-19">SuperAPI</span><span class="tooltip-description" id="th-toolkit-tip-19">Companion compatibility addon for the SuperWoW client mod.</span></label>
+      <label class="component"><input type="checkbox" value="Aegis Exchange" aria-describedby="th-auction-tip-0" aria-labelledby="th-auction-name-0"><span id="th-auction-name-0">Aegis Exchange</span><span class="tooltip-description" id="th-auction-tip-0">Auction search, full scans, and pricing tools.</span></label>
+      <label class="component"><input type="checkbox" value="Aux" aria-describedby="th-auction-tip-1" aria-labelledby="th-auction-name-1"><span id="th-auction-name-1">Aux</span><span class="tooltip-description" id="th-auction-tip-1">Auction search, pricing, and auction posting tools.</span></label>
+      <label class="component"><input type="checkbox" value="OctoAuctionator" aria-describedby="th-auction-tip-2" aria-labelledby="th-auction-name-2"><span id="th-auction-name-2">OctoAuctionator</span><span class="tooltip-description" id="th-auction-tip-2">Auctionator’s Buy, Sell, and More tabs for OctoWoW.</span></label>
+     </div>
+     <fieldset data-mod-tools aria-label="Client mods and tools">
+      <label class="component"><input type="checkbox" value="Nampower" aria-describedby="th-toolkit-tip-11" aria-labelledby="th-toolkit-label-11"><span id="th-toolkit-label-11">Nampower</span><span class="tooltip-description" id="th-toolkit-tip-11">Client mod that improves spell handling and provides extra functions for compatible addons. Installs together with NampowerSettings.</span></label>
       <label class="component"><input type="checkbox" value="ClassicAPI" aria-describedby="th-toolkit-tip-13" aria-labelledby="th-toolkit-label-13"><span id="th-toolkit-label-13">ClassicAPI</span><span class="tooltip-description" id="th-toolkit-tip-13">Adds newer WoW API functions so compatible addons can use them on the vanilla client.</span></label>
-      <label class="component"><input type="checkbox" value="UnitXP_SP3" aria-describedby="th-toolkit-tip-14" aria-labelledby="th-toolkit-label-14"><span id="th-toolkit-label-14">UnitXP_SP3 <small class="muted">brues-code</small></span><span class="tooltip-description" id="th-toolkit-tip-14">The brues-code client mod exposes extra unit information, including distances, for compatible addons.</span></label>
-      <label class="component"><input type="checkbox" value="UnitXP_SP3_Addon" aria-describedby="th-toolkit-tip-18" aria-labelledby="th-toolkit-label-18"><span id="th-toolkit-label-18">UnitXP_SP3_Addon</span><span class="tooltip-description" id="th-toolkit-tip-18">Companion addon for the UnitXP_SP3 client mod.</span></label>
+      <label class="component"><input type="checkbox" value="UnitXP_SP3" aria-describedby="th-toolkit-tip-14" aria-labelledby="th-toolkit-label-14"><span id="th-toolkit-label-14">UnitXP_SP3 <small class="muted">brues-code</small></span><span class="tooltip-description" id="th-toolkit-tip-14">The brues-code client mod exposes extra unit information, including distances, for compatible addons. Installs together with UnitXP_SP3_Addon.</span></label>
       <label class="component"><input type="checkbox" value="VanillaFixes" aria-describedby="th-toolkit-tip-15" aria-labelledby="th-toolkit-label-15"><span id="th-toolkit-label-15">VanillaFixes</span><span class="tooltip-description" id="th-toolkit-tip-15">Launcher and client fixes for WoW 1.12. It can also load compatible DLL mods.</span></label>
       <label class="component"><input type="checkbox" value="VanillaHelpers" aria-describedby="th-toolkit-tip-16" aria-labelledby="th-toolkit-label-16"><span id="th-toolkit-label-16">VanillaHelpers</span><span class="tooltip-description" id="th-toolkit-tip-16">Client helper library that adds file access, minimap functions, and graphics features.</span></label>
       <label class="component"><input type="checkbox" value="SuperWoW" aria-describedby="th-toolkit-tip-17" aria-labelledby="th-toolkit-label-17"><span id="th-toolkit-label-17">SuperWoW</span><span class="tooltip-description" id="th-toolkit-tip-17">Extends the vanilla client with extra game APIs, including live file export used by Twilight Hammer Sync.</span></label>
-      <label class="component"><input type="checkbox" value="SuperAPI" aria-describedby="th-toolkit-tip-19" aria-labelledby="th-toolkit-label-19"><span id="th-toolkit-label-19">SuperAPI</span><span class="tooltip-description" id="th-toolkit-tip-19">Companion compatibility addon for the SuperWoW client mod.</span></label>
       <label class="component"><input type="checkbox" value="Chronicle Sidekick" aria-describedby="th-toolkit-tip-21" aria-labelledby="th-toolkit-label-21"><span id="th-toolkit-label-21">Chronicle Sidekick <small class="muted">Windows app</small></span><span class="tooltip-description" id="th-toolkit-tip-21">Uploads OctoWoW combat logs to Chronicle from the Windows tray. Requires a Chronicle sign-in to upload.</span></label>
      </fieldset>
     </div>
-    <label class="auction" data-auction-picker>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
+    <label class="auction" data-auction-picker hidden>Auction House addon <select name="auction"><option value="">Keep my current setup</option><option value="Aegis Exchange">Aegis Exchange</option><option value="Aux">Aux</option><option value="OctoAuctionator">OctoAuctionator</option></select></label>
     <section data-addon-panel="installed" aria-label="Installed Addons" hidden><div class="inventory-controls"><label class="inventory-search"><svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4.5 4.5"/></svg><input type="search" data-inventory-search aria-label="Search installed addons" placeholder="Search installed addons" autocomplete="off" spellcheck="false"></label><span class="muted inventory-count" data-inventory-count role="status"></span><label>View <select data-inventory-mode><option value="pages">Pages</option><option value="scroll">Scroll</option></select></label></div><div data-addon-inventory></div><div class="inventory-pages" hidden><button type="button" data-page-back>Previous</button><span data-page-number></span><button type="button" data-page-next>Next</button></div></section>
     </div>
+   </div>
+   <div class="body experimental-page" data-experimental hidden>
+    <div><h2>Experimental</h2><p class="muted">Alternative clients and features being tested.</p></div>
+    <article class="experimental-client">
+     <div class="experimental-client-heading"><div><h3>Benilla-Octo</h3><p class="muted">Windows x64 · Experimental client</p></div><span class="installed-badge" data-benilla-badge hidden>Installed</span></div>
+     <p>A modern 1.12 client with enhanced lighting, shadows, water, and built-in support for SuperWoW, Nampower, UnitXP_SP3, and ClassicAPI.</p>
+     <dl><div><dt>Download</dt><dd>41.8 MB · Hosted on GitHub</dd></div><div><dt>Existing game data</dt><dd>Reads the existing Data folder in your selected OctoWoW installation. A second copy of the game data is not required.</dd></div><div><dt>Your OctoWoW installation</dt><dd>Installing Benilla does not replace or modify your existing OctoWoW executable, Data folder, addons, or settings.</dd></div><div><dt>Benilla files</dt><dd>Stored in a dedicated client folder with its own settings and addons. Open Client Folder to manage them.</dd></div></dl>
+     <p class="experimental-note">This build is experimental. A loot roster Lua error and excessive lighting have been observed.</p>
+     <div class="experimental-actions"><button type="button" class="primary" data-benilla-install>Download &amp; Install</button><button type="button" class="primary" data-benilla-play disabled>Play Benilla</button><button type="button" data-benilla-folder disabled>Open Client Folder</button><button type="button" class="security-link" data-benilla-source>Project &amp; Credits ↗</button></div>
+     <progress data-benilla-progress max="100" value="0" hidden aria-label="Benilla download progress"></progress>
+     <p class="muted" data-benilla-status role="status">Choose Download &amp; Install to set up this client.</p>
+     <details><summary>Lighting troubleshooting</summary><p class="muted">If the scene is too bright, try these commands one at a time in Benilla chat.</p><pre>/console sunShafts 0
+/console volumetricLight 0
+/console bloom 0
+/console autoExposure 0</pre></details>
+    </article>
    </div>
    <div class="body" data-tweaks hidden>
     <label><input type="checkbox" name="applyTweaks"> Apply client tweaks</label>
@@ -404,16 +502,15 @@
     </fieldset>
    </div>
    <div class="sync-dock">
-    <section class="sync sync-summary" data-sync-summary hidden>
-     <button type="button" data-sync-toggle aria-controls="installed-sync-details" aria-expanded="false">Twilight Hammer Sync <span class="installed-badge">Installed</span><span class="sync-chevron" aria-hidden="true">⌄</span></button>
-     <button class="security-link" type="button" data-uninstall>Uninstall</button>
-     <div class="sync-details" id="installed-sync-details" hidden><strong data-installed-sync-edition></strong><p class="muted" data-installed-sync-description></p></div>
-    </section>
     <div class="sync" data-sync-setup><h3>Twilight Hammer Sync</h3><select name="edition" aria-label="Sync edition" aria-describedby="sync-description"><option>Guild Sync</option><option>Auction Only</option><option>Bank and Guild Sync</option><option selected>Skip Sync</option></select><p class="muted" id="sync-description" data-sync-description aria-live="polite">Continues with selected addons and tweaks without installing Sync.</p></div>
    </div>
    <footer><output class="muted" aria-live="polite">0 optional components selected</output><a class="launcher-link" href="https://twilighthammer.hccpride.workers.dev/" target="_blank" rel="noopener noreferrer">Guild Portal ↗</a><a class="launcher-link" href="https://github.com/obs1deus/twilighthammertoolkit" target="_blank" rel="noopener noreferrer">GitHub ↗</a><button class="security-link" type="button" data-help>Windows Security</button><button class="primary" type="submit" disabled>Install</button><div class="status-detail" hidden></div></footer>
   </form>
  </section>
+ <dialog class="security-dialog" data-sync-details-dialog aria-labelledby="sync-details-heading">
+  <div class="security-content"><h2 id="sync-details-heading">Twilight Hammer Sync</h2><section><h3 data-installed-sync-edition></h3><p class="muted" data-installed-sync-description></p></section></div>
+  <footer><button class="security-link" type="button" data-uninstall>Uninstall Sync</button><button type="button" data-close-sync>Close</button></footer>
+ </dialog>
  <dialog class="security-dialog" aria-labelledby="repository-heading" data-repository-dialog>
   <form class="repository-form">
    <div class="security-content">
@@ -431,6 +528,7 @@
     <section data-review-origin hidden><h3>Repository</h3><code data-review-source></code></section>
     <ul class="update-results" data-review-items></ul>
     <p class="muted" data-review-note hidden></p>
+    <label class="review-confirmation" data-review-confirmation-field hidden><span data-review-confirmation-label>Type DELETE to confirm</span><input type="text" data-review-confirmation autocomplete="off" spellcheck="false" aria-label="Deletion confirmation"></label>
    </div>
    <footer><button value="cancel" autofocus>Cancel</button><button value="install" class="primary" data-review-action>Install</button></footer>
   </form>
@@ -485,38 +583,48 @@
  const syncDescriptions = {
   'Guild Sync':'Uploads the guild roster, professions, and auction scans. Requires Discord sign-in on the guild portal.',
   'Auction Only':'Uploads auction scans to the public Auction House. Open to everyone without signing in.',
-  'Bank and Guild Sync':'Uploads the guild roster, professions, auction scans, and Twilightbank inventory and gold. Requires a guild officer or admin to authorize through Discord.',
+  'Bank and Guild Sync':'Uploads the guild roster, professions, auction scans, and inventory and gold for Twilightbank and Twilightbags. Requires a guild officer or admin to authorize through Discord.',
   'Skip Sync':'Continues setting up your selected addons and tweaks without installing Sync.'
  };
  function describeSync(){
   root.querySelector('[data-sync-description]').textContent=syncDescriptions[edition.value];
  }
  edition.addEventListener('change',describeSync);
- const syncSummary=root.querySelector('[data-sync-summary]');
- const syncToggle=syncSummary.querySelector('[data-sync-toggle]');
- const syncDetails=syncSummary.querySelector('.sync-details');
+ const syncDialog=root.querySelector('[data-sync-details-dialog]');
  const mustHaves=root.querySelector('.must-have');
- function expandSync(expanded){
-  syncToggle.setAttribute('aria-expanded',String(expanded));
-  syncDetails.hidden=!expanded;
-  mustHaves.classList.toggle('compact',expanded);
+ let syncInstalled=false;
+ function updateSyncSetup(){
+  form.querySelector('.sync-dock').hidden=syncInstalled||componentsPage.dataset.mode!=='components'||addonView!=='recommended';
  }
- syncToggle.addEventListener('click',()=>expandSync(syncDetails.hidden));
+ root.querySelector('[data-close-sync]').addEventListener('click',()=>syncDialog.close());
  const status = root.querySelector('output');
+ const importedCatalog={{IMPORTED_CATALOG}};
+ const recommendedNames=new Set([...form.querySelectorAll('.component input[type=checkbox]')].map(input=>input.value));
+ for(const [index,addon] of importedCatalog.entries()){
+  const row=document.createElement('label');row.className='component';
+  const input=document.createElement('input');input.type='checkbox';input.value=addon.Name;
+  const name=document.createElement('span');name.id='imported-name-'+index;name.textContent=addon.Name;
+  const description=document.createElement('span');description.className='tooltip-description';description.id='imported-tip-'+index;description.textContent=addon.Help;
+  input.setAttribute('aria-labelledby',name.id);input.setAttribute('aria-describedby',description.id);
+  row.append(input,name,description);form.querySelector('[data-raid-addons]').append(row);
+ }
  const checks = [...form.querySelectorAll('.component input[type=checkbox]')];
  const tabs = [...form.querySelectorAll('[data-tab]')];
  tabs.forEach(button => button.addEventListener('click', () => {
   const mode=button.dataset.tab;
   tabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab===button)));
   form.dataset.page=mode;
-  componentsPage.hidden=mode==='play'||mode==='tweaks';
-  form.querySelector('.sync-dock').hidden=mode!=='components';
-  form.querySelector('footer').hidden=mode==='play';
+  componentsPage.hidden=mode==='play'||mode==='tweaks'||mode==='experimental';
+  updateSyncSetup();
+  form.querySelector('footer').hidden=mode==='play'||mode==='experimental';
   form.querySelector('[data-tweaks]').hidden=mode!=='tweaks';
+  form.querySelector('[data-experimental]').hidden=mode!=='experimental';
   componentsPage.dataset.mode=mode;
+  updateSyncSetup();
   componentsPage.querySelector('[data-section-title]').textContent=
     mode==='mods'?'Mods & Tools':'Addons';
   if(mode==='mods')selectAddonView('recommended');
+  filterRecommendations();
   showFolderSettings(false);
   if(mode==='play')playButton.focus();
   count(false);
@@ -621,15 +729,39 @@
   setLauncherTheme(themeControl.value);
   try {localStorage.setItem(themePreference,themeControl.value);} catch {}
  });
+ const benillaInstall=root.querySelector('[data-benilla-install]');
+ const benillaPlay=root.querySelector('[data-benilla-play]');
+ const benillaFolder=root.querySelector('[data-benilla-folder]');
+ const benillaStatus=root.querySelector('[data-benilla-status]');
+ const benillaProgress=root.querySelector('[data-benilla-progress]');
+ let benillaInstalled=false,experimentalDownloading=false;
+ function refreshExperimental(){
+  const ready=Boolean(confirmedFolder&&confirmedFolder===gameField.value);
+  benillaInstall.disabled=!ready||operationBusy;
+  benillaInstall.textContent=experimentalDownloading?'Downloading…':benillaInstalled?'Reinstall':'Download & Install';
+  benillaPlay.disabled=!ready||!benillaInstalled||operationBusy;
+  benillaFolder.disabled=!ready||!benillaInstalled||operationBusy;
+  root.querySelector('[data-benilla-badge]').hidden=!benillaInstalled;
+  benillaProgress.hidden=!experimentalDownloading;
+ }
+ benillaInstall.addEventListener('click',()=>send('install-experimental',{game:confirmedFolder}));
+ benillaPlay.addEventListener('click',()=>send('play-experimental',{game:confirmedFolder}));
+ benillaFolder.addEventListener('click',()=>send('experimental-folder',{game:confirmedFolder}));
+ root.querySelector('[data-benilla-source]').addEventListener('click',()=>send('experimental-source'));
  const launchClient=root.querySelector('[data-launch-client]');
  const savedClient=localStorage.getItem('launcher-client');
+ let defaultLaunchClient=!savedClient||savedClient==='auto';
  if([...launchClient.options].some(item=>item.value===savedClient))launchClient.value=savedClient;
- launchClient.addEventListener('change',()=>localStorage.setItem('launcher-client',launchClient.value));
+ launchClient.addEventListener('change',()=>{
+  defaultLaunchClient=launchClient.value==='auto';
+  localStorage.setItem('launcher-client',launchClient.value);
+ });
  function showPlayStatus(message,ready=false){
   playStatus.textContent=message;
   playStatus.dataset.ready=String(ready);
  }
  function refreshPlayButton(){
+  refreshExperimental();
   const ready=Boolean(confirmedFolder&&confirmedFolder===gameField.value);
   const update=ready&&patch?.State==='available';
   const verify=ready&&patch?.State==='unverified';
@@ -664,13 +796,18 @@
  function showFolderSettings(open,focus=false){
   folderSettings.hidden=!open;
   settingsButton.setAttribute('aria-expanded',String(open));
-  if(focus)(open?gameField:settingsButton).focus();
+  if(open){
+   form.dataset.page='settings';
+   componentsPage.hidden=true;
+   form.querySelector('[data-tweaks]').hidden=true;
+   form.querySelector('[data-experimental]').hidden=true;
+   form.querySelector('footer').hidden=true;
+   tabs.forEach(tab=>tab.setAttribute('aria-pressed','false'));
+   hovered=null;focused=null;drawTooltip();
+   if(focus)gameField.focus();
+  }
  }
- settingsButton.addEventListener('click',()=>{
-  if(folderSettings.hidden)showFolderSettings(true,true);
-  else if(confirmedFolder===gameField.value)showFolderSettings(false,true);
-  else send('save-folder',{game:gameField.value});
- });
+ settingsButton.addEventListener('click',()=>showFolderSettings(true));
  root.querySelector('[data-browse]').addEventListener('click',()=>send('browse',{game:gameField.value}));
  root.querySelector('[data-save-folder]').addEventListener('click',()=>send('save-folder',{game:gameField.value}));
  gameField.addEventListener('keydown',event=>{
@@ -698,8 +835,58 @@
  const submitButton=form.querySelector('[type=submit]');
  let installedStatuses={}, installedAddons=[], availableUpdates={}, scanPath, page=0, operationBusy=false, checkingUpdates=false;
  let addonView='recommended';
+ const inventorySelected=new Set();
  const updating=new Set();
  const removableComponents=new Set({{ADDON_COMPONENTS}});
+ const addonIcons={
+  'TWThreat':'ability_warrior_defensivestance',
+  "Rook's RaidVisuals":'inv_helmet_03',
+  'BigWigs':'inv_misc_bell_01',
+  '_LazyPig':'spell_magic_polymorphpig',
+  'DopingControl':'inv_potion_54',
+  'AutoMarker':'spell_shadow_skull',
+  'RollFor':'inv_misc_dice_01',
+  'SmartLoot':'inv_misc_bag_08',
+  'BetterCharacterStats':'inv_chest_plate16',
+  'Rinse':'spell_holy_dispelmagic',
+  'ChronicleCompanion':'inv_misc_book_09',
+  'NampowerSettings':'trade_engineering',
+  'UnitXP_SP3_Addon':'inv_gizmo_02',
+  'SuperAPI':'inv_misc_gear_01',
+  'Aegis Exchange':'inv_misc_coin_01',
+  'Aux':'inv_misc_coin_02',
+  'OctoAuctionator':'inv_misc_coin_03'
+ };
+ const bundledIcons=new Set(["ability_racial_shadowmeld","ability_tracking","ability_warrior_defensivestance","inv_chest_plate16","inv_gizmo_02","inv_helmet_03","inv_letter_15","inv_misc_bag_08","inv_misc_bell_01","inv_misc_book_09","inv_misc_coin_01","inv_misc_coin_02","inv_misc_coin_03","inv_misc_dice_01","inv_misc_fish_02","inv_misc_food_15","inv_misc_gear_01","inv_misc_grouplooking","inv_misc_herb_01","inv_misc_map_01","inv_misc_pocketwatch_01","inv_misc_questionmark","inv_misc_spyglass_02","inv_potion_54","spell_holy_dispelmagic","spell_holy_sealofwisdom","spell_holy_wordfortitude","spell_magic_polymorphpig","spell_nature_farsight","spell_shadow_skull","trade_engineering"]);
+ function addonIcon(name,notes='',metadata=''){
+  const key=(name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const content=[name,notes].filter(Boolean).join(' ').toLowerCase();
+  const texture=metadata.toLowerCase().replace(/^interface[\\/]icons[\\/]/,'').replace(/\.(tga|blp|png|jpg)$/,'');
+  const families=[
+   [/quest|atlas|map|levelrange|gather|flight|satellite|radar|world|explor/, 'inv_misc_map_01'],
+   [/mail|chat|message|notepad|communicat|voice|translate|telepathy|language/, 'inv_letter_15'],
+   [/craft|recipe|profession|tradeskill|alchemy|engineering/, 'trade_engineering'],
+   [/fish/, 'inv_misc_fish_02'],
+   [/auction|aegis|aux|sell|merchant|pricing|gold/, 'inv_misc_coin_01'],
+   [/heal|cure|dispel|puppeteer/, 'spell_holy_dispelmagic'],
+   [/dps|damage|threat|combat|honor|pvp|battleground|spy/, 'ability_warrior_defensivestance'],
+   [/buff|consume|mats|food|potion|rested/, 'inv_potion_54'],
+   [/loot|roll|bag|guda|inventory|itemrack|equip/, 'inv_misc_bag_08'],
+   [/timer|chrono|cooldown|movement/, 'inv_misc_pocketwatch_01'],
+   [/unit|hud|plate|party|guild|group|friend|target/, 'spell_nature_farsight'],
+   [/tweak|api|macro|helper|debug|throttle|super|nampower|fix|config|ui|performance|gear|stats/, 'inv_misc_gear_01']
+  ];
+  const aliases={lazypig:'spell_magic_polymorphpig',autolfm:'inv_misc_grouplooking'};
+  const graphic=(bundledIcons.has(texture)?texture:null)||addonIcons[name]||
+   aliases[key]||families.find(([pattern])=>pattern.test(content))?.[1]||'inv_misc_book_09';
+  const image=document.createElement('img');
+  image.src='/icons/'+graphic+'.jpg';
+  image.alt='';
+  image.width=36;
+  image.height=36;
+  image.className='addon-art';
+  return image;
+ }
  function removeButton(){
   const button=document.createElement('button');
   button.type='button';
@@ -716,12 +903,14 @@
  const modNames=new Set(checks.filter(input=>input.closest('[data-mod-tools]')).map(input=>input.value));
  const featured=[];
  const recommendations=root.querySelector('[data-raid-addons]');
+ const auctionNames=new Set(auctionChoices.map(option=>option.value));
  const catalogActions=checks.map(input=>{
   const row=input.closest('.component');
   const wrapper=document.createElement('div');
   wrapper.className='catalog-row removable-component';
   row.before(wrapper);
   const isFeatured=Boolean(row.closest('.must-have'));
+  wrapper.dataset.component=input.value;
   if(isFeatured||row.closest('.panels')){
    const name=document.getElementById(input.getAttribute('aria-labelledby'));
    name.classList.add('catalog-name');
@@ -731,6 +920,14 @@
    description.textContent=catalogDescriptions.get(input.value);
    row.append(description);
    if(isFeatured)featured.push({key:input.value,wrapper,row,name});
+  }
+  const art=addonIcon(input.value);
+  if(art){
+   const glyph=document.createElement('span');
+   glyph.className='catalog-glyph';
+   glyph.setAttribute('aria-hidden','true');
+   glyph.append(art);
+   input.after(glyph);
   }
   wrapper.append(row);
 
@@ -748,16 +945,109 @@
   }
   return [input.value,{action,trash}];
  });
+
+ const recommendationCategories=[
+  {label:'Raid & Combat',names:['TWThreat',"Rook's RaidVisuals",'BigWigs','DopingControl','AutoMarker','Rinse'],path:'M12 3 5 6v5c0 4.8 3 8 7 10 4-2 7-5.2 7-10V6z'},
+  {label:'Loot & Rolls',names:['RollFor','SmartLoot'],path:'m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Zm0 9 8-4.5M12 12 4 7.5M12 12v9'},
+  {label:'Character & Convenience',names:['_LazyPig','BetterCharacterStats'],path:'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2'},
+  {label:'Combat Logs',names:['ChronicleCompanion'],path:'M5 3h14v18H5zM8 8h8M8 12h8M8 16h5'},
+  {label:'Auction House',names:['Aegis Exchange','Aux','OctoAuctionator'],path:'M3 8h18M5 8l2-5h10l2 5M5 8v13h14V8M9 21v-7h6v7'},
+  {label:'Client Integration',names:['NampowerSettings','UnitXP_SP3_Addon','SuperAPI'],path:'M8 3v5m8-5v5M5 8h14v4a7 7 0 0 1-14 0V8Zm7 11v3'}
+ ];
+ for(const label of ['Professions','Quests & Exploration'])recommendationCategories.push({label,names:[],path:'M5 3h14v18H5zM8 8h8M8 12h8M8 16h5'});
+ for(const addon of importedCatalog)recommendationCategories.find(category=>category.label===addon.Group).names.push(addon.Name);
+ const recommendationGroups=new Map();
+ const recommendationControls=root.querySelector('[data-recommendation-controls]');
+ const recommendationSearch=root.querySelector('[data-recommendation-search]');
+ const categoryFilters=root.querySelector('[data-category-filters]');
+ const categoryByName=new Map();
+ let recommendationCategory='All';
+ for(const category of recommendationCategories){
+  const section=document.createElement('fieldset');
+  section.className='recommendation-group';
+  const title=document.createElement('legend');
+  const icon=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  icon.setAttribute('viewBox','0 0 24 24');
+  icon.setAttribute('fill','none');
+  icon.setAttribute('stroke','currentColor');
+  icon.setAttribute('stroke-width','1.8');
+  icon.setAttribute('stroke-linecap','round');
+  icon.setAttribute('stroke-linejoin','round');
+  icon.setAttribute('aria-hidden','true');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',category.path);
+  icon.append(path);
+  title.append(icon,document.createTextNode(category.label));
+  section.append(title);
+  recommendations.append(section);
+  recommendationGroups.set(category.label,section);
+  for(const name of category.names)categoryByName.set(name,category);
+ }
+ for(const [name,{action}] of catalogActions){
+  const category=categoryByName.get(name);
+  if(!category)continue;
+  const wrapper=action.closest('.catalog-row');
+  if(!wrapper.closest('.must-have'))recommendationGroups.get(category.label).append(wrapper);
+
+ }
+ const recommendationEmpty=document.createElement('p');
+ recommendationEmpty.className='muted recommendation-empty';
+ recommendationEmpty.setAttribute('role','status');
+ recommendationEmpty.textContent='No addons match these filters.';
+ recommendationEmpty.hidden=true;
+ recommendations.append(recommendationEmpty);
+ for(const category of ['All',...recommendationCategories.map(category=>category.label)]){
+  const button=document.createElement('button');
+  button.type='button';
+  button.textContent=category;
+  button.setAttribute('aria-pressed',String(category==='All'));
+  button.addEventListener('click',()=>{
+   recommendationCategory=category;
+   for(const item of categoryFilters.children)item.setAttribute('aria-pressed',String(item===button));
+   root.querySelector('.catalog-content').scrollTop=0;
+   filterRecommendations();
+  });
+  categoryFilters.append(button);
+ }
+ function filterRecommendations(){
+  const active=addonView!=='installed'&&componentsPage.dataset.mode==='components';
+  recommendationSearch.placeholder=addonView==='all'?'Search all addons…':'Search recommended addons…';
+  recommendationSearch.setAttribute('aria-label',addonView==='all'?'Search Discover addons':'Search recommended addons');
+  recommendationControls.hidden=!active;
+  const query=recommendationSearch.value.trim().toLowerCase();
+  let matches=0;
+  for(const [name,{action}] of catalogActions){
+   const category=categoryByName.get(name);
+   if(!category)continue;
+   const wrapper=action.closest('.catalog-row');
+   const visible=(addonView==='all'?!recommendedNames.has(name):recommendedNames.has(name))&&(recommendationCategory==='All'||recommendationCategory===category.label)&&
+    (!query||[name,category.label,catalogDescriptions.get(name)||''].join(' ').toLowerCase().includes(query));
+   wrapper.hidden=!visible;
+   if(visible)matches++;
+  }
+  for(const section of recommendationGroups.values())
+   section.hidden=![...section.querySelectorAll('.catalog-row')].some(row=>!row.hidden);
+  mustHaves.hidden=!active||![...mustHaves.querySelectorAll('.catalog-row')].some(row=>!row.hidden);
+  recommendationEmpty.hidden=matches>0;
+ }
+ recommendationSearch.addEventListener('input',()=>{
+  root.querySelector('.catalog-content').scrollTop=0;
+  filterRecommendations();
+ });
+
  function placeMustHaves(){
   for(const {key,wrapper,row,name} of featured){
    const installed=installedStatuses[key]==='Installed';
-   const container=installed?recommendations:mustHaves;
+   const container=installed?recommendationGroups.get('Raid & Combat'):mustHaves;
    if(wrapper.parentElement!==container){
-    container.append(wrapper);
-    (installed?name:row).append(componentBadges.get(key));
+    const order=recommendationCategories[0].names;
+    const next=installed?[...container.querySelectorAll('.catalog-row')].find(item=>order.indexOf(item.dataset.component)>order.indexOf(key)):null;
+    container.insertBefore(wrapper,next||null);
+    if(installed)name.insertBefore(componentBadges.get(key),name.querySelector('.catalog-version'));
+    else row.append(componentBadges.get(key));
    }
   }
-  mustHaves.hidden=addonView!=='recommended'||!featured.some(item=>item.wrapper.parentElement===mustHaves);
+  filterRecommendations();
  }
  const addonTabs=[...root.querySelectorAll('[data-addon-tab]')];
  function selectAddonView(view){
@@ -768,8 +1058,10 @@
   addonView=view;
   placeMustHaves();
   addonTabs.forEach(tab=>tab.setAttribute('aria-pressed',String(tab.dataset.addonTab===view)));
-  root.querySelectorAll('[data-addon-panel]').forEach(panel=>{panel.hidden=panel.dataset.addonPanel!==view;});
-  root.querySelector('[data-auction-picker]').hidden=view!=='recommended';
+  root.querySelectorAll('[data-addon-panel]').forEach(panel=>{panel.hidden=panel.dataset.addonPanel!==(view==='all'?'recommended':view);});
+  root.querySelector('[data-auction-picker]').hidden=true;
+  updateSyncSetup();
+  filterRecommendations();
   count(false);
  }
  addonTabs.forEach(tab=>tab.addEventListener('click',()=>selectAddonView(tab.dataset.addonTab)));
@@ -796,6 +1088,11 @@
  function renderInventory(){
   const pageSize=6;
   const addonInventory=installedAddons.filter(addon=>!modNames.has(addon.CatalogName));
+  if(syncInstalled&&!addonInventory.some(addon=>addon.Name.toLowerCase()==='twilighthammersync'))
+   addonInventory.push({Name:'TwilightHammerSync',Notes:syncDialog.querySelector('[data-installed-sync-description]').textContent});
+
+  const existingNames=new Set(installedAddons.map(addon=>addon.Name));
+  for(const name of inventorySelected)if(!existingNames.has(name))inventorySelected.delete(name);
   const query=search.value.trim().toLowerCase();
   const matches=query?addonInventory.filter(addon=>[addon.Name,addon.CatalogName].some(name=>name?.toLowerCase().includes(query))):addonInventory;
   inventoryCount.textContent=query?matches.length+' of '+addonInventory.length:matches.length+' installed';
@@ -821,9 +1118,10 @@
   for(const addon of scrolling?matches:matches.slice(page*pageSize,(page+1)*pageSize)){
    const row=document.createElement('div');
    row.className='inventory-row';
+   row.classList.toggle('selected',inventorySelected.has(addon.Name));
    const label=document.createElement('div');
    const title=document.createElement('strong');
-   title.textContent=addon.Name;
+   title.textContent=addon.Name.toLowerCase()==='twilighthammersync'?'Twilight Hammer Sync':addon.Name;
    const updateKey=addonKey(addon);
    const active=updating.has(updateKey);
    const badge=badgeFor(label);
@@ -850,6 +1148,28 @@
    const glyph=document.createElement('span');
    glyph.className='inventory-glyph';
    glyph.innerHTML='<svg class="launcher-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>';
+   const art=addonIcon(addon.CatalogName||addon.Name,addon.Notes,addon.IconTexture||'');
+   if(art)glyph.replaceChildren(art);
+   if(addon.Name.toLowerCase()==='twilighthammersync'){const mark=document.createElement('img');mark.src='/launcher-hammers.png';mark.alt='';mark.className='addon-art';glyph.replaceChildren(mark);}
+   if(addon.Name.toLowerCase()!=='twilighthammersync'){
+    const selection=document.createElement('input');
+    selection.type='checkbox';
+    selection.checked=inventorySelected.has(addon.Name);
+    selection.disabled=operationBusy;
+    selection.setAttribute('aria-label','Select '+addon.Name);
+    function select(checked){
+     if(checked)inventorySelected.add(addon.Name);else inventorySelected.delete(addon.Name);
+     selection.checked=checked;
+     row.classList.toggle('selected',checked);
+     count();
+    }
+    selection.addEventListener('change',()=>select(selection.checked));
+    row.addEventListener('click',event=>{
+     if(operationBusy||event.target.closest('button,input,a,select'))return;
+     select(!selection.checked);
+    });
+    identity.append(selection);
+   }
    identity.append(glyph,label);
    row.append(identity);
    const actions=document.createElement('div');
@@ -869,7 +1189,14 @@
     });
     actions.append(update);
    }
-   if(addon.Name.toLowerCase()!=='twilighthammersync'){
+   if(addon.Name.toLowerCase()==='twilighthammersync'){
+    const details=document.createElement('button');
+    details.type='button';
+    details.textContent='Details';
+    details.setAttribute('aria-label','Twilight Hammer Sync details');
+    details.addEventListener('click',()=>syncDialog.showModal());
+    actions.append(details);
+   } else {
     const trash=removeButton();
     bindRemoval(trash,addon.Name);
     actions.append(trash);
@@ -935,6 +1262,7 @@
  gameField.addEventListener('input',()=>{
   refreshPlayButton();
   installedAddons=[];
+  inventorySelected.clear();
   availableUpdates={};
   scanPath=null;
   showInstalled({});
@@ -958,23 +1286,58 @@
   return availableUpdates[addon?addonKey(addon):name]===true;
  }
  function plan(selected) {
+  const requested = new Set(selected);
+  selected.forEach(name => (dependencies[name] || []).forEach(dependency => {
+   if ((dependencies[dependency] || []).includes(name)) requested.add(dependency);
+  }));
   const names = new Set();
   const seen = new Set();
   function add(name) {
    if (seen.has(name)) return;
    seen.add(name);
    (dependencies[name] || []).forEach(add);
-   if(selected.includes(name)||installedStatuses[name]!=='Installed')names.add(name);
+   if(requested.has(name)||installedStatuses[name]!=='Installed')names.add(name);
   }
-  selected.forEach(add);
+  requested.forEach(add);
   return names;
+ }
+ function selectedInventoryAddons(){
+  return installedAddons.filter(addon=>inventorySelected.has(addon.Name)&&addon.Name.toLowerCase()!=='twilighthammersync');
+ }
+ function inventoryUpdateKeys(){
+  return selectedInventoryAddons().map(addonKey).filter(key=>key&&availableUpdates[key]);
+ }
+ function deleteSelection(){
+  if(addonView==='installed'){
+   const selected=selectedInventoryAddons();
+   return selected.length&&!inventoryUpdateKeys().length?selected.map(addon=>addon.Name):[];
+  }
+  const selected=[...manual,form.elements.auction.value].filter(Boolean);
+  if(!selected.length||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked||componentsPage.dataset.mode!=='components')return [];
+  const addons=selected.map(name=>installedAddons.find(addon=>addon.CatalogName===name));
+  const eligible=addons.every((addon,index)=>addon&&removableComponents.has(selected[index])&&
+   installedStatuses[selected[index]]==='Installed'&&availableUpdates[addon.Source?addonKey(addon):selected[index]]!==true);
+  return eligible?addons.map(addon=>addon.Name):[];
  }
  let lastSelectionCount=0;
  function count(writeStatus=true) {
+  if(addonView==='installed'&&componentsPage.dataset.mode==='components'){
+   const selected=selectedInventoryAddons();
+   const updates=selected.length?inventoryUpdateKeys():bulkKeys();
+   const deletions=deleteSelection();
+   submitButton.dataset.bulkAction=String(!selected.length);
+   submitButton.dataset.inventoryUpdate=String(selected.length>0&&updates.length>0);
+   submitButton.dataset.deleteAction=String(deletions.length>0);
+   submitButton.textContent=deletions.length?'Delete':selected.length?'Update':'Update All';
+   submitButton.disabled=operationBusy||(!deletions.length&&!updates.length);
+   status.textContent=selected.length+' addon'+(selected.length===1?'':'s')+' selected';
+   return;
+  }
+  submitButton.dataset.inventoryUpdate='false';
   const selected = [...manual].filter(canApply);
   const names = plan(selected);
   checks.forEach(input => {
-   input.checked = manual.has(input.value)||names.has(input.value);
+   input.checked = auctionNames.has(input.value)?form.elements.auction.value===input.value:manual.has(input.value)||names.has(input.value);
    input.disabled = names.has(input.value)&&!manual.has(input.value);
   });
   const auction=form.elements.auction.value;
@@ -983,22 +1346,36 @@
   const updates=picks.some(name=>installedStatuses[name]);
   const installs=picks.some(name=>!installedStatuses[name])||edition.value!=='Skip Sync'||form.elements.applyTweaks.checked;
   const pendingUpdates=bulkKeys();
+  const deletions=deleteSelection();
   const inactiveSelection=(manual.size>0||auction)&&total===0;
   const bulk=!componentsPage.hidden&&componentsPage.dataset.mode==='components'&&(addonView==='installed'||(!inactiveSelection&&!installs&&pendingUpdates.length>0));
-  submitButton.dataset.bulkAction=String(bulk);
-  submitButton.textContent=bulk?'Update All':installs?'Install':updates?'Update':'Install';
-  submitButton.disabled=operationBusy||(bulk?!pendingUpdates.length:!updates&&!installs);
-  if(writeStatus||(manual.size>0&&total!==lastSelectionCount))status.textContent = total + ' optional component' + (total === 1 ? '' : 's') + ' selected';
+  submitButton.dataset.bulkAction=String(!deletions.length&&bulk);
+  submitButton.dataset.deleteAction=String(deletions.length>0);
+  submitButton.textContent=deletions.length?'Delete':bulk?'Update All':installs?'Install':updates?'Update':'Install';
+  submitButton.disabled=operationBusy||(!deletions.length&&(bulk?!pendingUpdates.length:!updates&&!installs));
+  const selectedCount=deletions.length||total;
+  if(writeStatus||(manual.size>0&&total!==lastSelectionCount))status.textContent = selectedCount + ' optional component' + (selectedCount === 1 ? '' : 's') + ' selected';
   lastSelectionCount=total;
  }
  checks.forEach(input => input.addEventListener('change', () => {
-  if (input.checked) manual.add(input.value); else manual.delete(input.value);
+  if(auctionNames.has(input.value))form.elements.auction.value=input.checked?input.value:'';
+  else if (input.checked) manual.add(input.value); else manual.delete(input.value);
   count();
  }));
  form.elements.auction.addEventListener('change',()=>count());
  edition.addEventListener('change',()=>count());
  form.elements.applyTweaks.addEventListener('change',()=>count());
  function request(action) {
+  if(action==='install'&&submitButton.dataset.deleteAction==='true'){
+   const addons=deleteSelection();
+   if(addons.length)send('remove-addons',{game:gameField.value,addons});
+   return;
+  }
+  if(action==='install'&&submitButton.dataset.inventoryUpdate==='true'){
+   const keys=inventoryUpdateKeys();
+   if(keys.length)send('update-addons',{game:gameField.value,keys});
+   return;
+  }
   if(action==='install'&&submitButton.dataset.bulkAction==='true'){
    send('update-addons',{game:gameField.value,keys:bulkKeys()});
    return;
@@ -1077,6 +1454,7 @@
  const removal=root.querySelector('[data-removal]');
  const uninstallButton=root.querySelector('[data-uninstall]');
  uninstallButton.addEventListener('click',()=>{
+  syncDialog.close();
   removal.querySelector('[data-remove-addon]').checked=false;
   removal.querySelector('[data-removal-game]').textContent=form.elements.game.value||'Game folder not selected';
   removal.showModal();
@@ -1101,33 +1479,64 @@
  const detail=root.querySelector('.status-detail');
  const installReview=root.querySelector('[data-install-review]');
  let initialCheck=true;
- installReview.addEventListener('close',()=>send('review-install',{confirmed:installReview.returnValue==='install'}));
+ const reviewInput=installReview.querySelector('[data-review-confirmation]');
+ const reviewAction=installReview.querySelector('[data-review-action]');
+ let requiredConfirmation='';
+ function validReviewConfirmation(){return !requiredConfirmation||reviewInput.value===requiredConfirmation;}
+ reviewInput.addEventListener('input',()=>{reviewAction.disabled=!validReviewConfirmation();});
+ installReview.querySelector('form').addEventListener('submit',event=>{
+  if(event.submitter?.value==='install'&&!validReviewConfirmation())event.preventDefault();
+ });
+ installReview.addEventListener('close',()=>send('review-install',{
+  confirmed:installReview.returnValue==='install'&&validReviewConfirmation(),confirmation:reviewInput.value
+ }));
  bridge.addEventListener('message',({data})=>{
   if(data.game!==undefined){
    gameField.value=data.game;
+   benillaInstalled=false;
    const nextFolder=data.gameValid?data.game:undefined;
    if(nextFolder!==confirmedFolder){patch=null;patchChecking=false;patchTime=0;patchError='';}
    confirmedFolder=nextFolder;
    refreshPlayButton();
    checkGamePatch();
-   showFolderSettings(!data.gameValid,data.gameValid&&folderSettings.contains(document.activeElement));
-   installedAddons=[];availableUpdates={};scanPath=null;page=0;
+   if(!data.gameValid)showFolderSettings(true);
+   folderSettings.querySelector('[data-settings-feedback]').textContent=data.gameValid?'Game folder saved.':'Choose a valid OctoWoW game folder to continue.';
+   installedAddons=[];inventorySelected.clear();availableUpdates={};scanPath=null;page=0;
    showInstalled({});
    scanInstalled();
    if(initialCheck||data.gameValid)pendingBackgroundCheck=true;
    initialCheck=false;
   }
   if(data.componentStatuses&&data.installPath===gameField.value){
+   if(defaultLaunchClient)launchClient.value=data.vanillaFixesInstalled?'vanillafixes':'auto';
    installedAddons=data.addons||[];
+   benillaInstalled=Boolean(data.benillaInstalled);
+   refreshExperimental();
    scanPath=data.scanPath;
    const installed=Boolean(data.syncInstalled);
-   syncSummary.hidden=!installed;
-   if(!installed)expandSync(false);
-   syncSummary.querySelector('[data-installed-sync-edition]').textContent=data.syncEdition||'Installed edition unavailable';
-   syncSummary.querySelector('[data-installed-sync-description]').textContent=syncDescriptions[data.syncEdition]||'The uploader is installed, but the game folder does not identify its edition.';
+   syncInstalled=installed;
+   updateSyncSetup();
+   syncDialog.querySelector('[data-installed-sync-edition]').textContent=data.syncEdition||'Installed edition unavailable';
+   syncDialog.querySelector('[data-installed-sync-description]').textContent=syncDescriptions[data.syncEdition]||'The uploader is installed, but the game folder does not identify its edition.';
    root.querySelector('[data-sync-setup]').hidden=installed;
    if(installed&&edition.value!=='Skip Sync'){edition.value='Skip Sync';describeSync();}
    showInstalled(data.componentStatuses);
+  }
+  if(data.benillaInstalled!==undefined){
+   benillaInstalled=Boolean(data.benillaInstalled);
+   if(benillaInstalled&&!experimentalDownloading)benillaStatus.textContent='Benilla-Octo is installed. Ready to play.';
+   refreshExperimental();
+  }
+  if(data.experimentalStatus!==undefined)benillaStatus.textContent=data.experimentalStatus;
+  if(data.experimentalDownloading!==undefined){
+   experimentalDownloading=data.experimentalDownloading;
+   refreshExperimental();
+  }
+  if(data.experimentalDone!==undefined){
+   if(data.experimentalTotal>0){
+    benillaProgress.value=data.experimentalDone/data.experimentalTotal*100;
+    benillaStatus.textContent=(data.experimentalDone/1048576).toFixed(1)+' MB of '+(data.experimentalTotal/1048576).toFixed(1)+' MB downloaded';
+   }else benillaProgress.removeAttribute('value');
   }
   if(data.renderAdvice){
    const {distance,ramGiB,threads}=data.renderAdvice;
@@ -1167,6 +1576,19 @@
    }
    showInstalled(installedStatuses);
   }
+  if(data.removed){
+   for(const name of data.removed)inventorySelected.delete(name);
+   const components=data.removedComponents||[];
+   installedAddons=installedAddons.filter(addon=>!data.removed.includes(addon.Name));
+   for(const name of components){
+    manual.delete(name);
+    delete installedStatuses[name];
+    delete availableUpdates[name];
+   }
+   for(const name of data.removed)delete availableUpdates['git:'+name];
+   if(components.includes(form.elements.auction.value))form.elements.auction.value='';
+   showInstalled(installedStatuses);
+  }
   if(data.updating){
    data.updating.forEach(name=>updating.add(name));
    showInstalled(installedStatuses);
@@ -1176,7 +1598,13 @@
    showInstalled(installedStatuses);
   }
   if(data.review){
-   const {title,source,items,note,action}=data.review;
+   const {title,source,items,note,action,confirmation}=data.review;
+   requiredConfirmation=confirmation||'';
+   reviewInput.value='';
+   installReview.querySelector('[data-review-confirmation-field]').hidden=!requiredConfirmation;
+   installReview.querySelector('[data-review-confirmation-label]').textContent='Type '+requiredConfirmation+' to confirm';
+   reviewAction.disabled=!validReviewConfirmation();
+   reviewAction.dataset.deleteAction=String(Boolean(requiredConfirmation));
    installReview.querySelector('#install-review-title').textContent=title;
    installReview.querySelector('[data-review-action]').textContent=action||'Install';
    installReview.querySelector('[data-review-origin]').hidden=!source;

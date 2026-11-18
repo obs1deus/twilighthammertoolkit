@@ -10,7 +10,7 @@ Choosing a Sync edition installs a Windows scheduled task that checks OctoWoW ga
 | --- | --- |
 | Auction Only | Auction listings for Y'Shaarj Alliance, including item, price, and in-game seller data when present. The portal displays auction data publicly. The uploader removes the scanning character and guild fields from the auction payload. |
 | Guild Sync | Auction data plus Twilight Hammer roster and captured profession data. Private guild uploads require authorization through Discord on the guild portal. |
-| Bank and Guild Sync | Guild Sync data plus inventory and gold captures for Twilightbank. Authorization is required through the guild portal. |
+| Bank and Guild Sync | Guild Sync data plus inventory and gold captures for Twilightbank and Twilightbags. Authorization is required through the guild portal. |
 
 For Guild Sync and Bank and Guild Sync, the uploader stores its authorization encrypted for the current Windows user. The portal opens in your browser for authorization. The Toolkit and uploader do not ask for your Discord password.
 

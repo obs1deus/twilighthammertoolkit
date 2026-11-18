@@ -19,6 +19,7 @@ internal sealed class InstalledAddon {
     public string Source {get;set;}
     public string CatalogName {get;set;}
     public string Notes {get;set;}
+    public string IconTexture {get;set;}
 }
 
 internal static class ToolkitInstall {
@@ -70,7 +71,7 @@ internal static class ToolkitInstall {
             RepositoryAddon repository;
             repositories.TryGetValue(name,out repository);
             return new InstalledAddon{Name=name,Version=TocVersion(toc),Source=repository==null?null:repository.Source,
-                CatalogName=package==null?null:package.Name,Notes=package==null?ReadAddonNotes(toc):null};
+                CatalogName=package==null?null:package.Name,Notes=package==null?ReadAddonNotes(toc):null,IconTexture=TocField(toc,"IconTexture")};
         }).Where(addon=>addon!=null).OrderBy(addon=>addon.Name,StringComparer.OrdinalIgnoreCase).ToArray();
     }
     private static string ReadAddonNotes(string toc) {

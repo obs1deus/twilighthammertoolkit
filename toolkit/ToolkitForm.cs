@@ -445,7 +445,7 @@ internal sealed class ToolkitForm : Form {
             };
             foreach(string name in explicitlySelected)visit(packages[name]);
             foreach(var pick in picks) {
-                if(required.Contains(pick.Key)){pick.Value.Checked=true;pick.Value.Enabled=false;}
+                if(required.Contains(pick.Key)&&!explicitlySelected.Contains(pick.Key)){pick.Value.Checked=true;pick.Value.Enabled=false;}
                 else if(!pick.Value.Enabled){pick.Value.Enabled=true;pick.Value.Checked=explicitlySelected.Contains(pick.Key);}
             }
             status.Text=picks.Count(p=>p.Value.Checked)+(auction.SelectedIndex>0?1:0)+" optional components selected.";
@@ -459,7 +459,9 @@ internal sealed class ToolkitForm : Form {
         visit=p=>{
             if(!visited.Add(p))return;
             foreach(string name in p.Requires)visit(packages[name]);
-            if(includeInstalledDependencies||p.Group=="Auction House"||explicitlySelected.Contains(p.Name)||!ToolkitInstall.DependencyPresent(folder,p))
+            if(includeInstalledDependencies||p.Group=="Auction House"||explicitlySelected.Contains(p.Name)||
+               p.Requires.Any(name=>explicitlySelected.Contains(name)&&packages[name].Requires.Contains(p.Name))||
+               !ToolkitInstall.DependencyPresent(folder,p))
                 planned.Add(p);
         };
         foreach(var picked in picks.Where(pair=>pair.Value.Checked))visit(packages[picked.Key]);

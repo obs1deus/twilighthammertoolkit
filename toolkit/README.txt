@@ -43,7 +43,7 @@ Sync uploader
 Checks OctoWoW game files for changes every two minutes while signed in to
 Windows. Auction Only is open to everyone. Guild Sync requires a one-time Discord
 sign-in and device authorization on the portal. Bank and Guild Sync additionally
-requires a guild officer or admin to approve the Twilightbank uploader.
+requires a guild officer or admin to approve uploads from Twilightbank and Twilightbags.
 Existing Twilight Hammer Sync setup is replaced if you choose a Sync edition.
 To remove it, click Uninstall Sync under Addons & Tools. This removes the
 uploader and scheduled task. You can also remove the addon. Saved captures,

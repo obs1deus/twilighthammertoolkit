@@ -74,7 +74,7 @@ internal static class TwilightSetup {
             data += " Also sends the Twilight Hammer guild roster and captured professions after authorization through Discord.";
 #endif
 #if BANK_ENABLED
-            data += " Also sends Twilightbank inventory and gold.";
+            data += " Also sends inventory and gold for Twilightbank and Twilightbags.";
 #endif
             string message = "Setup installs a scheduled task that reads OctoWoW game files and uploads eligible captures to "
                 + Portal + ".\n\n" + data + "\n\nChoose No to skip installation. Use Uninstall Sync in the Toolkit to stop future uploads.";
@@ -227,7 +227,10 @@ internal static class TwilightSetup {
         if (!row.TryGetValue("items", out items) || !(items is IList)) return null;
         string kind = Field(row, "kind");
 #if BANK_ENABLED
-        if ((kind == "inventory" || kind == "wallet") && Field(row, "character").Equals("Twilightbank", StringComparison.OrdinalIgnoreCase))
+        string character = Field(row, "character");
+        if ((kind == "inventory" || kind == "wallet") &&
+            (character.Equals("Twilightbank", StringComparison.OrdinalIgnoreCase) ||
+             character.Equals("Twilightbags", StringComparison.OrdinalIgnoreCase)))
             return "toolkit-upload";
 #endif
         if (((IList)items).Count == 0) return null;

@@ -72,6 +72,7 @@ internal sealed class RenderedToolkit : Form {
     private int updateEpoch;
     private const string ReloadHint="Run /reload in OctoWoW. If a newly installed addon is missing, restart the game.";
     private TaskCompletionSource<bool> installReview;
+    private string reviewConfirmation;
     private double cssToWindowScale;
     private string releaseUrl;
     private Release toolkitRelease;
@@ -114,6 +115,7 @@ internal sealed class RenderedToolkit : Form {
             var dependencies=catalog.Values.Where(p=>p.Requires.Length>0).ToDictionary(p=>p.Name,p=>p.Requires);
             var addons=catalog.Values.Where(p=>p.Folder!="game"&&p.Folder!="Data"&&p.Folder!="sidekick").Select(p=>p.Name).ToArray();
             document=Encoding.UTF8.GetBytes(reader.ReadToEnd().Replace("{{VERSION}}",ToolkitPackages.Version)
+                .Replace("{{IMPORTED_CATALOG}}",json.Serialize(ImportedCatalog.Packages.Select(p=>new { p.Name,p.Group,p.Help })))
                 .Replace("{{DEPENDENCIES}}",json.Serialize(dependencies)).Replace("{{ADDON_COMPONENTS}}",json.Serialize(addons))
                 .Replace("{{FRAME}}",nativeFrame?"native":"fallback"));
         }
@@ -130,6 +132,13 @@ internal sealed class RenderedToolkit : Form {
                 case InterfaceUrl+"launcher-hammers.png": resource="LauncherHammers.png";mime="image/png";break;
                 case InterfaceUrl+"octowow-logo.webp": resource="OctoWoWLogo.webp";mime="image/webp";break;
                 default:
+                    if(e.Request.Uri.StartsWith(InterfaceUrl+"icons/",StringComparison.Ordinal)) {
+                        resource="icons."+e.Request.Uri.Substring((InterfaceUrl+"icons/").Length);
+                        if(GetType().Assembly.GetManifestResourceInfo(resource)!=null) {
+                            mime="image/jpeg";
+                            break;
+                        }
+                    }
                     e.Response=environment.CreateWebResourceResponse(null,404,"Not Found","");
                     return;
             }
@@ -161,6 +170,14 @@ internal sealed class RenderedToolkit : Form {
                 case "browse": if(!busy)Browse(game);break;
                 case "save-folder": SaveGameFolder(game);break;
                 case "play": if(!busy)LaunchGame(game,TextField(request,"client"));break;
+                case "install-experimental": if(!busy)await InstallExperimental(GamePath(game));break;
+                case "play-experimental": if(!busy)LaunchGame(game,"benilla");break;
+                case "experimental-source": Open(ExperimentalClient.SourceUrl);break;
+                case "experimental-folder":
+                    string clientFolder=ExperimentalClient.Root(GamePath(game));
+                    if(!Directory.Exists(clientFolder))throw new IOException("Install Benilla-Octo first.");
+                    Process.Start(new ProcessStartInfo(clientFolder){UseShellExecute=true});
+                    break;
                 case "check-game-patch": await CheckGamePatch(game);break;
                 case "apply-game-patch": if(!busy)await ApplyGamePatch(game);break;
                 case "installed": await ReadInstalled(game);break;
@@ -176,9 +193,17 @@ internal sealed class RenderedToolkit : Form {
                 case "install": if(!busy)await Install(request,GamePath(game));break;
                 case "update-addons": if(!busy)await UpdateAddons(request,GamePath(game));break;
                 case "install-repository": if(!busy)await InstallRepository(GamePath(game),TextField(request,"repository"));break;
-                case "remove-addon": if(!busy)await RemoveAddon(GamePath(game),TextField(request,"addon"));break;
+                case "remove-addon": if(!busy)await RemoveAddons(GamePath(game),new[]{TextField(request,"addon")});break;
+                case "remove-addons":
+                    if(!busy) {
+                        var names=Field(request,"addons") as IList;
+                        if(names==null||names.Count==0||names.Count>1000)throw new IOException("Choose installed addons to delete.");
+                        await RemoveAddons(GamePath(game),names.Cast<object>().Select(Convert.ToString).ToArray());
+                    }
+                    break;
                 case "review-install":
-                    if(installReview!=null)installReview.TrySetResult(IsChecked(request,"confirmed"));
+                    if(installReview!=null)installReview.TrySetResult(IsChecked(request,"confirmed")&&
+                        (String.IsNullOrEmpty(reviewConfirmation)||TextField(request,"confirmation")==reviewConfirmation));
                     break;
                 case "uninstall":
                     if(!busy)await Uninstall(game,IsChecked(request,"removeAddon"));
@@ -216,6 +241,9 @@ internal sealed class RenderedToolkit : Form {
         var requested=new HashSet<string>(input.Cast<object>().Select(Convert.ToString));
         if(requested.Any(name=>!catalog.ContainsKey(name)))throw new IOException("Unknown component in the install plan.");
         if(requested.Count(name=>catalog[name].Group=="Auction House")>1)throw new IOException("Choose one auction addon.");
+        foreach(string name in requested.ToArray())
+            foreach(string dependency in catalog[name].Requires.Where(dependency=>catalog[dependency].Requires.Contains(name)))
+                requested.Add(dependency);
         var seen=new HashSet<string>();
         var plan=new List<Package>();
         Action<string> add=null;
@@ -254,7 +282,7 @@ internal sealed class RenderedToolkit : Form {
         if(edition!="Skip Sync") {
             string data="Y'Shaarj Alliance auction listings, including in-game sellers when available, for the public Auction House";
             if(edition!="Auction Only")data+=", plus the Twilight Hammer roster and captured professions";
-            if(edition=="Bank and Guild Sync")data+=", plus Twilightbank inventory and gold";
+            if(edition=="Bank and Guild Sync")data+=", plus inventory and gold for Twilightbank and Twilightbags";
             note+=" Sync installs a scheduled task that sends "+data+" to the Twilight Hammer portal. Choose Skip Sync to continue without uploads.";
         }
         if(!await ConfirmInstall("Review changes",null,review,note)) {
@@ -375,31 +403,50 @@ internal sealed class RenderedToolkit : Form {
         if(finished.Count>0)status+=" "+ReloadHint;
         Post(new{status,busy=false});
     }
-    private async Task RemoveAddon(string game,string name) {
-        var addon=ToolkitInstall.Addons(game).FirstOrDefault(row=>row.Name==name);
-        if(addon==null||addon.Name.Equals("TwilightHammerSync",StringComparison.OrdinalIgnoreCase))
-            throw new IOException("Choose an installed addon to remove.");
+    private async Task RemoveAddons(string game,string[] names) {
+        var installed=ToolkitInstall.Addons(game);
+        var selected=names.Distinct(StringComparer.OrdinalIgnoreCase).Select(name=>
+            installed.FirstOrDefault(row=>row.Name.Equals(name,StringComparison.OrdinalIgnoreCase))).ToArray();
+        if(selected.Any(addon=>addon==null||addon.Name.Equals("TwilightHammerSync",StringComparison.OrdinalIgnoreCase)))
+            throw new IOException("Choose installed addons to delete. Manage Sync through its Details button.");
         busy=true;
-        if(!await ConfirmInstall("Remove addon?",null,new[]{name},"The Toolkit moves the addon to a backup. Your saved addon settings stay in place.","Remove")) {
+        if(!await ConfirmInstall("Delete selected addons?",null,selected.Select(addon=>addon.Name),
+            "The selected addons will be removed from the game folder and backed up. Saved addon settings are kept.",
+            "Delete","DELETE")) {
             busy=false;
             Post(new{busy=false});
             return;
         }
         updateEpoch++;
-        await Task.Run(()=>ToolkitInstall.RemoveAddon(game,name));
-        ToolkitLog.Write("addons","Removed "+name+" and backed up its files.");
+        var removed=new List<InstalledAddon>();
+        int failures=0;
+        foreach(var addon in selected) {
+            try {
+                await Task.Run(()=>ToolkitInstall.RemoveAddon(game,addon.Name));
+                removed.Add(addon);
+                ToolkitLog.Write("addons","Removed "+addon.Name+" and backed up its files.");
+            } catch(Exception error) {
+                failures++;
+                ToolkitLog.Write("addons","Could not remove "+addon.Name+": "+error.Message,"error");
+            }
+        }
         busy=false;
-        Post(new{status="Removed "+name+". Run /reload in OctoWoW.",busy=false,
-            updated=new[]{"git:"+name,addon.CatalogName}.Where(key=>key!=null).ToArray()});
+        string status=removed.Count+" addon"+(removed.Count==1?"":"s")+" deleted.";
+        if(failures>0)status+=" "+failures+" could not be deleted. See the Toolkit log.";
+        if(removed.Count>0)status+=" Run /reload in OctoWoW.";
+        Post(new{status,busy=false,removed=removed.Select(addon=>addon.Name).ToArray(),
+            removedComponents=removed.Select(addon=>addon.CatalogName).Where(name=>name!=null).ToArray()});
     }
-    private async Task<bool> ConfirmInstall(string title,string source,IEnumerable<string> items,string note,string action="Install") {
+    private async Task<bool> ConfirmInstall(string title,string source,IEnumerable<string> items,string note,string action="Install",string confirmation=null) {
         var review=new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         installReview=review;
+        reviewConfirmation=confirmation;
         try {
-            Post(new{busy=true,review=new{title,source,items=items.ToArray(),note,action}});
+            Post(new{busy=true,review=new{title,source,items=items.ToArray(),note,action,confirmation}});
             return await review.Task;
         } finally {
             installReview=null;
+            reviewConfirmation=null;
         }
     }
     private async Task Updates(string game,bool background) {
@@ -465,7 +512,8 @@ internal sealed class RenderedToolkit : Form {
                 bool syncInstalled=ToolkitInstall.SyncInstalled(path);
                 return new{installPath=game,scanPath=path,componentStatuses=ToolkitInstall.ComponentStatuses(path),
                     addons=ToolkitInstall.Addons(path),syncInstalled=syncInstalled,
-                    syncEdition=syncInstalled?ToolkitInstall.SyncEdition(path):null};
+                    syncEdition=syncInstalled?ToolkitInstall.SyncEdition(path):null,benillaInstalled=ExperimentalClient.Installed(path),
+                    vanillaFixesInstalled=File.Exists(Path.Combine(path,"VanillaFixes.exe"))};
             });
             Post(inventory);
         } catch(IOException) {Post(new {installPath=game,componentStatuses=new Dictionary<string,string>()});}
@@ -503,7 +551,8 @@ internal sealed class RenderedToolkit : Form {
     internal static string ResolveGameClient(string folder,string client) {
         string[] candidates;
         switch(client) {
-            case "auto": candidates=new[]{"WoW_Modernized.exe","WoW.exe"};break;
+            case "benilla": return ExperimentalClient.Executable(folder);
+            case "auto": candidates=new[]{"VanillaFixes.exe","WoW_Modernized.exe","WoW.exe"};break;
             case "modernized": candidates=new[]{"WoW_Modernized.exe"};break;
             case "standard": candidates=new[]{"WoW.exe"};break;
             case "vanillafixes": candidates=new[]{"VanillaFixes.exe"};break;
@@ -544,15 +593,33 @@ internal sealed class RenderedToolkit : Form {
             Post(new{busy=false,patchApplying=false});
         }
     }
+    private async Task InstallExperimental(string game) {
+        busy=true;
+        Post(new{busy=true,experimentalStatus="Downloading Benilla-Octo…",experimentalDownloading=true});
+        try {
+            var progress=new Progress<Tuple<long,long>>(value=>Post(new{experimentalDone=value.Item1,experimentalTotal=value.Item2}));
+            await Task.Run(()=>ExperimentalClient.Install(game,(done,total)=>
+                ((IProgress<Tuple<long,long>>)progress).Report(Tuple.Create(done,total))));
+            ToolkitLog.Write("experimental","Installed verified Benilla-Octo package "+ExperimentalClient.PackageHash.Substring(0,12)+".");
+            Post(new{benillaInstalled=true,experimentalStatus="Benilla-Octo is installed. Ready to play."});
+        } catch(Exception error) {
+            ToolkitLog.Write("experimental","Benilla installation failed: "+error.Message,"error");
+            Post(new{experimentalStatus=error.Message});
+        } finally {
+            busy=false;
+            Post(new{busy=false,experimentalDownloading=false});
+        }
+    }
     private void LaunchGame(string game,string client) {
         try {
             string folder=GamePath(game);
             string executable=ResolveGameClient(folder,client);
-            if(new[]{"WoW","WoW_Modernized","WoW_tweaked","VanillaFixes"}.Any(name=>Process.GetProcessesByName(name).Length>0)) {
+            if(new[]{"WoW","WoW_Modernized","WoW_tweaked","VanillaFixes","Benilla-Octo"}.Any(name=>Process.GetProcessesByName(name).Length>0)) {
                 Post(new{playStatus="Game already running"});
                 return;
             }
-            using(var process=Process.Start(new ProcessStartInfo(executable){WorkingDirectory=folder,UseShellExecute=false})) {
+            var start=client=="benilla"?ExperimentalClient.StartInfo(folder):new ProcessStartInfo(executable){WorkingDirectory=folder,UseShellExecute=false};
+            using(var process=Process.Start(start)) {
                 if(process==null)throw new IOException("Windows could not start the game.");
             }
             ToolkitLog.Write("launcher","Started "+Path.GetFileName(executable)+".");

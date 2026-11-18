@@ -43,6 +43,9 @@ $options+="/resource:$(Join-Path $PSScriptRoot 'Toolkit.html'),Toolkit.html"
 foreach($asset in @('LauncherHero.jpg','LauncherHorde.jpg','LauncherHammers.png','OctoWoWLogo.webp')){
     $options+="/resource:$(Join-Path $PSScriptRoot $asset),$asset"
 }
+Get-ChildItem (Join-Path $PSScriptRoot 'Icons') -Filter '*.jpg' -File | ForEach-Object {
+    $options+="/resource:$($_.FullName),icons.$($_.Name)"
+}
 $options+=@('guild.exe','auction.exe','bank.exe') | ForEach-Object {"/resource:$(Join-Path $stage $_),$_"}
 $source=Get-ChildItem $PSScriptRoot -Filter '*.cs' -File | Select-Object -ExpandProperty FullName
 $version=[regex]::Match([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'ToolkitPackages.cs')),'const string Version = "([0-9]+\.[0-9]+\.[0-9]+)"').Groups[1].Value

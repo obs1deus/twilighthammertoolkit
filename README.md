@@ -3,7 +3,7 @@
 A one-stop Windows installer for [OctoWoW](https://octowow.st/): Twilight Hammer Sync, popular raid addons, client mods, and optional client tweaks, all from a single app.
 
 
-Current version: **v0.1.23**
+Current version: **v0.1.33**
 
 
 ![Twilight Hammer Toolkit v0.1.18 showing Addons & Tools and installed addon badges](toolkit/screenshot.png)
@@ -15,6 +15,14 @@ Current version: **v0.1.23**
 - [Roadmap](ROADMAP.md)
 - [Code signing policy](CODE_SIGNING.md)
 - [Privacy policy](PRIVACY.md)
+
+## Experimental launcher branch
+
+The experimental redesign includes Play, categorized Recommended Addons, Installed Addons with search and icons, and Discover with 123 additional addons. Recommended repository choices take precedence over imported alternatives, so Discover does not list duplicate versions. See [catalog sources and attribution](toolkit/CATALOG-SOURCES.md).
+
+Settings is a full launcher page for the game folder, launch client, appearance, updates, and logs. Automatic launch prefers VanillaFixes when installed; explicitly chosen clients remain selected.
+
+The Experimental tab offers a checksum-verified Benilla-Octo download with isolated settings and addons. It reads your existing Data folder without replacing your existing OctoWoW installation. This client is experimental; compatibility issues may occur.
 
 ## Features
 
@@ -58,7 +66,7 @@ Sync captures game data with an in-game addon and uploads it to the Twilight Ham
 | --- | --- |
 | **Guild Sync** | Professions, the Twilight Hammer roster, and auction scans |
 | **Auction Only** | Completed Aegis Exchange, Aux, and OctoAuctionator scans |
-| **Bank and Guild Sync** | Everything in Guild Sync, plus Twilightbank bags, bank contents, and gold |
+| **Bank and Guild Sync** | Everything in Guild Sync, plus bags, bank contents, and gold for Twilightbank and Twilightbags |
 
 **How the uploader works**
 
