@@ -17,6 +17,7 @@ internal sealed class InstalledAddon {
     public string Name {get;set;}
     public string Version {get;set;}
     public string Source {get;set;}
+    public string SourceUrl {get;set;}
     public string CatalogName {get;set;}
     public string Notes {get;set;}
     public string IconTexture {get;set;}
@@ -34,7 +35,13 @@ internal static class ToolkitInstall {
         return result;
     }
     internal static bool ComponentExists(string game,Package package) {
-        if(package.Folder=="Data")return File.Exists(Path.Combine(game,"Data","patch-O.mpq"));
+        if(DxvkSettings.IsVariant(package.Name))return DxvkSettings.Cached(game,package.Name);
+        if(package.Name=="Discord Presence")return DiscordPresence.State(game).installed;
+        if(package.Name=="Auto Login")return ClientMods.LoginInstalled(game);
+        if(package.Folder=="Data") {
+            string raidVisuals=Path.Combine(game,"Data",MpqPatches.RaidVisualsName);
+            return File.Exists(raidVisuals)||File.Exists(raidVisuals+MpqPatches.DisabledSuffix);
+        }
         if(package.Folder=="sidekick")return Directory.Exists(SidekickFolder)&&Directory.EnumerateFiles(SidekickFolder,"Chronicle-Sidekick-windows-*.exe").Any();
         if(package.Name=="VanillaFixes")return File.Exists(Path.Combine(game,"VanillaFixes.exe"))&&File.Exists(Path.Combine(game,"VfPatcher.dll"));
         if(package.Folder=="game")return File.Exists(Path.Combine(game,ModLibrary(package)));
@@ -70,8 +77,10 @@ internal static class ToolkitInstall {
             var package=ToolkitPackages.Catalog.FirstOrDefault(p=>p.Folder.Equals(name,StringComparison.OrdinalIgnoreCase));
             RepositoryAddon repository;
             repositories.TryGetValue(name,out repository);
-            return new InstalledAddon{Name=name,Version=TocVersion(toc),Source=repository==null?null:repository.Source,
-                CatalogName=package==null?null:package.Name,Notes=package==null?ReadAddonNotes(toc):null,IconTexture=TocField(toc,"IconTexture")};
+            string source=repository==null?null:repository.Source;
+            return new InstalledAddon{Name=name,Version=TocVersion(toc),Source=source,
+                SourceUrl=ToolkitPackages.AddonSourceUrl(source??(package==null?null:package.SourceUrl)),
+                CatalogName=package==null?null:package.Name,Notes=package==null?ReadAddonNotes(toc):package.Help,IconTexture=TocField(toc,"IconTexture")};
         }).Where(addon=>addon!=null).OrderBy(addon=>addon.Name,StringComparer.OrdinalIgnoreCase).ToArray();
     }
     private static string ReadAddonNotes(string toc) {
@@ -109,6 +118,9 @@ internal static class ToolkitInstall {
                     Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,installed.Select(pair=>pair.Key+"\t"+pair.Value))));
                 Replace(State(stage),versionFile,Path.Combine(Path.GetDirectoryName(backup),"versions.txt"),changes);
             }
+            var removedFiles=Directory.GetFiles(backup,"*",SearchOption.AllDirectories).Select(file=>
+                new KeyValuePair<string,string>(Path.Combine(folder,file.Substring(backup.Length+1)),file));
+            ToolkitHistory.Record(game,"Remove addon: "+name,changes.Concat(removedFiles));
         } catch {
             Restore(changes);
             Directory.Move(backup,folder);
@@ -153,9 +165,10 @@ internal static class ToolkitInstall {
         return statuses;
     }
     private static string ModLibrary(Package package) {
-        return package.Name=="SuperWoW"?"SuperWoWhook.dll":package.Name+".dll";
+        return ClientMods.Library(package);
     }
     internal static bool DependencyPresent(string game,Package package) {
+        if(DxvkSettings.IsVariant(package.Name))return DxvkSettings.Active(game)==package.Name;
         if(!ComponentExists(game,package))return false;
         if(package.Name=="VanillaFixes")return true;
         if(package.Folder=="game") {
@@ -175,7 +188,9 @@ internal static class ToolkitInstall {
             repositories[addon]=new RepositoryAddon{Source=source,Fingerprint=RepositoryFingerprint(stage,addon)};
         SaveRepositories(stage,repositories);
         string backup=Path.Combine(game,".twilight-toolkit","backups","repository-"+Guid.NewGuid().ToString("N"));
-        var files=Directory.EnumerateFiles(stage,"*",SearchOption.AllDirectories)
+        var files=addons.SelectMany(addon=>Directory.EnumerateFiles(
+                ToolkitPackages.SafePath(stage,Path.Combine("Interface","AddOns",addon)),"*",SearchOption.AllDirectories))
+            .Concat(new[]{RepositoryState(stage)})
             .Select(file=>new {Source=file,Relative=file.Substring(stage.Length+1)}).ToArray();
         foreach(var file in files) {
             CheckForLinks(game,ToolkitPackages.SafePath(game,file.Relative));
@@ -185,6 +200,7 @@ internal static class ToolkitInstall {
         try {
             foreach(var file in files)
                 Replace(file.Source,ToolkitPackages.SafePath(game,file.Relative),ToolkitPackages.SafePath(backup,file.Relative),changes);
+            ToolkitHistory.Record(game,"Git addons: "+String.Join(", ",addons),changes);
         } catch {
             Restore(changes);
             throw;
@@ -210,9 +226,10 @@ internal static class ToolkitInstall {
               catch(DirectoryNotFoundException) { }
         }
     }
-    internal static void Run(string game,string edition,Package[] packages,ClientTweaks tweaks,Action<string> progress) {
+    internal static void Run(string game,string edition,Package[] packages,ClientTweaks tweaks,Action<string> progress,Action verifyGameClosed=null) {
+        Action checkClosed=verifyGameClosed??EnsureClosed;
         bool requiresClose=RequiresClosedGame(edition,packages,tweaks);
-        if(requiresClose)EnsureClosed();
+        if(requiresClose)checkClosed();
         string work=Path.Combine(Path.GetTempPath(),"TwilightToolkit-"+Guid.NewGuid().ToString("N"));
         string stage=Path.Combine(work,"stage");
         string backup=Path.Combine(game,".twilight-toolkit","backups",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N").Substring(0,6));
@@ -220,7 +237,11 @@ internal static class ToolkitInstall {
         Directory.CreateDirectory(stage);
         var installed=Installed(game);
         var changes=new List<KeyValuePair<string,string>>();
+        bool rendererChanges=tweaks.ModChanges.Keys.Any(DxvkSettings.IsVariant)||packages.Any(package=>DxvkSettings.IsVariant(package.Name));
+        bool installsLogin=packages.Any(package=>package.Name=="Auto Login");
+        FileStream gameLock=null;
         try {
+            if(rendererChanges||installsLogin||tweaks.LoginChange||tweaks.Enabled||packages.Any(package=>package.Folder=="Data"))gameLock=OctoPatch.OpenPatchLock(game);
             tweaks.Stage(game,stage);
             foreach(var package in packages) {
                 progress("Downloading "+package.Name+"…");
@@ -232,6 +253,14 @@ internal static class ToolkitInstall {
                     throw new IOException(package.Name+": "+error.Message,error);
                 }
             }
+            if(installsLogin) {
+                ClientMods.PrepareLoginClient(game,stage);
+                ClientMods.StageUltrawideLogin(game,stage);
+            }
+            if(tweaks.LoginChange&&!tweaks.LoginEnabled) {
+                ClientMods.StageDisableLogin(game,stage);
+                installed.Remove("Auto Login");
+            }
             if(packages.Length>0&&File.Exists(RepositoryState(game))) {
                 var repositories=Repositories(game);
                 bool changed=false;
@@ -242,7 +271,7 @@ internal static class ToolkitInstall {
                 if(changed)SaveRepositories(stage,repositories);
             }
             string[] dlls=Directory.GetFiles(stage,"*.dll");
-            string[] loaders={"nampower.dll","ClassicAPI.dll","UnitXP_SP3.dll","VanillaHelpers.dll","SuperWoWhook.dll"};
+            string[] loaders=ToolkitPackages.Catalog.Where(package=>package.Folder=="game"&&package.Name!="VanillaFixes"&&!DxvkSettings.IsVariant(package.Name)).Select(ModLibrary).ToArray();
             dlls=dlls.Select(Path.GetFileName).Where(file=>loaders.Contains(file,StringComparer.OrdinalIgnoreCase)).ToArray();
             if(dlls.Length>0) {
                 string path=Path.Combine(game,"dlls.txt");
@@ -250,10 +279,28 @@ internal static class ToolkitInstall {
                 foreach(string dll in dlls)if(!lines.Any(line=>String.Equals(line.Trim(),dll,StringComparison.OrdinalIgnoreCase)))lines.Add(dll);
                 ToolkitPackages.Save(stage,"dlls.txt",Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,lines)+Environment.NewLine));
             }
-            if(packages.Length>0)ToolkitPackages.Save(stage,Path.Combine(".twilight-toolkit","versions.txt"),
+            bool presencePackage=packages.Any(package=>package.Name=="Discord Presence");
+            if(tweaks.ModChanges.Count>0)ClientModSettings.Stage(game,stage,tweaks.ModChanges);
+            if(dlls.Length>0||tweaks.ModChanges.Count>0)ClientModSettings.ValidateLoader(game,stage);
+            if(tweaks.PresenceChange||presencePackage) {
+                var previous=DiscordPresence.State(game);
+                DiscordPresence.StageSettings(game,stage,tweaks.PresenceChange?tweaks.PresenceEnabled:previous.enabled,
+                    tweaks.PresenceChange?tweaks.PresenceFlags:previous.flags);
+            }
+            if(packages.Length>0||tweaks.LoginChange)ToolkitPackages.Save(stage,Path.Combine(".twilight-toolkit","versions.txt"),
                 Encoding.UTF8.GetBytes(String.Join(Environment.NewLine,installed.Select(kv=>kv.Key+"\t"+kv.Value))));
-            if(requiresClose)EnsureClosed();
+            if(requiresClose)checkClosed();
+            bool removeRenderer=false;
+            if(rendererChanges) {
+                string active=DxvkSettings.Active(game);
+                if(active!=null&&packages.Any(package=>package.Name==active)&&!tweaks.ModChanges.ContainsKey(active))
+                    tweaks.ModChanges[active]=true;
+                if(tweaks.ModChanges.Keys.Any(DxvkSettings.IsVariant))removeRenderer=DxvkSettings.StageSwitch(game,stage,tweaks.ModChanges);
+            }
             progress("Installing selected components…");
+            if(removeRenderer)RemoveFile(game,backup,DxvkSettings.Library,changes);
+            if(tweaks.LoginChange&&!tweaks.LoginEnabled)foreach(string name in new[]{"AutoLogin.lua","AutoLogin.xml"})
+                RemoveFile(game,backup,Path.Combine("Data","Interface","GlueXML",name),changes);
             foreach(var file in Directory.EnumerateFiles(stage,"*",SearchOption.AllDirectories)) {
                 string relative=file.Substring(stage.Length+1);
                 if(relative.StartsWith("sidekick"+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase)) {
@@ -269,7 +316,20 @@ internal static class ToolkitInstall {
                     shortcut.Save();
                     Replace(stagedLink,link,ToolkitPackages.SafePath(backup,"Chronicle Sidekick.lnk"),changes);
                 } else {
-                    Replace(file,ToolkitPackages.SafePath(game,relative),ToolkitPackages.SafePath(backup,relative),changes);
+                    if(relative.Equals("VMMFix_preferred_monitor.txt",StringComparison.OrdinalIgnoreCase)&&File.Exists(ToolkitPackages.SafePath(game,relative)))continue;
+                    if(MpqPatches.IsRaidVisualsPath(relative)) {
+                        string active=ToolkitPackages.SafePath(game,relative),disabled=active+MpqPatches.DisabledSuffix;
+                        CheckForLinks(game,active);CheckForLinks(game,disabled);
+                        if(File.Exists(disabled)) {
+                            if(File.Exists(active))throw new IOException("Both active and disabled RaidVisuals archives exist. Remove the duplicate before updating.");
+                            relative+=MpqPatches.DisabledSuffix;
+                        }
+                    }
+                    string target=ToolkitPackages.SafePath(game,relative),saved=ToolkitPackages.SafePath(backup,relative);
+                    if(DxvkSettings.IsManagedPath(relative)||ClientMods.IsGluePath(relative)||MpqPatches.IsCustomPath(relative)){
+                        CheckForLinks(game,target);CheckForLinks(game,saved);
+                    }
+                    Replace(file,target,saved,changes);
                 }
             }
             if(edition!="Skip Sync") {
@@ -283,15 +343,32 @@ internal static class ToolkitInstall {
                     if(child.ExitCode!=0)throw new IOException("Twilight Hammer Sync setup failed.");
                 }
             }
+            string title=String.Join(", ",packages.Select(package=>package.Name));
+            if(tweaks.Enabled)title+=(title.Length>0?" · ":"")+"Client Tweaks";
+            if(tweaks.LoginChange&&!tweaks.LoginEnabled)title+=(title.Length>0?" · ":"")+"Disable AutoLogin";
+            if(tweaks.PresenceChange)title+=(title.Length>0?" · ":"")+"Discord Presence settings";
+            if(tweaks.ModChanges.Count>0)title+=(title.Length>0?" · ":"")+"Client mod switches";
+            ToolkitHistory.Record(game,title.Length>0?title:"Client changes",changes);
         } catch {
             Restore(changes);
             throw;
         } finally {
+            if(gameLock!=null)gameLock.Dispose();
             try {Directory.Delete(work,true);} catch(IOException) { } catch(UnauthorizedAccessException) { }
         }
     }
+    private static void RemoveFile(string game,string backup,string relative,List<KeyValuePair<string,string>> changes) {
+        string target=ToolkitPackages.SafePath(game,relative),saved=ToolkitPackages.SafePath(backup,relative);
+        CheckForLinks(game,target);
+        CheckForLinks(game,saved);
+        if(!File.Exists(target))return;
+        Directory.CreateDirectory(Path.GetDirectoryName(saved));
+        File.Copy(target,saved);
+        changes.Add(new KeyValuePair<string,string>(target,saved));
+        File.Delete(target);
+    }
     internal static bool RequiresClosedGame(string edition,Package[] packages,ClientTweaks tweaks) {
-        return edition!="Skip Sync"||tweaks.Enabled||packages.Any(package=>package.Folder=="game"||package.Folder=="Data");
+        return edition!="Skip Sync"||tweaks.Enabled||tweaks.LoginChange||tweaks.PresenceChange||tweaks.ModChanges.Count>0||packages.Any(package=>package.Folder=="game"||package.Folder=="Data"||package.Name=="Auto Login");
     }
     internal static void Restore(List<KeyValuePair<string,string>> changes) {
         for(int i=changes.Count-1;i>=0;i--) {
@@ -303,20 +380,20 @@ internal static class ToolkitInstall {
               catch(UnauthorizedAccessException) { }
         }
     }
-    internal static void Replace(string from,string to,string backup,List<KeyValuePair<string,string>> changes) {
+    internal static void Replace(string from,string to,string backup,List<KeyValuePair<string,string>> changes,bool consumeSource=false) {
         Directory.CreateDirectory(Path.GetDirectoryName(to));
         if(File.Exists(to)) {
             Directory.CreateDirectory(Path.GetDirectoryName(backup));
             File.Copy(to,backup);
         } else backup=null;
         changes.Add(new KeyValuePair<string,string>(to,backup));
-        string temp=to+".th-"+Guid.NewGuid().ToString("N")+".tmp";
+        string temp=consumeSource?from:to+".th-"+Guid.NewGuid().ToString("N")+".tmp";
         try {
-            File.Copy(from,temp);
+            if(!consumeSource)File.Copy(from,temp);
             if(File.Exists(to))File.Replace(temp,to,null);
             else File.Move(temp,to);
         } finally {
-            if(File.Exists(temp))File.Delete(temp);
+            if(!consumeSource&&File.Exists(temp))File.Delete(temp);
         }
     }
     internal static void EnsureClosed() {

@@ -23,7 +23,7 @@ internal sealed class ToolkitForm : Form {
     private readonly Dictionary<string,CheckBox> picks=new Dictionary<string,CheckBox>();
     private readonly CheckBox enableTweaks=Check("Apply client tweaks"), laa=Check("Enable Large Address Aware"), audio=Check("Enable background sounds");
     private readonly CheckBox autoLoot=Check("Always auto-loot (hold Shift for manual loot)");
-    private readonly NumericUpDown plates=Number(1,100,30), fov=Number(60,150,110), render=Number(777,3000,2200), clutter=Number(0,1000,300), camera=Number(1,100,75);
+    private readonly NumericUpDown plates=Number(1,41,30), fov=Number(60,130,110), render=Number(777,1500,1500), clutter=Number(0,300,300), camera=Number(1,100,75);
     private bool changing, operationRunning;
     private bool checkingUpdates;
     private string releaseUrl;
@@ -39,7 +39,7 @@ internal sealed class ToolkitForm : Form {
         if(args.Length>0&&args[0]=="--apply-toolkit-update"){ToolkitSelfUpdate.Apply(args);return;}
         if(args.Length==2&&args[0]=="--clean-toolkit-update")
             Task.Run(()=>ToolkitSelfUpdate.Clean(args[1]));
-        ToolkitLog.Write("toolkit","Started Toolkit v"+ToolkitPackages.Version+".");
+        ToolkitLog.Write("toolkit","Started Launcher v"+ToolkitPackages.Version+".");
         string error;
         try {
             if (EvergreenWebView.EnsureInstalled()) {
@@ -64,7 +64,7 @@ internal sealed class ToolkitForm : Form {
     }
 
     private ToolkitForm() {
-        Text="Twilight Hammer Toolkit v"+ToolkitPackages.Version;
+        Text="Twilight Hammer Launcher v"+ToolkitPackages.Version;
         Icon=Icon.ExtractAssociatedIcon(Application.ExecutablePath);
         Font=new Font("Segoe UI",10F);
         StartPosition=FormStartPosition.CenterScreen;
@@ -88,7 +88,7 @@ internal sealed class ToolkitForm : Form {
         header.Controls.Add(crest,0,0);
         var brand=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,Padding=new Padding(0,16,0,0),Margin=Padding.Empty};
         var title=Row();title.Padding=Padding.Empty;title.WrapContents=false;
-        var heading=LabelText("Twilight Hammer Toolkit",Ink);
+        var heading=LabelText("Twilight Hammer Launcher",Ink);
         heading.Font=new Font(Font.FontFamily,15,FontStyle.Bold);heading.Margin=Padding.Empty;
         var version=LabelText("v"+ToolkitPackages.Version,Muted);version.Font=new Font(Font.FontFamily,8);version.Margin=new Padding(7,6,0,0);
         version.BackColor=Card;
@@ -134,7 +134,7 @@ internal sealed class ToolkitForm : Form {
         tools.Visible=false;
         path.Controls.Add(tools,3,0);
         var settings=ButtonText("⚙",()=>tools.Visible=!tools.Visible);
-        settings.AccessibleName="Toolkit settings";
+        settings.AccessibleName="Launcher settings";
         path.Controls.Add(settings,4,0);
         shell.Controls.Add(path,0,1);
 
@@ -146,7 +146,7 @@ internal sealed class ToolkitForm : Form {
         status.AutoSize=true;status.ForeColor=Muted;status.Anchor=AnchorStyles.Left;status.Margin=new Padding(0,3,8,3);
         status.MaximumSize=new Size(360,0);status.Text="0 optional components selected";
         footer.Controls.Add(status,0,0);
-        toolkitUpdate=Link("Toolkit update ↗",()=>Open(releaseUrl));toolkitUpdate.Visible=false;
+        toolkitUpdate=Link("Launcher update ↗",()=>Open(releaseUrl));toolkitUpdate.Visible=false;
         footer.Controls.Add(toolkitUpdate,1,0);
         install=ButtonText("Install selected",async()=>await Apply());
         install.BackColor=Gold;install.ForeColor=Color.FromArgb(50,32,22);install.Padding=new Padding(12,4,12,4);
@@ -425,7 +425,7 @@ internal sealed class ToolkitForm : Form {
         title.Font=new Font(Font.FontFamily,14,FontStyle.Bold);
         content.Controls.Add(title);
         content.Controls.Add(LabelText("Open Protection History, find the entry, and compare the detected file and publisher with the upstream release. Report a suspected false positive to the publisher or Microsoft.",Ink));
-        content.Controls.Add(LabelText("Toolkit leaves your antivirus settings alone. If a blocked download prevents setup, rerun with that component unchecked.",Muted));
+        content.Controls.Add(LabelText("Launcher leaves your antivirus settings alone. If a blocked download prevents setup, rerun with that component unchecked.",Muted));
         var actions=Row();
         actions.Controls.Add(ButtonText("Open Windows Security ↗",()=>Open("windowsdefender:")));
         actions.Controls.Add(ButtonText("Virus & threat protection ↗",()=>Open("windowsdefender://threat/")));
@@ -694,6 +694,6 @@ internal sealed class ToolkitForm : Form {
     private static void Open(string url) {
         if(String.IsNullOrEmpty(url))return;
         try {Process.Start(new ProcessStartInfo(url){UseShellExecute=true});}
-        catch(Exception error){MessageBox.Show(error.Message,"Twilight Hammer Toolkit");}
+        catch(Exception error){MessageBox.Show(error.Message,"Twilight Hammer Launcher");}
     }
 }

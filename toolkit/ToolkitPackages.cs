@@ -17,6 +17,7 @@ internal sealed class Package {
     internal readonly bool Octo;
     internal string Revision = "";
     internal readonly string[] Requires;
+    internal string SourceUrl {get {return (Octo?"https://octowow.st/git/":"https://github.com/")+Repo;}}
     internal Package(string name, string group, string repo, string match, string folder, string help, params string[] requires) {
         Name=name; Group=group; Octo=repo.StartsWith("octo:");
         Repo=Octo?repo.Substring(5):repo; Match=match; Folder=folder; Help=help; Requires=requires;
@@ -27,8 +28,29 @@ internal sealed class Release {
 }
 internal static class ToolkitPackages {
     internal const string GitHub = "https://github.com/obs1deus/twilighthammertoolkit";
-    internal const string Version = "0.1.35";
+    internal const string Version = "0.1.62";
     internal static readonly Package[] Recommended = {
+        new Package("Interact","Client tools & compatibility","lookino/Interact",@"^Interact\.zip$","game","Adds an interact key for nearby NPCs, objects, gathering nodes and loot. Includes its key-binding addon.","VanillaFixes","Interact Addon"),
+        new Package("Interact Addon","Raid & character addons","lookino/Interact",@"^Interact\.zip$","Interact","Key bindings and configuration for the Interact client plugin.","Interact"),
+        new Package("No1600x1200","Client tools & compatibility","client-mods/No1600x1200",null,"game","Fixes the old resolution limit on affected displays.","VanillaFixes"),
+        new Package("VanillaMultiMonitorFix","Client tools & compatibility","Mates1500/VanillaMultiMonitorFix",@"^release\.zip$","game","Improves monitor, resolution and refresh-rate detection.","VanillaFixes"),
+        new Package("Discord Presence","Client tools & compatibility","octo:Dusk/WowPresence",@"^WowPresence\.zip$","game","Shows OctoWoW in Discord. Character details are hidden unless explicitly selected.","VanillaFixes"),
+        new Package("PerfBoost","Client tools & compatibility","client-mods/PerfBoost",null,"game","Adds unit-rendering performance controls.","VanillaFixes"),
+        new Package("TransmogFix","Client tools & compatibility","client-mods/TransmogFix",null,"game","Reduces frame-rate drops from rapid appearance updates.","VanillaFixes"),
+        new Package("WeirdPerformance","Client tools & compatibility","client-mods/WeirdPerformance",null,"game","Client performance fixes for smoother gameplay.","VanillaFixes"),
+        new Package("BigCursor","Client tools & compatibility","client-mods/BigCursor",null,"game","Larger, sharper hardware cursor for high-resolution displays.","VanillaFixes"),
+        new Package("Heal Text Fix","Client tools & compatibility","client-mods/HealTextFix",null,"game","Fixes duplicate floating heal numbers with SuperWoW. Requires SuperWoW.","SuperWoW"),
+        new Package("DPSLog Community Edition","Client tools & compatibility","NovaElysium/DPSLog-Community",null,"game","Provides structured combat data for compatible addons such as CawDPSMeter.","VanillaFixes"),
+        new Package(DxvkSettings.Bundled,"Client tools & compatibility","hannesmann/vanillafixes",null,"game","Use the Vulkan renderer bundled with VanillaFixes. Requires a Vulkan 1.3-capable driver.","VanillaFixes"),
+        new Package(DxvkSettings.Modern,"Client tools & compatibility","doitsujin/dxvk",null,"game","Run the game through the DXVK 2.7.1 Vulkan renderer. Requires a Vulkan 1.3-capable driver."),
+        new Package(DxvkSettings.Cursor,"Client tools & compatibility","RetroCro/TurtleWoW-Mods",null,"game","Use a custom DXVK renderer with a 2× cursor when you start the game through this launcher."),
+        new Package("CustomAssets","Client tools & compatibility","client-mods/CustomAssets",null,"game","Loads loose custom files from Data and supports longer patch names.","VanillaFixes"),
+        new Package("LogSessions","Client tools & compatibility","client-mods/LogSessions",null,"game","Organizes combat and chat logs by character and day.","VanillaFixes"),
+        new Package("MinimapIcons","Client tools & compatibility","client-mods/MinimapIcons",null,"game","Adds tracking icons and a combined tracking menu to the minimap.","VanillaFixes"),
+        new Package("PNG Screenshots","Client tools & compatibility","client-mods/PNGScreenshots",null,"game","Saves compressed PNG screenshots using background processing.","VanillaFixes"),
+        new Package("WorldMarkers","Client tools & compatibility","client-mods/WorldMarkers",null,"game","Lets group leaders place animated world markers for positioning.","VanillaFixes"),
+        new Package("AuctionQueryThrottle","Client tools & compatibility","brues-code/AuctionQueryThrottle",@"^AuctionQueryThrottle\.dll$","game","Removes the fixed delay between Auction House queries.","VanillaFixes"),
+        new Package("Auto Login","Client tools & compatibility","MarcelineVQ/turtle-autologin",null,"client-login","Account selection, character ordering, and automatic login. Saves accounts in game; uses Nampower password encryption. Requires a client with custom login-screen support.","Nampower","VanillaFixes") { Revision="7f5840c8a0351b452d23c95854b7090eb02b36a3" },
         new Package("TWThreat","Must-have raid addons","octo-addons/TWThreat",null,"TWThreat","Shows threat so you can tell when you are close to pulling aggro."),
         new Package("Rook's RaidVisuals","Must-have raid addons","octo:Rook/RaidVisuals-OctoWoW",@"^patch-O\.mpq$","Data","Makes raid mechanics easier to see. Installs an OctoWoW client data patch."),
         new Package("BigWigs","Must-have raid addons","prodigeomix/BigWigs",@"^BigWigs-.*\.zip$", "BigWigs","Boss timers and raid warnings from the prodigeomix fork."),
@@ -55,7 +77,7 @@ internal static class ToolkitPackages {
         new Package("OctoAuctionator","Auction House","octo:John-The-Baptist/OctoAuctionator",null,"OctoAuctionator","Auctionator’s Buy, Sell, and More tabs for OctoWoW.")
     };
     internal static readonly Package[] Catalog = Recommended.Concat(ImportedCatalog.Packages).ToArray();
-    internal static readonly Package Self = new Package("Toolkit","","obs1deus/twilighthammertoolkit",@"^TwilightHammerToolkit\.exe$","","");
+    internal static readonly Package Self = new Package("Launcher","","obs1deus/twilighthammertoolkit",@"^TwilightHammer(?:Launcher|Toolkit)\.exe$","","");
     private static readonly JavaScriptSerializer Json = new JavaScriptSerializer();
     private static readonly HashSet<string> AddonExtensions = new HashSet<string>(".toc .lua .xml .blp .tga .jpg .jpeg .png .wav .ogg .mp3 .ttf .otf .txt .md .gif .dds".Split(' '),StringComparer.OrdinalIgnoreCase);
 
@@ -68,7 +90,18 @@ internal static class ToolkitPackages {
         return Json.Deserialize<Dictionary<string,object>>(Encoding.UTF8.GetString(Download(url,2*1024*1024)));
     }
     private static bool Allowed(Uri uri) {
-        return uri.Scheme=="https" && new[] {"api.github.com","github.com","codeload.github.com","release-assets.githubusercontent.com","objects.githubusercontent.com","octowow.st"}.Contains(uri.Host);
+        return uri.Scheme=="https" && new[] {"api.github.com","github.com","codeload.github.com","release-assets.githubusercontent.com","objects.githubusercontent.com","octowow.st","raw.githubusercontent.com","codeberg.org"}.Contains(uri.Host);
+    }
+    private const string RepositorySegment=@"^[A-Za-z0-9_][A-Za-z0-9_.-]*$";
+    internal static string AddonSourceUrl(string link) {
+        Uri repository;
+        if(String.IsNullOrWhiteSpace(link)||!Uri.TryCreate(link.Trim(),UriKind.Absolute,out repository)||repository.Scheme!="https"||
+           repository.UserInfo.Length!=0||repository.Query.Length!=0||repository.Fragment.Length!=0)return null;
+        string path=repository.AbsolutePath.Trim('/');
+        if(path.EndsWith(".git",StringComparison.OrdinalIgnoreCase))path=path.Substring(0,path.Length-4);
+        string[] segments=path.Split('/');
+        if(segments.Length<2||segments.Any(part=>!Regex.IsMatch(part,RepositorySegment)))return null;
+        return new UriBuilder(repository){Host=repository.IdnHost,Path=path}.Uri.AbsoluteUri;
     }
     internal static byte[] Download(string url,int limit,string expectedTag="",Uri repositoryServer=null,Action<long,long> progress=null) {
         for(int redirects=0;redirects<6;redirects++) {
@@ -77,7 +110,7 @@ internal static class ToolkitPackages {
                !(repositoryServer==null?Allowed(uri):uri.Authority.Equals(repositoryServer.Authority,StringComparison.OrdinalIgnoreCase)))
                 throw new IOException("Unexpected download server.");
             var req=(HttpWebRequest)WebRequest.Create(uri);
-            req.UserAgent="Twilight-Hammer-Toolkit/"+Version;
+            req.UserAgent="Twilight-Hammer-Launcher/"+Version;
             req.AllowAutoRedirect=false; req.Timeout=20000; req.ReadWriteTimeout=20000;
             using(var response=(HttpWebResponse)req.GetResponse()) {
                 if((int)response.StatusCode>=300&&(int)response.StatusCode<400) {
@@ -108,7 +141,7 @@ internal static class ToolkitPackages {
            repository.UserInfo.Length!=0||repository.Query.Length!=0||repository.Fragment.Length!=0)
             throw new IOException("Enter the HTTPS link to a public addon repository.");
         var path=repository.AbsolutePath.Trim('/').Split('/');
-        if(path.Length<2||path.Any(part=>!Regex.IsMatch(part,@"^[A-Za-z0-9_][A-Za-z0-9_.-]*$")))
+        if(path.Length<2||path.Any(part=>!Regex.IsMatch(part,RepositorySegment)))
             throw new IOException("Enter the repository's main page or HTTPS clone link.");
         if(path[path.Length-1].EndsWith(".git",StringComparison.OrdinalIgnoreCase))
             path[path.Length-1]=path[path.Length-1].Substring(0,path[path.Length-1].Length-4);
@@ -134,6 +167,8 @@ internal static class ToolkitPackages {
         return Directory.GetDirectories(addons).Select(Path.GetFileName).OrderBy(name=>name,StringComparer.OrdinalIgnoreCase).ToArray();
     }
     internal static Release Resolve(Package package) {
+        if(DxvkSettings.IsVariant(package.Name))return DxvkSettings.Resolve(package.Name);
+        if(ClientMods.Pinned(package.Name))return ClientMods.Resolve(package.Name);
         string api=(package.Octo?"https://octowow.st/git/api/v1/repos/":"https://api.github.com/repos/")+package.Repo;
         if(package.Match!=null) {
             var release=Metadata(api+"/releases/latest");
@@ -145,14 +180,14 @@ internal static class ToolkitPackages {
                 if(!Regex.IsMatch(name,package.Match,RegexOptions.IgnoreCase))continue;
                 if(package.Folder=="sidekick"&&!name.Contains(architecture=="ARM64"?"-arm64.":"-amd64."))continue;
                 return new Release {Version=StringField(release,"tag_name"),File=name,Url=StringField(asset,"browser_download_url"),
-                    Digest=StringField(asset,"digest"),Notes=StringField(release,"body")};
+                    Digest=package.Name=="Discord Presence"&&StringField(release,"tag_name")=="v1.3"?"sha256:9b2dca9c69b5ab3b6dae3ef3b3efc9671779a227802ebb6ac98cb22bc6ea448a":StringField(asset,"digest"),Notes=StringField(release,"body")};
             }
             throw new IOException("No matching release asset.");
         }
         if(!package.Octo) {
             string archive="https://codeload.github.com/"+package.Repo+"/zip/"+(package.Revision.Length>0?Uri.EscapeDataString(package.Revision):"HEAD");
             var request=(HttpWebRequest)WebRequest.Create(archive);
-            request.UserAgent="Twilight-Hammer-Toolkit/"+Version;
+            request.UserAgent="Twilight-Hammer-Launcher/"+Version;
             request.Method="HEAD"; request.AllowAutoRedirect=false; request.Timeout=20000;
             using(var response=(HttpWebResponse)request.GetResponse()) {
                 string tag=response.Headers["ETag"]??"";
@@ -176,6 +211,11 @@ internal static class ToolkitPackages {
         if(release.Digest.StartsWith("sha256:",StringComparison.OrdinalIgnoreCase) &&
            !Hash(bytes).Equals(release.Digest.Substring(7),StringComparison.OrdinalIgnoreCase))
             throw new IOException("Upstream checksum did not match.");
+        if(DxvkSettings.IsVariant(package.Name)){DxvkSettings.StagePackage(package.Name,bytes,stage);return;}
+        if(package.Name=="Auto Login"){ClientMods.StageLogin(bytes,stage);return;}
+        if(package.Name=="Discord Presence"){DiscordPresence.StageArchive(bytes,stage);return;}
+        if(package.Name=="VanillaMultiMonitorFix"){ClientMods.StageMultiMonitor(bytes,stage);return;}
+        if(package.Folder=="game"&&release.File.EndsWith(".dll",StringComparison.OrdinalIgnoreCase))ClientMods.ValidateDll(bytes);
         if(!release.File.EndsWith(".zip",StringComparison.OrdinalIgnoreCase)) {
             string folder=package.Folder=="game"?"":package.Folder;
             Save(stage,Path.Combine(folder,release.File),bytes);

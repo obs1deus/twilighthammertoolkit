@@ -1,20 +1,20 @@
-Twilight Hammer Toolkit v0.1.23
+Twilight Hammer Launcher v0.1.49
 
-Open TwilightHammerToolkit.exe and choose the game folder.
+Open TwilightHammerLauncher.exe and choose the game folder.
 Addon-only changes can run while OctoWoW is open. Run /reload afterward
 or restart if a newly installed addon is missing. Close the game for
 client mods, patches, client tweaks, and Sync setup.
-Use the settings gear to change the saved game folder, check for updates,
-or open the log.
+Use the settings gear to change the saved game folder, choose launch options,
+configure Discord Presence, or open the log. Updates are checked automatically.
 The preview-style interface uses Microsoft Edge WebView2. If WebView2 cannot
-start, Toolkit opens the native Windows interface instead.
+start, Launcher opens the native Windows interface instead.
 Select your Guild Sync, Auction Only, or Bank and Guild Sync edition.
 Choose Skip Sync if you only want addons or client tweaks. Optional
 components start unchecked. Setup uses Windows components and does not
 require Node.js, PowerShell, or administrator access to a writable game folder.
 
 Addons & Tools
-The Toolkit downloads the selected components from their upstream sources.
+The Launcher downloads the selected components from their upstream sources.
 It adds required components to the install plan automatically and reuses
 detected prerequisites when possible. Use VanillaFixes to start the game
 when installing DLL mods. Chronicle Sidekick is installed as a separate app
@@ -29,15 +29,15 @@ Setup saves the previous executable, config, and replaced package files under
 .twilight-toolkit\backups in your game folder.
 
 Check for updates
-Checks Toolkit releases on GitHub, catalog components, and Git addons with
+Checks Launcher releases on GitHub, catalog components, and Git addons with
 a saved source. Installed Addons displays addon versions when available.
-Checks run at launch and every 30 minutes while the Toolkit is open.
+Checks run at launch and every 30 minutes while the Launcher is open.
 Update Available opens the changelog and installs a verified new executable.
 The trash button backs up removed addons and keeps saved game settings.
 
 Windows Security
 If Windows blocks an upstream file, click Windows Security in the footer for
-Protection History guidance, copyable paths, and the Microsoft file review link. Check again checks selected or Toolkit-managed component files.
+Protection History guidance, copyable paths, and the Microsoft file review link. Check again checks selected or Launcher-managed component files.
 
 Sync uploader
 Checks OctoWoW game files for changes every two minutes while signed in to

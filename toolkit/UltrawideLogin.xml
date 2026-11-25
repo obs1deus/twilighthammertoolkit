@@ -1,0 +1,34 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <Frame name="TwilightUltrawideLogin" setAllPoints="true" frameStrata="HIGH" enableMouse="false">
+        <Scripts>
+            <OnLoad>
+                local left = this:CreateTexture()
+                left:SetTexture(0, 0, 0, 1)
+                left:SetPoint("TOPLEFT", this, "TOPLEFT", 0, 0)
+                left:SetPoint("BOTTOMRIGHT", GlueParent, "BOTTOMLEFT", 1, 0)
+                left:Hide()
+
+                local right = this:CreateTexture()
+                right:SetTexture(0, 0, 0, 1)
+                right:SetPoint("TOPLEFT", GlueParent, "TOPRIGHT", -1, 0)
+                right:SetPoint("BOTTOMRIGHT", this, "BOTTOMRIGHT", 0, 0)
+                right:Hide()
+
+                this.leftBand = left
+                this.rightBand = right
+            </OnLoad>
+            <OnUpdate>
+                local show = GlueParent:IsVisible() and this:GetWidth() > GlueParent:GetWidth() + 1
+                if show == this.bandsVisible then return end
+                this.bandsVisible = show
+                if show then
+                    this.leftBand:Show()
+                    this.rightBand:Show()
+                else
+                    this.leftBand:Hide()
+                    this.rightBand:Hide()
+                end
+            </OnUpdate>
+        </Scripts>
+    </Frame>
+</Ui>

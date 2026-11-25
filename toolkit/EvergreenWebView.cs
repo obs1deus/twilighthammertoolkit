@@ -27,8 +27,8 @@ internal static class EvergreenWebView {
     internal static bool EnsureInstalled() {
         if (IsInstalled()) return true;
         if (MessageBox.Show(
-            "The full Toolkit interface needs Microsoft Edge WebView2. Download and install the Evergreen Runtime from Microsoft now? Choose No to open the built-in Windows interface.",
-            "Twilight Hammer Toolkit", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+            "The full Launcher interface needs Microsoft Edge WebView2. Download and install the Evergreen Runtime from Microsoft now? Choose No to open the built-in Windows interface.",
+            "Twilight Hammer Launcher", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
             return false;
 
         string path = Path.Combine(Path.GetTempPath(), "TwilightHammer-WebView2-" + Guid.NewGuid().ToString("N") + ".exe");
@@ -39,7 +39,7 @@ internal static class EvergreenWebView {
 
             using (var installer = Process.Start(new ProcessStartInfo(path, "/install") { UseShellExecute = false })) {
                 if (!installer.WaitForExit(300000))
-                    throw new IOException("The WebView2 installer is still running. Reopen the Toolkit after setup finishes.");
+                    throw new IOException("The WebView2 installer is still running. Reopen the Launcher after setup finishes.");
                 if (!IsInstalled())
                     throw new IOException("The WebView2 installer did not register the runtime (exit code " + installer.ExitCode + ").");
             }

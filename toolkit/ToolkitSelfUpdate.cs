@@ -19,7 +19,7 @@ internal static class ToolkitSelfUpdate {
             if(metadata.Name!=Assembly.GetExecutingAssembly().GetName().Name||
                !Version.TryParse(release.Version.TrimStart('v'),out expected)||
                FileVersionInfo.GetVersionInfo(staged).ProductVersion!=expected.ToString())
-                throw new IOException("The downloaded executable does not match the Toolkit release.");
+                throw new IOException("The downloaded executable does not match the Launcher release.");
             return staged;
         } catch {
             if(File.Exists(staged))File.Delete(staged);
@@ -42,11 +42,11 @@ internal static class ToolkitSelfUpdate {
             string target=Path.GetFullPath(args[2]);
             if(!source.StartsWith(target+".update-",StringComparison.OrdinalIgnoreCase)||
                !File.Exists(target)||AssemblyName.GetAssemblyName(target).Name!=Assembly.GetExecutingAssembly().GetName().Name)
-                throw new IOException("The original Toolkit executable could not be verified.");
+                throw new IOException("The original Launcher executable could not be verified.");
             Process parent=null;
             try {parent=Process.GetProcessById(pid);} catch(ArgumentException) { }
             using(parent) {
-                if(parent!=null&&!parent.WaitForExit(20000))throw new IOException("Close the old Toolkit window and try again.");
+                if(parent!=null&&!parent.WaitForExit(20000))throw new IOException("Close the old Launcher window and try again.");
             }
             temporary=target+"."+Guid.NewGuid().ToString("N")+".tmp";
             string backup=temporary+".previous";
@@ -58,10 +58,10 @@ internal static class ToolkitSelfUpdate {
                 File.Replace(backup,target,null);
                 throw;
             }
-            ToolkitLog.Write("selfUpdater","Updated Toolkit to "+ToolkitPackages.Version+".");
+            ToolkitLog.Write("selfUpdater","Updated Launcher to "+ToolkitPackages.Version+".");
         } catch(Exception error) {
-            ToolkitLog.Write("selfUpdater","Could not apply the Toolkit update ("+error.GetType().Name+").","error");
-            MessageBox.Show(error.Message,"Toolkit update failed",MessageBoxButtons.OK,MessageBoxIcon.Error);
+            ToolkitLog.Write("selfUpdater","Could not apply the Launcher update ("+error.GetType().Name+").","error");
+            MessageBox.Show(error.Message,"Launcher update failed",MessageBoxButtons.OK,MessageBoxIcon.Error);
         } finally {
             if(temporary!=null&&File.Exists(temporary))File.Delete(temporary);
         }

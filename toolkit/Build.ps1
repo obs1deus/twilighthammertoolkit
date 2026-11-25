@@ -40,7 +40,11 @@ foreach($arch in @('x86','x64','arm64')){
     $options+="/resource:$file,WebView2Loader.$arch.dll"
 }
 $options+="/resource:$(Join-Path $PSScriptRoot 'Toolkit.html'),Toolkit.html"
-foreach($asset in @('LauncherHero.jpg','LauncherHorde.jpg','LauncherHammers.png','OctoWoWLogo.webp')){
+$options+="/resource:$(Join-Path $PSScriptRoot 'LauncherLocales.js'),LauncherLocales.js"
+$options+="/resource:$(Join-Path $PSScriptRoot 'UltrawideLogin.xml'),UltrawideLogin.xml"
+$options+="/resource:$(Join-Path $PSScriptRoot 'licenses\vanilla-tweaks-MIT.txt'),vanilla-tweaks-MIT.txt"
+foreach($asset in @('LauncherHero.jpg','LauncherHorde.jpg','LauncherOcto.jpg','LauncherYshaarj.jpg','LauncherCthun.jpg',
+    'LauncherNzoth.jpg','LauncherTurtle.jpg','LauncherHammers.png','OctoWoWLogo.webp')){
     $options+="/resource:$(Join-Path $PSScriptRoot $asset),$asset"
 }
 Get-ChildItem (Join-Path $PSScriptRoot 'Icons') -Filter '*.jpg' -File | ForEach-Object {
@@ -49,19 +53,22 @@ Get-ChildItem (Join-Path $PSScriptRoot 'Icons') -Filter '*.jpg' -File | ForEach-
 $options+=@('guild.exe','auction.exe','bank.exe') | ForEach-Object {"/resource:$(Join-Path $stage $_),$_"}
 $source=Get-ChildItem $PSScriptRoot -Filter '*.cs' -File | Select-Object -ExpandProperty FullName
 $version=[regex]::Match([IO.File]::ReadAllText((Join-Path $PSScriptRoot 'ToolkitPackages.cs')),'const string Version = "([0-9]+\.[0-9]+\.[0-9]+)"').Groups[1].Value
-if(!$version){throw 'Toolkit version was not found'}
+if(!$version){throw 'Launcher version was not found'}
 $versionFile=Join-Path $stage 'ToolkitVersion.cs'
 [IO.File]::WriteAllText($versionFile,@"
 using System.Reflection;
-[assembly: AssemblyTitle("Twilight Hammer Toolkit")]
-[assembly: AssemblyProduct("Twilight Hammer Toolkit")]
+[assembly: AssemblyTitle("Twilight Hammer Launcher")]
+[assembly: AssemblyProduct("Twilight Hammer Launcher")]
 [assembly: AssemblyVersion("$version.0")]
 [assembly: AssemblyFileVersion("$version.0")]
 [assembly: AssemblyInformationalVersion("$version")]
 "@)
 & $compiler @options @source $versionFile
-if($LASTEXITCODE){throw 'Toolkit build failed'}
+if($LASTEXITCODE){throw 'Launcher build failed'}
 Copy-Item -LiteralPath (Join-Path $sync 'LICENSE'),(Join-Path $PSScriptRoot 'README.txt') -Destination $out -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'licenses\vanilla-tweaks-MIT.txt') -Destination (Join-Path $out 'ClientPatches-LICENSE.txt') -Force
 Copy-Item -LiteralPath (Join-Path $sdk 'LICENSE.txt') -Destination (Join-Path $out 'WebView2-LICENSE.txt') -Force
 Copy-Item -LiteralPath (Join-Path $sdk 'NOTICE.txt') -Destination (Join-Path $out 'WebView2-NOTICE.txt') -Force
-Write-Output (Join-Path $out 'TwilightHammerToolkit.exe')
+# Retain the assembly identity and legacy asset for existing self-updaters.
+Copy-Item -LiteralPath (Join-Path $out 'TwilightHammerToolkit.exe') -Destination (Join-Path $out 'TwilightHammerLauncher.exe') -Force
+Write-Output (Join-Path $out 'TwilightHammerLauncher.exe')
